@@ -3,7 +3,7 @@
 //  ViewFinder
 //
 //  Created by Jacob Kohn on 6/20/16.
-//  Copyright © 2016 Jacob Kohn. All rights reserved.
+//  Copyright © 2016 Microsoft. All rights reserved.
 //
 
 import UIKit
