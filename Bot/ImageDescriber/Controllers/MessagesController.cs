@@ -7,7 +7,6 @@ using Microsoft.Bot.Connector;
 using Microsoft.Bot.Connector.Utilities;
 using System.IO;
 
-using Newtonsoft.Json;
 using Microsoft.ProjectOxford.Vision;
 using Microsoft.ProjectOxford.Vision.Contract;
 using Microsoft.ProjectOxford.Emotion;
@@ -69,13 +68,16 @@ namespace ImageDescriber
                             ReplyMessage = message.CreateReplyMessage(await Facer(message));
                             return ReplyMessage;
                         case "ActionsAsk":
-                            ReplyMessage = message.CreateReplyMessage("This bot gives information about images. First, either attach an image in the message or as a url. You can then ask the bot about the contents of the image, emotions, and faces within it. For example, try asking \"What is the primary emotion?\"");
+                            ReplyMessage = message.CreateReplyMessage("This bot gives information about images. First, either attach an image in the message or as a url. You can then ask the bot about the contents of the image, levels of particular emotions, and people within it (age, gender, celebrities). For example, try asking \"What is the primary emotion?\"");
                             return ReplyMessage;
                         case "Age":
                             ReplyMessage = message.CreateReplyMessage(await Ager(message));
                             return ReplyMessage;
                         case "Celebrity":
                             ReplyMessage = message.CreateReplyMessage(await Celebrities(message));
+                            return ReplyMessage;
+                        case "Gender":
+                            ReplyMessage = message.CreateReplyMessage(await Gender(message));
                             return ReplyMessage;
                     }
                 }
@@ -160,28 +162,37 @@ namespace ImageDescriber
         {
             EmotionServiceClient emotionServiceClient = new EmotionServiceClient(KeyEmo);
             string ret = "Please first attach an image or enter an image URL.";
-            if (!ValidEmo(which)) return "Not a valid emotion. Please try again.";
+            if (null == ValidEmo(which)) return "Not a valid emotion. Valid emotions are anger, contempt, disgust, fear, happiness, neutral, sadness, and surprise. Please try again.";
             if (message.GetBotUserData<int>("Attachment") == 11)
             {
                 WebRequest req = WebRequest.Create(message.GetBotUserData<string>("ImageStream"));
                 WebResponse response = req.GetResponse();
                 Stream stream = response.GetResponseStream();
                 Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(stream);
-                ret = CalcEmotion(emotionResult, which);
+                ret = CalcEmotion(emotionResult, ValidEmo(which));
             }
             else if (message.GetBotUserData<int>("Attachment") == 22)
             {
                 Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(message.GetBotUserData<string>("ImageUrl"));
-                ret = CalcEmotion(emotionResult, which);
+                ret = CalcEmotion(emotionResult, ValidEmo(which));
             }
             return ret;
         }
 
         // helper method that checks whether user input is one that is supported
-        public static bool ValidEmo(string which)
+        public static string ValidEmo(string which)
         {
-            string[] emotions = { "anger", "contempt", "disgust", "fear", "happiness", "neutral", "sadness", "surpise" };
-            return emotions.Contains(which);
+            string ret = null;
+            string[,] allEmotions = new string[,] { { "anger", "angry", "angered" }, { "contempt", "contemptuous", "contempted" }, { "disgust", "disgusted", "disgustedness" }, { "fear", "scared", "scaredness" },
+                                                    {"happiness", "happy", "joy" }, {"neutral", "neutrality", "neutralness" }, {"sadness", "sad", "sorrow" }, {"surprise", "surprised", "surprisedness" } };
+            for (int i = 0; i < 8; i++)
+            {
+                for (int k = 0; k < 3; k++)
+                {
+                    if (which.Equals(allEmotions[i, k])) return allEmotions[i, 0];
+                }
+            }
+            return ret;
         }
 
         // helper method that calculates the percentage of a certain emotion
@@ -328,10 +339,10 @@ namespace ImageDescriber
         }
 
         // helper method that calculates which celebrities are present
-        public static string CalcCeleb (AnalysisResult analysisResult)
+        public static string CalcCeleb (AnalysisResult analysisResult)  // need to sort by lefts
         {
             string ret = "No celebrity detected. Would you like to know anything else?";
-            if (analysisResult.Categories.Length > 0 && analysisResult.Categories[0].Name.Contains("people") && analysisResult.Categories[0].Detail.ToString().Length > 25) // based on number of characters
+            if (null != analysisResult.Categories && analysisResult.Categories.Length > 0 && analysisResult.Categories[0].Name.Contains("people") && analysisResult.Categories[0].Detail.ToString().Length > 25) // based on number of characters
             {
                 string total = analysisResult.Categories[0].Detail.ToString();
                 int start = 0;
@@ -342,18 +353,18 @@ namespace ImageDescriber
                     int len = total.IndexOf(",", start) - start - 1;
                     names.Add(total.Substring(start, len));
                 }
-                if (names.Count == 1) ret = "This person is " + names[0] + ". Would you like to know anything else?";
+                if (names.Count == 1) ret = "This person is [" + names[0] + "](http://en.wikipedia.org/wiki/" + ReplaceSpace(names[0]) + "). Would you like to know anything else?";
                 else
                 {
                     ret = "The people are ";
                     for (int i = 0; i < names.Count; i++)
                     {
                         if (i == names.Count - 2)
-                            ret = ret + names[i] + " and ";
+                            ret = ret + "[" + names[i] + "](http://en.wikipedia.org/wiki/" + ReplaceSpace(names[i]) + ") and ";
                         else if (i == names.Count - 1)
-                            ret = ret + names[i] + ".";
+                            ret = ret + "[" + names[i] + "](http://en.wikipedia.org/wiki/" + ReplaceSpace(names[i]) + ").";
                         else
-                            ret = ret + names[i] + ", ";
+                            ret = ret + "[" + names[i] + "](http://en.wikipedia.org/wiki/" + ReplaceSpace(names[i]) + "), ";
                     }
                     ret = ret + " Would you like to know anything else?";
                 }
@@ -362,7 +373,73 @@ namespace ImageDescriber
             return ret;
         }
 
+        public static string ReplaceSpace (string input)
+        {
+            string ret = "";
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (input[i] == ' ') ret = ret + "_";
+                else ret = ret + input[i];
+            }
+            return ret;
+        }
+        // returns gender using CV API
+        public static async Task<string> Gender (Message message)
+        {
+            VisionServiceClient VisionServiceClient = new VisionServiceClient(KeyDes);
+            string ret = "Please first attach an image or enter an image URL.";
+            if (message.GetBotUserData<int>("Attachment") == 11)
+            {
+                WebRequest req = WebRequest.Create(message.GetBotUserData<string>("ImageStream"));
+                WebResponse response = req.GetResponse();
+                Stream stream = response.GetResponseStream();
+                VisualFeature[] visualFeatures = new VisualFeature[] { VisualFeature.Faces };
+                AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(stream, visualFeatures);
+                ret = CalcGender(analysisResult);
+            }
+            else if (message.GetBotUserData<int>("Attachment") == 22)
+            {
+                Uri imageUri = new Uri(message.GetBotUserData<string>("ImageUrl"));
+                VisualFeature[] visualFeatures = new VisualFeature[] { VisualFeature.Faces };
+                AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(imageUri.AbsoluteUri, visualFeatures);
+                ret = CalcGender(analysisResult);
+            }
+            return ret;
+        }
 
+        // helper method that calculates gender
+        public static string CalcGender (AnalysisResult analysisResult)
+        {
+            string ret = "No person detected. Would you like to know anything else?";
+            if (analysisResult.Faces.Length == 1)
+            {
+                ret = "The person's gender is " + analysisResult.Faces[0].Gender + ". Would you like to know anything else?";
+            }
+            else if (analysisResult.Faces.Length > 1)
+            {
+                ret = "The genders from left to right are: ";
+                List<string> genders = new List<string>();
+                List<int> lefts = new List<int>();
+                for (int i = 0; i < analysisResult.Faces.Length; i++)
+                {
+                    genders.Add(analysisResult.Faces[i].Gender);
+                    lefts.Add(analysisResult.Faces[i].FaceRectangle.Left);
+                }
+                while (genders.Count > 0)
+                {
+                    int min = 0;
+                    for (int i = 0; i < genders.Count; i++)
+                    {
+                        if (lefts[i] < lefts[min]) min = i;
+                    }
+                    ret = ret + genders[min] + ", ";
+                    genders.RemoveAt(min);
+                    lefts.RemoveAt(min);
+                }
+                ret = ret + "Would you like to know anything else?";
+            }
+            return ret;
+        }
         private Message HandleSystemMessage(Message message)
         {
             if (message.Type == "Ping")
