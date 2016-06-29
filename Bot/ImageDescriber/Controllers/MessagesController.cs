@@ -41,12 +41,22 @@ namespace ImageDescriber
                     ReplyMessage.SetBotUserData("Attachment", 11); // 11 for attachment, 22 for url
                     return ReplyMessage;
                 }
-                if (message.Text.Contains("png") || message.Text.Contains("jpg") || message.Text.Contains("gif")) // sending url
+
+                if (message.Text.ToLower().Contains("http"))
                 {
-                    ReplyMessage = message.CreateReplyMessage("What would you like to know?");
-                    ReplyMessage.SetBotUserData("ImageUrl", message.Text);
-                    ReplyMessage.SetBotUserData("Attachment", 22); // 11 for attachment, 22 for url
-                    return ReplyMessage;
+                    if (message.Text.ToLower().Contains("png") || message.Text.ToLower().Contains("jpg") || message.Text.ToLower().Contains("gif")) // sending url
+                    {
+                        ReplyMessage = message.CreateReplyMessage("What would you like to know?");
+                        //ReplyMessage = message.CreateReplyMessage("channel: " + message.Participants[0].ChannelId + ", name: " + message.Participants[0].Name + ", address: " + message.Participants[0].Address);
+                        ReplyMessage.SetBotUserData("ImageUrl", message.Text);
+                        ReplyMessage.SetBotUserData("Attachment", 22); // 11 for attachment, 22 for url
+                        return ReplyMessage;
+                    }
+                    else
+                    {
+                        ReplyMessage = message.CreateReplyMessage("Please attach a direct link to the image. The link should end in .jpg, .png, or .gif.");
+                        return ReplyMessage;
+                    }
                 }
 
                 ImageLUIS luis = await LUISClient.ParseUserInput(message.Text);
@@ -78,6 +88,9 @@ namespace ImageDescriber
                             return ReplyMessage;
                         case "Gender":
                             ReplyMessage = message.CreateReplyMessage(await Gender(message));
+                            return ReplyMessage;
+                        case "Text":
+                            ReplyMessage = message.CreateReplyMessage(await Texter(message));
                             return ReplyMessage;
                     }
                 }
@@ -437,6 +450,47 @@ namespace ImageDescriber
                     lefts.RemoveAt(min);
                 }
                 ret = ret + "Would you like to know anything else?";
+            }
+            return ret;
+        }
+
+        // returns OCR using CV API
+        public static async Task<string> Texter (Message message)
+        {
+            VisionServiceClient VisionServiceClient = new VisionServiceClient(KeyDes);
+            string ret = "Please first attach an image or enter an image URL.";
+            if (message.GetBotUserData<int>("Attachment") == 11)
+            {
+                WebRequest req = WebRequest.Create(message.GetBotUserData<string>("ImageStream"));
+                WebResponse response = req.GetResponse();
+                Stream stream = response.GetResponseStream();
+                OcrResults analysisResult = await VisionServiceClient.RecognizeTextAsync(stream);
+                ret = CalcText(analysisResult);
+            }
+            else if (message.GetBotUserData<int>("Attachment") == 22)
+            {
+                Uri imageUri = new Uri(message.GetBotUserData<string>("ImageUrl"));
+                OcrResults analysisResult = await VisionServiceClient.RecognizeTextAsync(imageUri.AbsoluteUri);
+                ret = CalcText(analysisResult);
+            }
+            return ret;
+        }
+
+        // helper method that calculates the text
+        public static string CalcText (OcrResults analysisResult)
+        {
+            string ret = "No text detected. Would you like to know anything else?";
+            if (analysisResult != null && analysisResult.Regions != null && analysisResult.Regions.Length > 0)
+            {
+                ret = "The text says ";
+                foreach (var region in analysisResult.Regions)
+                {
+                    foreach (var line in region.Lines)
+                    {
+                        foreach (var word in line.Words) ret = ret + word.Text + " ";
+                    }
+                }
+                ret = ret + ". Would you like to know anything else?";
             }
             return ret;
         }

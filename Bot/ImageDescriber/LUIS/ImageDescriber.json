@@ -17,6 +17,9 @@
       "name": "None"
     },
     {
+      "name": "Text"
+    },
+    {
       "name": "ActionsAsk"
     },
     {
@@ -1097,6 +1100,31 @@
     {
       "text": "what is their facial expression",
       "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "what does this say",
+      "intent": "Text",
+      "entities": []
+    },
+    {
+      "text": "what is written",
+      "intent": "Text",
+      "entities": []
+    },
+    {
+      "text": "what are the words",
+      "intent": "Text",
+      "entities": []
+    },
+    {
+      "text": "what are these words",
+      "intent": "Text",
+      "entities": []
+    },
+    {
+      "text": "what is the text",
+      "intent": "Text",
       "entities": []
     }
   ]
