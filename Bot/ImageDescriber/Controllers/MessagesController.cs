@@ -32,6 +32,8 @@ namespace ImageDescriber
         private static string KeyDes = "cbc1463902284471bf4aaae732da10a0";
         private static string KeyEmo = "ebe3b657187242f684da0318c812c878";
         private static string KeyFace = "4cb2b28396104278867114638f7a75b0";
+        private static string IdTrans = "ImageDescriber";
+        private static string SecTrans = "3RDYrwAxYga8hPqbjJXlWDDSL1mJpodCE2lvcGae9Qo=";
 
         // method that handles user messages and sends back replies
         public async Task<Message> Post([FromBody]Message message)
@@ -89,7 +91,7 @@ namespace ImageDescriber
                             SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
                             return ReplyMessage;
                         case "ActionsAsk":
-                            ReplyMessage = message.CreateReplyMessage("This bot gives information about images. First, either attach an image in the message or as a url. You can then ask the bot about the contents of the image, levels of particular emotions, and people within it (age, gender, celebrities). For example, try asking \"What is the primary emotion?\"");
+                            ReplyMessage = message.CreateReplyMessage("This bot gives information about images. First, either attach an image in the message or as a url. You can then ask the bot about the contents of the image, levels of particular emotions,  people within it (age, gender, celebrities), and text in it (which can be translated). For example, try asking \"What is the primary emotion?\"");
                             SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
                             return ReplyMessage;
                         case "Age":
@@ -106,6 +108,11 @@ namespace ImageDescriber
                             return ReplyMessage;
                         case "Text":
                             ReplyMessage = message.CreateReplyMessage(await Texter(message));
+                            SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
+                            return ReplyMessage;
+                        case "Translate":
+                            if (luis.entities.Count() > 0) ReplyMessage = message.CreateReplyMessage(await Translator(message, luis.entities[0].entity));
+                            else ReplyMessage = message.CreateReplyMessage("You need to specify a language to translate to. Please try again.");
                             SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
                             return ReplyMessage;
                     }
@@ -507,7 +514,8 @@ namespace ImageDescriber
                         foreach (var word in line.Words) ret = ret + word.Text + " ";
                     }
                 }
-                ret = ret + ". Would you like to know anything else?";
+                if (ret[ret.Length - 1] != '.') ret = ret + '.';
+                ret = ret + " Would you like to know anything else?";
             }
             return ret;
         }
@@ -638,6 +646,35 @@ namespace ImageDescriber
             ret = ret + string.Format("{0}{1}", "}", Environment.NewLine);
             return ret;
         }
+
+
+        public static async Task<string> Translator (Message message, string to)
+        {
+            string text = await Texter(message);
+            string ret = text;
+            if (ret.Contains("No text detected") || ret.Contains("Please first attach")) return ret;
+            else
+            {
+                text = text.Replace("The text says", " ").Replace(". Would you like to know anything else?", " ");
+                text = text.Trim();
+                AdmAccessToken admToken;
+                string headerValue;
+                AdmAuthentication admAuth = new AdmAuthentication(IdTrans, SecTrans);
+                admToken = admAuth.GetAccessToken();
+                headerValue = "Bearer " + admToken.access_token;
+                string langTo = Translate.CheckLanguage(headerValue, to);
+
+                if (langTo == null) ret = "Not a valid language name. Try again.";
+                else
+                {
+                    ret = "The translation is " + Translate.TranslateMethod(headerValue, text, langTo);
+                    if (ret[ret.Length - 1] != '.') ret = ret + '.';
+                    ret = ret + " Would you like to know anything else?";
+                }
+            }
+            return ret;
+        }
+
         private Message HandleSystemMessage(Message message)
         {
             if (message.Type == "Ping")
