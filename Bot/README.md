@@ -6,5 +6,7 @@ It uses [Microsoft LUIS](https://www.luis.ai/) for interpreting natural language
 * [Emotion API](https://www.microsoft.com/cognitive-services/en-us/emotion-api) for detecting facial emotion
 * [Face API](https://www.microsoft.com/cognitive-services/en-us/face-api) for analysis of faces
  
+The bot also uses [Microsoft Translator API](https://www.microsoft.com/en-us/translator) for text translation within images. It is hosted as an Azure web app and relies on Azure blob storage.
+
 The bot can be used by running the [bot framework emulator](http://download.botframework.com/botconnector/tools/emulator/publish.htm) and entering in the appropriate App Id and App Secret, found in the Web.config file. 
 
