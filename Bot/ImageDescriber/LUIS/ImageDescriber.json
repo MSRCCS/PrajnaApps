@@ -1,0 +1,1626 @@
+﻿{
+  "luis_schema_version": "1.3.0",
+  "name": "ImageDescriber",
+  "desc": "",
+  "culture": "en-us",
+  "intents": [
+    {
+      "name": "Age"
+    },
+    {
+      "name": "Translate"
+    },
+    {
+      "name": "Gender"
+    },
+    {
+      "name": "Celebrity"
+    },
+    {
+      "name": "None"
+    },
+    {
+      "name": "Text"
+    },
+    {
+      "name": "ActionsAsk"
+    },
+    {
+      "name": "Describe"
+    },
+    {
+      "name": "Emotion"
+    },
+    {
+      "name": "Face"
+    }
+  ],
+  "entities": [
+    {
+      "name": "WhichLanguage"
+    },
+    {
+      "name": "WhichEmotion"
+    }
+  ],
+  "composites": [],
+  "bing_entities": [],
+  "actions": [],
+  "model_features": [],
+  "regex_features": [],
+  "utterances": [
+    {
+      "text": "what is the primary emotion",
+      "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "how happy is this photo",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 1,
+          "endPos": 1
+        }
+      ]
+    },
+    {
+      "text": "how angry is this picture",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 1,
+          "endPos": 1
+        }
+      ]
+    },
+    {
+      "text": "what is this picture about",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what is in this photo",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "how happy are the people",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 1,
+          "endPos": 1
+        }
+      ]
+    },
+    {
+      "text": "what is the emotion",
+      "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "emotion",
+      "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "description",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "caption",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "how much sadness is there",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "how much anger is there",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "how much contempt",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "what is this about",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what is in this",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "describe this photo",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "give a caption for this",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "describe this image",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "tell me what this is about",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what is the level of happiness",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "how sad is this photo",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 1,
+          "endPos": 1
+        }
+      ]
+    },
+    {
+      "text": "what is the level of anger",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "what is the level of surprise",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "what is the level of contempt",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "what is the picture of",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what is the picture about",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what is happening",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what is it of",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what is happening in it",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what is it a picture of",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "how many faces are there",
+      "intent": "Face",
+      "entities": []
+    },
+    {
+      "text": "are there any faces",
+      "intent": "Face",
+      "entities": []
+    },
+    {
+      "text": "what is the number of faces",
+      "intent": "Face",
+      "entities": []
+    },
+    {
+      "text": "how many people are there",
+      "intent": "Face",
+      "entities": []
+    },
+    {
+      "text": "what is the number of people",
+      "intent": "Face",
+      "entities": []
+    },
+    {
+      "text": "how old are the people",
+      "intent": "Age",
+      "entities": []
+    },
+    {
+      "text": "what age is everyone",
+      "intent": "Age",
+      "entities": []
+    },
+    {
+      "text": "what are the people's ages",
+      "intent": "Age",
+      "entities": []
+    },
+    {
+      "text": "what are the ages",
+      "intent": "Age",
+      "entities": []
+    },
+    {
+      "text": "how old",
+      "intent": "Age",
+      "entities": []
+    },
+    {
+      "text": "what ages",
+      "intent": "Age",
+      "entities": []
+    },
+    {
+      "text": "what can this bot do",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what can i do with this",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what are the possible questions",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what is this bot for",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what does this bot do",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "who is this",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "which celebrity is this",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "which person is this",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "who is this celebrity",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "what is this person's name",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "what is their name",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "what is his name",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "what is the age from left to right",
+      "intent": "Age",
+      "entities": []
+    },
+    {
+      "text": "what ethnicity is the man?",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "how old is he\\",
+      "intent": "Age",
+      "entities": []
+    },
+    {
+      "text": "how old is he",
+      "intent": "Age",
+      "entities": []
+    },
+    {
+      "text": "what is the age",
+      "intent": "Age",
+      "entities": []
+    },
+    {
+      "text": "how old is it",
+      "intent": "Age",
+      "entities": []
+    },
+    {
+      "text": "who are these people",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "how old are they",
+      "intent": "Age",
+      "entities": []
+    },
+    {
+      "text": "what are their ages",
+      "intent": "Age",
+      "entities": []
+    },
+    {
+      "text": "what is it\\",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what color is the building",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "what is their age",
+      "intent": "Age",
+      "entities": []
+    },
+    {
+      "text": "what is the level of disgust",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "what is the level of neutral",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "is he happy",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "what is the happiness",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 3,
+          "endPos": 3
+        }
+      ]
+    },
+    {
+      "text": "how much surprise",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "caption this",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what is the level of contemopt",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "what is the predominant emotion",
+      "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "what can you do",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "who are in the picture",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what is their names",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "who is the man?",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "who is the man",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "who is it",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "who made this picture",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "what type of owl is it",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "how many men are there",
+      "intent": "Face",
+      "entities": []
+    },
+    {
+      "text": "how much contempt is there",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "how many faces",
+      "intent": "Face",
+      "entities": []
+    },
+    {
+      "text": "faces",
+      "intent": "Face",
+      "entities": []
+    },
+    {
+      "text": "what is htis",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what is it about",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what is the primary emotiobn",
+      "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "what is this a picture of",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what is the level of sad",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "what can i do with this bot",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what is sauhdasu",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "who is in the picture?",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "who are in the picture?",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "who is in the picture",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "no",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "anything else",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "are there any celebrities",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "which celebrities are there",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "which person is that",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "hello",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what can i do",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what can this do",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what expression does he have",
+      "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "what is the expression",
+      "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "what is her expression",
+      "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "what is their expression",
+      "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "what is it",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what is the gender",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "is it a boy or a girl",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "is he a boy",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "is she a girl",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "what is the sex",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "what are their genders",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "what are the people's genders",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "what is their gender",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "what is tis",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what is he doing",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "is the man angry",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 3,
+          "endPos": 3
+        }
+      ]
+    },
+    {
+      "text": "what is the level of neutrality?",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "is it a boy or a girl in the image?",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "is she a boy",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "what",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what is the gender?",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "what is in the image?",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what is the emotion displayed on his face?",
+      "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "who is that?",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "who are they",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "what celebrities are there",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "what is in the photo?",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what is his emotion",
+      "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "what is that",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "is it female",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "is it male",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "is it a female",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "is it a male",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "how sad is he",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 1,
+          "endPos": 1
+        }
+      ]
+    },
+    {
+      "text": "how sad are they",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 1,
+          "endPos": 1
+        }
+      ]
+    },
+    {
+      "text": "how contemptuous are they",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 1,
+          "endPos": 1
+        }
+      ]
+    },
+    {
+      "text": "how angry is he",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 1,
+          "endPos": 1
+        }
+      ]
+    },
+    {
+      "text": "how disgusted is he",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 1,
+          "endPos": 1
+        }
+      ]
+    },
+    {
+      "text": "how neutral are they",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 1,
+          "endPos": 1
+        }
+      ]
+    },
+    {
+      "text": "what is the level of neutrality",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "how angered are they",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 1,
+          "endPos": 1
+        }
+      ]
+    },
+    {
+      "text": "are they scared",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "are they happy",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "how much sorrow is there",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "are they surprised",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "is she happy",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "is she sad",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "is she scared",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "is she contemptuous",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "is he angered",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "is she disgusted",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "is it a she",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "is it a he",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "is she a female",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "is he a male",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "is the person a male",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "is the person a female",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "what is the gender of the person",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "what are those",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what are their expressions",
+      "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "what is his expression",
+      "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "what is their facial expression",
+      "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "what does this say",
+      "intent": "Text",
+      "entities": []
+    },
+    {
+      "text": "what is written",
+      "intent": "Text",
+      "entities": []
+    },
+    {
+      "text": "what are the words",
+      "intent": "Text",
+      "entities": []
+    },
+    {
+      "text": "what are these words",
+      "intent": "Text",
+      "entities": []
+    },
+    {
+      "text": "what is the text",
+      "intent": "Text",
+      "entities": []
+    },
+    {
+      "text": "what are the genders",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "what is this",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what is the level of sadness",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "what is in this picture",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "is it female?",
+      "intent": "Gender",
+      "entities": []
+    },
+    {
+      "text": "what is the level of happiness?",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "what is in this picture?",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what do you do",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what is emotion",
+      "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "what does it say",
+      "intent": "Text",
+      "entities": []
+    },
+    {
+      "text": "who is in this picture?",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "what can i ask?",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "http://imgur.com/beolllf",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "what is their emotion",
+      "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "who is it?",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "who is this?",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "what is in the picture?",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "who is in it",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "what are they doing",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what can i make with this",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what does it mean?",
+      "intent": "Text",
+      "entities": []
+    },
+    {
+      "text": "what is the primary emotion of this image?",
+      "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "what is the photo about",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what is in the picture",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what does this do",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what is this image about.",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "how much anger",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "what is the primary emotino",
+      "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "what is the level of excitedness",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "what is the expression?",
+      "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "what is the level of joy",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "level of sadness",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "what is the level of angert",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "how many people",
+      "intent": "Face",
+      "entities": []
+    },
+    {
+      "text": "how mnay faces are there",
+      "intent": "Face",
+      "entities": []
+    },
+    {
+      "text": "level of neutral",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "how many",
+      "intent": "Face",
+      "entities": []
+    },
+    {
+      "text": "what does this mean in spanish",
+      "intent": "Translate",
+      "entities": [
+        {
+          "entity": "WhichLanguage",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "what does this say in chinese",
+      "intent": "Translate",
+      "entities": [
+        {
+          "entity": "WhichLanguage",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "what is this in german",
+      "intent": "Translate",
+      "entities": [
+        {
+          "entity": "WhichLanguage",
+          "startPos": 4,
+          "endPos": 4
+        }
+      ]
+    },
+    {
+      "text": "translate this to hindi",
+      "intent": "Translate",
+      "entities": [
+        {
+          "entity": "WhichLanguage",
+          "startPos": 3,
+          "endPos": 3
+        }
+      ]
+    },
+    {
+      "text": "what is the meaning in english",
+      "intent": "Translate",
+      "entities": [
+        {
+          "entity": "WhichLanguage",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "to chinese",
+      "intent": "Translate",
+      "entities": [
+        {
+          "entity": "WhichLanguage",
+          "startPos": 1,
+          "endPos": 1
+        }
+      ]
+    },
+    {
+      "text": "what does the text say",
+      "intent": "Text",
+      "entities": []
+    },
+    {
+      "text": "what is this?",
+      "intent": "Describe",
+      "entities": []
+    },
+    {
+      "text": "what does this bot",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "gggggggggggg",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "what is the level of anger?",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "what level of happiness?",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 3,
+          "endPos": 3
+        }
+      ]
+    },
+    {
+      "text": "what is the primary emotion'",
+      "intent": "Emotion",
+      "entities": []
+    },
+    {
+      "text": "what does this say in spanish",
+      "intent": "Translate",
+      "entities": [
+        {
+          "entity": "WhichLanguage",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "what is this in portuguese",
+      "intent": "Translate",
+      "entities": [
+        {
+          "entity": "WhichLanguage",
+          "startPos": 4,
+          "endPos": 4
+        }
+      ]
+    },
+    {
+      "text": "what is the text in dutch",
+      "intent": "Translate",
+      "entities": [
+        {
+          "entity": "WhichLanguage",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "what does this say in asddasd",
+      "intent": "Translate",
+      "entities": [
+        {
+          "entity": "WhichLanguage",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "translate to asdasda",
+      "intent": "Translate",
+      "entities": [
+        {
+          "entity": "WhichLanguage",
+          "startPos": 2,
+          "endPos": 2
+        }
+      ]
+    },
+    {
+      "text": "what does it say in italian",
+      "intent": "Translate",
+      "entities": [
+        {
+          "entity": "WhichLanguage",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "what does it say in chiense",
+      "intent": "Translate",
+      "entities": [
+        {
+          "entity": "WhichLanguage",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "what does it say in sadja",
+      "intent": "Translate",
+      "entities": [
+        {
+          "entity": "WhichLanguage",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "spanish",
+      "intent": "Translate",
+      "entities": [
+        {
+          "entity": "WhichLanguage",
+          "startPos": 0,
+          "endPos": 0
+        }
+      ]
+    },
+    {
+      "text": "french",
+      "intent": "Translate",
+      "entities": [
+        {
+          "entity": "WhichLanguage",
+          "startPos": 0,
+          "endPos": 0
+        }
+      ]
+    },
+    {
+      "text": "italian",
+      "intent": "Translate",
+      "entities": [
+        {
+          "entity": "WhichLanguage",
+          "startPos": 0,
+          "endPos": 0
+        }
+      ]
+    },
+    {
+      "text": "german",
+      "intent": "Translate",
+      "entities": [
+        {
+          "entity": "WhichLanguage",
+          "startPos": 0,
+          "endPos": 0
+        }
+      ]
+    },
+    {
+      "text": "hindi",
+      "intent": "Translate",
+      "entities": [
+        {
+          "entity": "WhichLanguage",
+          "startPos": 0,
+          "endPos": 0
+        }
+      ]
+    }
+  ]
+}
