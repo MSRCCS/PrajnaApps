@@ -14,6 +14,11 @@ using Microsoft.ProjectOxford.Emotion.Contract;
 using System.Collections;
 using System.Collections.Generic;
 
+using Microsoft.Azure; // Namespace for CloudConfigurationManager
+using Microsoft.WindowsAzure.Storage; // Namespace for CloudStorageAccount
+using Microsoft.WindowsAzure.Storage.Blob; // Namespace for Blob storage types
+using System.ComponentModel;
+
 namespace ImageDescriber
 {
     [BotAuthentication]
@@ -33,12 +38,14 @@ namespace ImageDescriber
         {
             if (message.Type == "Message")
             {
+                SaveMessage(message, message.Created.ToString().Substring(0, 9), false);
                 Message ReplyMessage = new Message();
                 if (message.Attachments.Count() > 0) // sending image
                 {
                     ReplyMessage = message.CreateReplyMessage("What would you like to know?");
                     ReplyMessage.SetBotUserData("ImageStream", message.Attachments[0].ContentUrl);
                     ReplyMessage.SetBotUserData("Attachment", 11); // 11 for attachment, 22 for url
+                    SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
                     return ReplyMessage;
                 }
 
@@ -47,18 +54,18 @@ namespace ImageDescriber
                     if (message.Text.ToLower().Contains("png") || message.Text.ToLower().Contains("jpg") || message.Text.ToLower().Contains("gif")) // sending url
                     {
                         ReplyMessage = message.CreateReplyMessage("What would you like to know?");
-                        //ReplyMessage = message.CreateReplyMessage("channel: " + message.Participants[0].ChannelId + ", name: " + message.Participants[0].Name + ", address: " + message.Participants[0].Address);
                         ReplyMessage.SetBotUserData("ImageUrl", message.Text);
                         ReplyMessage.SetBotUserData("Attachment", 22); // 11 for attachment, 22 for url
+                        SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
                         return ReplyMessage;
                     }
                     else
                     {
                         ReplyMessage = message.CreateReplyMessage("Please attach a direct link to the image. The link should end in .jpg, .png, or .gif.");
+                        SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
                         return ReplyMessage;
                     }
                 }
-
                 ImageLUIS luis = await LUISClient.ParseUserInput(message.Text);
                 if (luis.intents.Count() > 0)  // identifying the correct intent from LUIS
                 {
@@ -66,34 +73,44 @@ namespace ImageDescriber
                     {
                         case "None":
                             ReplyMessage = message.CreateReplyMessage("I don't understand what you mean. Please enter in another request.");
+                            SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
                             return ReplyMessage;
                         case "Describe":
                             ReplyMessage = message.CreateReplyMessage(await Describer(message));
+                            SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
                             return ReplyMessage;
                         case "Emotion":
                             if (luis.entities.Count() > 0) ReplyMessage = message.CreateReplyMessage(await Emotioner(message, luis.entities[0].entity));
                             else ReplyMessage = message.CreateReplyMessage(await Emotioner(message));
+                            SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
                             return ReplyMessage;
                         case "Face":
                             ReplyMessage = message.CreateReplyMessage(await Facer(message));
+                            SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
                             return ReplyMessage;
                         case "ActionsAsk":
                             ReplyMessage = message.CreateReplyMessage("This bot gives information about images. First, either attach an image in the message or as a url. You can then ask the bot about the contents of the image, levels of particular emotions, and people within it (age, gender, celebrities). For example, try asking \"What is the primary emotion?\"");
+                            SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
                             return ReplyMessage;
                         case "Age":
                             ReplyMessage = message.CreateReplyMessage(await Ager(message));
+                            SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
                             return ReplyMessage;
                         case "Celebrity":
                             ReplyMessage = message.CreateReplyMessage(await Celebrities(message));
+                            SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
                             return ReplyMessage;
                         case "Gender":
                             ReplyMessage = message.CreateReplyMessage(await Gender(message));
+                            SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
                             return ReplyMessage;
                         case "Text":
                             ReplyMessage = message.CreateReplyMessage(await Texter(message));
+                            SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
                             return ReplyMessage;
                     }
                 }
+                SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
                 return ReplyMessage;  // replying back to user
             }
             else
@@ -492,6 +509,133 @@ namespace ImageDescriber
                 }
                 ret = ret + ". Would you like to know anything else?";
             }
+            return ret;
+        }
+
+
+        public static void SaveMessage (Message message, string dateIn, bool reply)
+        {
+            //Parse the connection string for the storage account.
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
+                Microsoft.Azure.CloudConfigurationManager.GetSetting("StorageConnectionString"));
+
+            //Create service client for credentialed access to the Blob service.
+            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
+
+            //Get a reference to a container.
+            CloudBlobContainer container = blobClient.GetContainerReference("image-bot");
+            
+            //Create the container if it does not already exist.
+            container.CreateIfNotExists();
+
+            //Get a reference to an append blob.
+            string date = dateIn.Replace('/', '-');
+            CloudAppendBlob appendBlob = container.GetAppendBlobReference(date);
+            if (!appendBlob.Exists()) appendBlob.CreateOrReplace();
+            if (reply) appendBlob.AppendText((ConvertReplyString(message) + Environment.NewLine));
+            else appendBlob.AppendText((ConvertMessageString(message) + Environment.NewLine));
+        }
+
+
+        public static string ConvertMessageString(Message message)
+        {
+            string ret = "{";
+            ret = ret + string.Format("\"type\": \"{0}\",{1}", message.Type, Environment.NewLine);
+            ret = ret + string.Format("\"id\": \"{0}\",{1}", message.Id, Environment.NewLine);
+            ret = ret + string.Format("\"conversationId\": \"{0}\",{1}", message.ConversationId, Environment.NewLine);
+            ret = ret + string.Format("\"created\": \"{0}\",{1}", message.Created, Environment.NewLine);
+            ret = ret + string.Format("\"language\": \"{0}\",{1}", message.Language, Environment.NewLine);
+            ret = ret + string.Format("\"text\": \"{0}\",{1}", message.Text, Environment.NewLine);
+            ret = ret + string.Format("\"attachments\": {0}{1}", "[", Environment.NewLine);
+            if (message.Attachments != null && message.Attachments.Count > 0)
+            {
+                for (int i = 0; i < message.Attachments.Count; i++)
+                {
+                    ret = ret + string.Format("{{\"contentType\": \"{0}\",{1}", message.Attachments[i].ContentType, Environment.NewLine);
+                    ret = ret + string.Format("\"contentUrl\": \"{0}\"{1}", message.Attachments[i].ContentUrl, Environment.NewLine);
+                }
+                ret = ret + string.Format("}}{0}", Environment.NewLine);
+            }
+            ret = ret + "]," + Environment.NewLine;
+            ret = ret + string.Format("\"from\": {0}{1}", "{", Environment.NewLine);
+            ret = ret + string.Format("\"name\": \"{0}\",{1}", message.From.Name, Environment.NewLine);
+            ret = ret + string.Format("\"channelId\": \"{0}\",{1}", message.From.ChannelId, Environment.NewLine);
+            ret = ret + string.Format("\"address\": \"{0}\",{1}", message.From.Address, Environment.NewLine);
+            ret = ret + string.Format("\"id\": \"{0}\",{1}", message.From.Id, Environment.NewLine);
+            ret = ret + string.Format("\"isBot\": {0} }},{1}", message.From.IsBot, Environment.NewLine);
+
+            ret = ret + string.Format("\"to\": {0}{1}", "{", Environment.NewLine);
+            ret = ret + string.Format("\"name\": \"{0}\",{1}", message.To.Name, Environment.NewLine);
+            ret = ret + string.Format("\"channelId\": \"{0}\",{1}", message.To.ChannelId, Environment.NewLine);
+            ret = ret + string.Format("\"address\": \"{0}\",{1}", message.To.Address, Environment.NewLine);
+            ret = ret + string.Format("\"id\": \"{0}\",{1}", message.To.Id, Environment.NewLine);
+            ret = ret + string.Format("\"isBot\": {0} }},{1}", message.To.IsBot, Environment.NewLine);
+
+            ret = ret + string.Format("\"participants\": {0}{1}", "[", Environment.NewLine);
+            for (int i = 0; i < message.Participants.Count; i++)
+            {
+                ret = ret + string.Format("{0}{1}\"name\": \"{2}\",{3}", "{", Environment.NewLine, message.Participants[i].Name, Environment.NewLine);
+                ret = ret + string.Format("\"channelId\": \"{0}\",{1}", message.Participants[i].ChannelId, Environment.NewLine);
+                ret = ret + string.Format("\"address\": \"{0}\",{1}", message.Participants[i].Address, Environment.NewLine);
+                ret = ret + string.Format("\"id\": \"{0}\",{1}", message.Participants[i].Id, Environment.NewLine);
+                ret = ret + string.Format("\"isBot\": {0} }},{1}", message.Participants[i].IsBot, Environment.NewLine);
+            }
+            ret = ret + "]," + Environment.NewLine;
+
+            ret = ret + string.Format("\"totalParticipants\": \"{0}\",{1}", message.TotalParticipants, Environment.NewLine);
+            ret = ret + string.Format("\"channelMessageId\": \"{0}\",{1}", message.ChannelMessageId, Environment.NewLine);
+            ret = ret + string.Format("\"channelConversationId\": \"{0}\",{1}", message.ChannelConversationId, Environment.NewLine);
+
+            ret = ret + string.Format("\"botUserData\": {0}{1}", "{", Environment.NewLine);
+            if (message.BotUserData != null)
+            {
+                if (message.GetBotUserData<string>("ImageStream") != (null)) ret = ret + string.Format("\"ImageStream\": \"{0}\",{1}", message.GetBotUserData<string>("ImageStream"), Environment.NewLine);
+                if (message.GetBotUserData<string>("ImageUrl") != (null)) ret = ret + string.Format("\"ImageUrl\": \"{0}\",{1}", message.GetBotUserData<string>("ImageUrl"), Environment.NewLine);
+                ret = ret + string.Format("\"Attachment\": \"{0}\",{1}", message.GetBotUserData<int>("Attachment"), Environment.NewLine);
+            }
+            ret = ret + string.Format("{0}{1}{0}{1}", "}", Environment.NewLine);
+            return ret;
+        }
+
+        public static string ConvertReplyString (Message message)
+        {
+            string ret = "{";
+            ret = ret + string.Format("\"conversationId\": \"{0}\",{1}", message.ConversationId, Environment.NewLine);
+            ret = ret + string.Format("\"language\": \"{0}\",{1}", message.Language, Environment.NewLine);
+            ret = ret + string.Format("\"text\": \"{0}\",{1}", message.Text, Environment.NewLine);
+            ret = ret + string.Format("\"attachments\": {0}{1}", "[", Environment.NewLine);
+
+            ret = ret + string.Format("\"from\": {0}{1}", "{", Environment.NewLine);
+            ret = ret + string.Format("\"name\": \"{0}\",{1}", message.From.Name, Environment.NewLine);
+            ret = ret + string.Format("\"channelId\": \"{0}\",{1}", message.From.ChannelId, Environment.NewLine);
+            ret = ret + string.Format("\"address\": \"{0}\",{1}", message.From.Address, Environment.NewLine);
+            ret = ret + string.Format("\"id\": \"{0}\",{1}", message.From.Id, Environment.NewLine);
+            ret = ret + string.Format("\"isBot\": {0} }},{1}", message.From.IsBot, Environment.NewLine);
+
+            ret = ret + string.Format("\"to\": {0}{1}", "{", Environment.NewLine);
+            ret = ret + string.Format("\"name\": \"{0}\",{1}", message.To.Name, Environment.NewLine);
+            ret = ret + string.Format("\"channelId\": \"{0}\",{1}", message.To.ChannelId, Environment.NewLine);
+            ret = ret + string.Format("\"address\": \"{0}\",{1}", message.To.Address, Environment.NewLine);
+            ret = ret + string.Format("\"id\": \"{0}\",{1}", message.To.Id, Environment.NewLine);
+            ret = ret + string.Format("\"isBot\": {0} }},{1}", message.To.IsBot, Environment.NewLine);
+            ret = ret + string.Format("\"replyToMessageId\": \"{0}\",{1}", message.ReplyToMessageId, Environment.NewLine);
+
+            ret = ret + string.Format("\"participants\": {0}{1}", "[", Environment.NewLine);
+            for (int i = 0; i < message.Participants.Count; i++)
+            {
+                ret = ret + string.Format("{0}{1}\"name\": \"{2}\",{3}", "{", Environment.NewLine, message.Participants[i].Name, Environment.NewLine);
+                ret = ret + string.Format("\"channelId\": \"{0}\",{1}", message.Participants[i].ChannelId, Environment.NewLine);
+                ret = ret + string.Format("\"address\": \"{0}\",{1}", message.Participants[i].Address, Environment.NewLine);
+                ret = ret + string.Format("\"id\": \"{0}\",{1}", message.Participants[i].Id, Environment.NewLine);
+                ret = ret + string.Format("\"isBot\": {0} }},{1}", message.Participants[i].IsBot, Environment.NewLine);
+            }
+            ret = ret + "]," + Environment.NewLine;
+
+            ret = ret + string.Format("\"totalParticipants\": \"{0}\",{1}", message.TotalParticipants, Environment.NewLine);
+            ret = ret + string.Format("\"channelMessageId\": \"{0}\",{1}", message.ChannelMessageId, Environment.NewLine);
+            ret = ret + string.Format("\"channelConversationId\": \"{0}\",{1}", message.ChannelConversationId, Environment.NewLine);
+
+            ret = ret + string.Format("{0}{1}", "}", Environment.NewLine);
             return ret;
         }
         private Message HandleSystemMessage(Message message)
