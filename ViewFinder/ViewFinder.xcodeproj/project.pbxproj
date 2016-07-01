@@ -24,6 +24,8 @@
 		2CE441971D1DA5A4009A7DC1 /* MenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE441961D1DA5A4009A7DC1 /* MenuViewController.swift */; };
 		2CE441991D219A1D009A7DC1 /* TranslateWordBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE441981D219A1D009A7DC1 /* TranslateWordBox.swift */; };
 		2CE4419F1D21DE16009A7DC1 /* menuButtonSlim2.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CE4419E1D21DE16009A7DC1 /* menuButtonSlim2.png */; };
+		2CE441A71D2485D5009A7DC1 /* VFVCWC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE441A61D2485D5009A7DC1 /* VFVCWC.swift */; };
+		2CE441AB1D2592B7009A7DC1 /* SteadyViewFinderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE441AA1D2592B7009A7DC1 /* SteadyViewFinderViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,6 +69,8 @@
 		2CE441961D1DA5A4009A7DC1 /* MenuViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuViewController.swift; sourceTree = "<group>"; };
 		2CE441981D219A1D009A7DC1 /* TranslateWordBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TranslateWordBox.swift; sourceTree = "<group>"; };
 		2CE4419E1D21DE16009A7DC1 /* menuButtonSlim2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = menuButtonSlim2.png; sourceTree = "<group>"; };
+		2CE441A61D2485D5009A7DC1 /* VFVCWC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = VFVCWC.swift; path = ../VFVCWC.swift; sourceTree = "<group>"; };
+		2CE441AA1D2592B7009A7DC1 /* SteadyViewFinderViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SteadyViewFinderViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,6 +127,8 @@
 				2CE441941D1D9E01009A7DC1 /* uploadButton.png */,
 				2CE4410A1D18A599009A7DC1 /* AppDelegate.swift */,
 				2CE4410E1D18A599009A7DC1 /* Main.storyboard */,
+				2CE441A61D2485D5009A7DC1 /* VFVCWC.swift */,
+				2CE441AA1D2592B7009A7DC1 /* SteadyViewFinderViewController.swift */,
 				2CE441961D1DA5A4009A7DC1 /* MenuViewController.swift */,
 				2CE4413B1D18A5F3009A7DC1 /* ImageCaptureViewController.swift */,
 				2CE441901D1C4AFB009A7DC1 /* ViewFinderViewController.swift */,
@@ -298,7 +304,9 @@
 				2CE441991D219A1D009A7DC1 /* TranslateWordBox.swift in Sources */,
 				2CE441911D1C4AFB009A7DC1 /* ViewFinderViewController.swift in Sources */,
 				2CE4413C1D18A5F3009A7DC1 /* ImageCaptureViewController.swift in Sources */,
+				2CE441A71D2485D5009A7DC1 /* VFVCWC.swift in Sources */,
 				2CE4410B1D18A599009A7DC1 /* AppDelegate.swift in Sources */,
+				2CE441AB1D2592B7009A7DC1 /* SteadyViewFinderViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
