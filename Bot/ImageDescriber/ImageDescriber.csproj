@@ -155,6 +155,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="LUIS\luis.cs" />
+    <Compile Include="MessageClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Translate.cs" />
   </ItemGroup>

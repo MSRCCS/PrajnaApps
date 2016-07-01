@@ -18,6 +18,10 @@ using Microsoft.Azure; // Namespace for CloudConfigurationManager
 using Microsoft.WindowsAzure.Storage; // Namespace for CloudStorageAccount
 using Microsoft.WindowsAzure.Storage.Blob; // Namespace for Blob storage types
 using System.ComponentModel;
+using System.Reflection;
+using System.Runtime.Serialization.Json;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace ImageDescriber
 {
@@ -29,25 +33,32 @@ namespace ImageDescriber
         /// Receive a message from a user and reply to it
         /// </summary>
 
-        private static string KeyDes = "cbc1463902284471bf4aaae732da10a0";
-        private static string KeyEmo = "ebe3b657187242f684da0318c812c878";
-        private static string KeyFace = "4cb2b28396104278867114638f7a75b0";
-        private static string IdTrans = "ImageDescriber";
+        private static string KeyDes   = "cbc1463902284471bf4aaae732da10a0";
+        private static string KeyEmo   = "ebe3b657187242f684da0318c812c878";
+        private static string KeyFace  = "4cb2b28396104278867114638f7a75b0";
+        private static string IdTrans  = "ImageDescriber";
         private static string SecTrans = "3RDYrwAxYga8hPqbjJXlWDDSL1mJpodCE2lvcGae9Qo=";
+
+        private static CloudStorageAccount storageAccount;
+        private static CloudBlobClient     blobClient;
+        private static CloudBlobContainer  container;
+        private static CloudAppendBlob     appendBlob;
+        private static string              Date;
+
 
         // method that handles user messages and sends back replies
         public async Task<Message> Post([FromBody]Message message)
         {
             if (message.Type == "Message")
             {
-                SaveMessage(message, message.Created.ToString().Substring(0, 9), false);
+                await SaveMessage(message, message.Created.ToString().Substring(0, 9));
                 Message ReplyMessage = new Message();
                 if (message.Attachments.Count() > 0) // sending image
                 {
                     ReplyMessage = message.CreateReplyMessage("What would you like to know?");
                     ReplyMessage.SetBotUserData("ImageStream", message.Attachments[0].ContentUrl);
                     ReplyMessage.SetBotUserData("Attachment", 11); // 11 for attachment, 22 for url
-                    SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
+                    await SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9));
                     return ReplyMessage;
                 }
 
@@ -58,15 +69,22 @@ namespace ImageDescriber
                         ReplyMessage = message.CreateReplyMessage("What would you like to know?");
                         ReplyMessage.SetBotUserData("ImageUrl", message.Text);
                         ReplyMessage.SetBotUserData("Attachment", 22); // 11 for attachment, 22 for url
-                        SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
+                        await SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9));
                         return ReplyMessage;
                     }
                     else
                     {
                         ReplyMessage = message.CreateReplyMessage("Please attach a direct link to the image. The link should end in .jpg, .png, or .gif.");
-                        SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
+                        await SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9));
                         return ReplyMessage;
                     }
+                }
+
+                if (message.Text.ToLower().Contains("help"))
+                {
+                    ReplyMessage = message.CreateReplyMessage("Full capabilities: image description, primary emotion, levels of emotions, number of faces, age of people, genders, celebrity recognition, image text detection, image text translation. To use the bot in a different language, enter \"use\" followed by your language.");
+                    await SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9));
+                    return ReplyMessage;
                 }
                 ImageLUIS luis = await LUISClient.ParseUserInput(message.Text);
                 if (luis.intents.Count() > 0)  // identifying the correct intent from LUIS
@@ -75,49 +93,49 @@ namespace ImageDescriber
                     {
                         case "None":
                             ReplyMessage = message.CreateReplyMessage("I don't understand what you mean. Please enter in another request.");
-                            SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
+                            await SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9));
                             return ReplyMessage;
                         case "Describe":
                             ReplyMessage = message.CreateReplyMessage(await Describer(message));
-                            SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
+                            await SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9));
                             return ReplyMessage;
                         case "Emotion":
                             if (luis.entities.Count() > 0) ReplyMessage = message.CreateReplyMessage(await Emotioner(message, luis.entities[0].entity));
                             else ReplyMessage = message.CreateReplyMessage(await Emotioner(message));
-                            SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
+                            await SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9));
                             return ReplyMessage;
                         case "Face":
                             ReplyMessage = message.CreateReplyMessage(await Facer(message));
-                            SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
+                            await SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9));
                             return ReplyMessage;
                         case "ActionsAsk":
-                            ReplyMessage = message.CreateReplyMessage("This bot gives information about images. First, either attach an image in the message or as a url. You can then ask the bot about the contents of the image, levels of particular emotions,  people within it (age, gender, celebrities), and text in it (which can be translated). For example, try asking \"What is the primary emotion?\"");
-                            SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
+                            ReplyMessage = message.CreateReplyMessage("This bot provides information about images. After attachming an image or sending an image URL, you can ask the bot about the image's contents, emotions, people, and text, using natural language commands. For a full list of functions, ask \"help\". To get started, enter an image and try asking \"What is this a picture of\"");
+                            await SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9));
                             return ReplyMessage;
                         case "Age":
                             ReplyMessage = message.CreateReplyMessage(await Ager(message));
-                            SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
+                            await SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9));
                             return ReplyMessage;
                         case "Celebrity":
                             ReplyMessage = message.CreateReplyMessage(await Celebrities(message));
-                            SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
+                            await SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9));
                             return ReplyMessage;
                         case "Gender":
                             ReplyMessage = message.CreateReplyMessage(await Gender(message));
-                            SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
+                            await SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9));
                             return ReplyMessage;
                         case "Text":
                             ReplyMessage = message.CreateReplyMessage(await Texter(message));
-                            SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
+                            await SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9));
                             return ReplyMessage;
                         case "Translate":
                             if (luis.entities.Count() > 0) ReplyMessage = message.CreateReplyMessage(await Translator(message, luis.entities[0].entity));
                             else ReplyMessage = message.CreateReplyMessage("You need to specify a language to translate to. Please try again.");
-                            SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
+                            await SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9));
                             return ReplyMessage;
                     }
                 }
-                SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9), true);
+                await SaveMessage(ReplyMessage, message.Created.ToString().Substring(0, 9));
                 return ReplyMessage;  // replying back to user
             }
             else
@@ -521,133 +539,50 @@ namespace ImageDescriber
         }
 
 
-        public static void SaveMessage (Message message, string dateIn, bool reply)
+        public static async Task SaveMessage (Message message, string dateIn)
         {
-            //Parse the connection string for the storage account.
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(
-                Microsoft.Azure.CloudConfigurationManager.GetSetting("StorageConnectionString"));
+            if (storageAccount == null)
+            {
+                storageAccount = CloudStorageAccount.Parse(Microsoft.Azure.CloudConfigurationManager.GetSetting("StorageConnectionString"));
+                blobClient = storageAccount.CreateCloudBlobClient();
+                container = blobClient.GetContainerReference("test-json-async");
+                container.CreateIfNotExists();
+            }
 
-            //Create service client for credentialed access to the Blob service.
-            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
+            if (Date == null || appendBlob == null || !Date.Equals(dateIn.Replace('/', '-')))
+            {
+                Date = dateIn.Replace('/', '-');
+                appendBlob = container.GetAppendBlobReference(Date);
+                if (!appendBlob.Exists()) await appendBlob.CreateOrReplaceAsync();
+            }
 
-            //Get a reference to a container.
-            CloudBlobContainer container = blobClient.GetContainerReference("image-bot");
-            
-            //Create the container if it does not already exist.
-            container.CreateIfNotExists();
-
-            //Get a reference to an append blob.
-            string date = dateIn.Replace('/', '-');
-            CloudAppendBlob appendBlob = container.GetAppendBlobReference(date);
-            if (!appendBlob.Exists()) appendBlob.CreateOrReplace();
-            if (reply) appendBlob.AppendText((ConvertReplyString(message) + Environment.NewLine));
-            else appendBlob.AppendText((ConvertMessageString(message) + Environment.NewLine));
+            await appendBlob.AppendTextAsync((ConvertToJson(message) + Environment.NewLine));
         }
 
-
-        public static string ConvertMessageString(Message message)
+        public static string ConvertToJson(Message message)
         {
-            string ret = "{";
-            ret = ret + string.Format("\"type\": \"{0}\",{1}", message.Type, Environment.NewLine);
-            ret = ret + string.Format("\"id\": \"{0}\",{1}", message.Id, Environment.NewLine);
-            ret = ret + string.Format("\"conversationId\": \"{0}\",{1}", message.ConversationId, Environment.NewLine);
-            ret = ret + string.Format("\"created\": \"{0}\",{1}", message.Created, Environment.NewLine);
-            ret = ret + string.Format("\"language\": \"{0}\",{1}", message.Language, Environment.NewLine);
-            ret = ret + string.Format("\"text\": \"{0}\",{1}", message.Text, Environment.NewLine);
-            ret = ret + string.Format("\"attachments\": {0}{1}", "[", Environment.NewLine);
-            if (message.Attachments != null && message.Attachments.Count > 0)
+            MessageClass output = new MessageClass();
+
+            var type = typeof(Message);
+            PropertyInfo[] propertiesM = type.GetProperties();
+
+            var type2 = typeof(MessageClass);
+            FieldInfo[] propertiesMC = type2.GetFields();
+
+            for (int i = 0; i < propertiesM.Length; i++)
             {
-                for (int i = 0; i < message.Attachments.Count; i++)
+                for (int k = 0; k < propertiesMC.Length; k++)
                 {
-                    ret = ret + string.Format("{{\"contentType\": \"{0}\",{1}", message.Attachments[i].ContentType, Environment.NewLine);
-                    ret = ret + string.Format("\"contentUrl\": \"{0}\"{1}", message.Attachments[i].ContentUrl, Environment.NewLine);
+                    if (propertiesM[i].Name.ToLower().Equals(propertiesMC[k].Name.ToLower()))
+                    {
+                        var value = propertiesM[i].GetValue(message);
+                        propertiesMC[k].SetValue(output, value);
+                    }
                 }
-                ret = ret + string.Format("}}{0}", Environment.NewLine);
             }
-            ret = ret + "]," + Environment.NewLine;
-            ret = ret + string.Format("\"from\": {0}{1}", "{", Environment.NewLine);
-            ret = ret + string.Format("\"name\": \"{0}\",{1}", message.From.Name, Environment.NewLine);
-            ret = ret + string.Format("\"channelId\": \"{0}\",{1}", message.From.ChannelId, Environment.NewLine);
-            ret = ret + string.Format("\"address\": \"{0}\",{1}", message.From.Address, Environment.NewLine);
-            ret = ret + string.Format("\"id\": \"{0}\",{1}", message.From.Id, Environment.NewLine);
-            ret = ret + string.Format("\"isBot\": {0} }},{1}", message.From.IsBot, Environment.NewLine);
-
-            ret = ret + string.Format("\"to\": {0}{1}", "{", Environment.NewLine);
-            ret = ret + string.Format("\"name\": \"{0}\",{1}", message.To.Name, Environment.NewLine);
-            ret = ret + string.Format("\"channelId\": \"{0}\",{1}", message.To.ChannelId, Environment.NewLine);
-            ret = ret + string.Format("\"address\": \"{0}\",{1}", message.To.Address, Environment.NewLine);
-            ret = ret + string.Format("\"id\": \"{0}\",{1}", message.To.Id, Environment.NewLine);
-            ret = ret + string.Format("\"isBot\": {0} }},{1}", message.To.IsBot, Environment.NewLine);
-
-            ret = ret + string.Format("\"participants\": {0}{1}", "[", Environment.NewLine);
-            for (int i = 0; i < message.Participants.Count; i++)
-            {
-                ret = ret + string.Format("{0}{1}\"name\": \"{2}\",{3}", "{", Environment.NewLine, message.Participants[i].Name, Environment.NewLine);
-                ret = ret + string.Format("\"channelId\": \"{0}\",{1}", message.Participants[i].ChannelId, Environment.NewLine);
-                ret = ret + string.Format("\"address\": \"{0}\",{1}", message.Participants[i].Address, Environment.NewLine);
-                ret = ret + string.Format("\"id\": \"{0}\",{1}", message.Participants[i].Id, Environment.NewLine);
-                ret = ret + string.Format("\"isBot\": {0} }},{1}", message.Participants[i].IsBot, Environment.NewLine);
-            }
-            ret = ret + "]," + Environment.NewLine;
-
-            ret = ret + string.Format("\"totalParticipants\": \"{0}\",{1}", message.TotalParticipants, Environment.NewLine);
-            ret = ret + string.Format("\"channelMessageId\": \"{0}\",{1}", message.ChannelMessageId, Environment.NewLine);
-            ret = ret + string.Format("\"channelConversationId\": \"{0}\",{1}", message.ChannelConversationId, Environment.NewLine);
-
-            ret = ret + string.Format("\"botUserData\": {0}{1}", "{", Environment.NewLine);
-            if (message.BotUserData != null)
-            {
-                if (message.GetBotUserData<string>("ImageStream") != (null)) ret = ret + string.Format("\"ImageStream\": \"{0}\",{1}", message.GetBotUserData<string>("ImageStream"), Environment.NewLine);
-                if (message.GetBotUserData<string>("ImageUrl") != (null)) ret = ret + string.Format("\"ImageUrl\": \"{0}\",{1}", message.GetBotUserData<string>("ImageUrl"), Environment.NewLine);
-                ret = ret + string.Format("\"Attachment\": \"{0}\",{1}", message.GetBotUserData<int>("Attachment"), Environment.NewLine);
-            }
-            ret = ret + string.Format("{0}{1}{0}{1}", "}", Environment.NewLine);
-            return ret;
+            return JsonConvert.SerializeObject(output, Formatting.Indented); ;
         }
-
-        public static string ConvertReplyString (Message message)
-        {
-            string ret = "{";
-            ret = ret + string.Format("\"conversationId\": \"{0}\",{1}", message.ConversationId, Environment.NewLine);
-            ret = ret + string.Format("\"language\": \"{0}\",{1}", message.Language, Environment.NewLine);
-            ret = ret + string.Format("\"text\": \"{0}\",{1}", message.Text, Environment.NewLine);
-            ret = ret + string.Format("\"attachments\": {0}{1}", "[", Environment.NewLine);
-
-            ret = ret + string.Format("\"from\": {0}{1}", "{", Environment.NewLine);
-            ret = ret + string.Format("\"name\": \"{0}\",{1}", message.From.Name, Environment.NewLine);
-            ret = ret + string.Format("\"channelId\": \"{0}\",{1}", message.From.ChannelId, Environment.NewLine);
-            ret = ret + string.Format("\"address\": \"{0}\",{1}", message.From.Address, Environment.NewLine);
-            ret = ret + string.Format("\"id\": \"{0}\",{1}", message.From.Id, Environment.NewLine);
-            ret = ret + string.Format("\"isBot\": {0} }},{1}", message.From.IsBot, Environment.NewLine);
-
-            ret = ret + string.Format("\"to\": {0}{1}", "{", Environment.NewLine);
-            ret = ret + string.Format("\"name\": \"{0}\",{1}", message.To.Name, Environment.NewLine);
-            ret = ret + string.Format("\"channelId\": \"{0}\",{1}", message.To.ChannelId, Environment.NewLine);
-            ret = ret + string.Format("\"address\": \"{0}\",{1}", message.To.Address, Environment.NewLine);
-            ret = ret + string.Format("\"id\": \"{0}\",{1}", message.To.Id, Environment.NewLine);
-            ret = ret + string.Format("\"isBot\": {0} }},{1}", message.To.IsBot, Environment.NewLine);
-            ret = ret + string.Format("\"replyToMessageId\": \"{0}\",{1}", message.ReplyToMessageId, Environment.NewLine);
-
-            ret = ret + string.Format("\"participants\": {0}{1}", "[", Environment.NewLine);
-            for (int i = 0; i < message.Participants.Count; i++)
-            {
-                ret = ret + string.Format("{0}{1}\"name\": \"{2}\",{3}", "{", Environment.NewLine, message.Participants[i].Name, Environment.NewLine);
-                ret = ret + string.Format("\"channelId\": \"{0}\",{1}", message.Participants[i].ChannelId, Environment.NewLine);
-                ret = ret + string.Format("\"address\": \"{0}\",{1}", message.Participants[i].Address, Environment.NewLine);
-                ret = ret + string.Format("\"id\": \"{0}\",{1}", message.Participants[i].Id, Environment.NewLine);
-                ret = ret + string.Format("\"isBot\": {0} }},{1}", message.Participants[i].IsBot, Environment.NewLine);
-            }
-            ret = ret + "]," + Environment.NewLine;
-
-            ret = ret + string.Format("\"totalParticipants\": \"{0}\",{1}", message.TotalParticipants, Environment.NewLine);
-            ret = ret + string.Format("\"channelMessageId\": \"{0}\",{1}", message.ChannelMessageId, Environment.NewLine);
-            ret = ret + string.Format("\"channelConversationId\": \"{0}\",{1}", message.ChannelConversationId, Environment.NewLine);
-
-            ret = ret + string.Format("{0}{1}", "}", Environment.NewLine);
-            return ret;
-        }
-
-
+        
         public static async Task<string> Translator (Message message, string to)
         {
             string text = await Texter(message);
