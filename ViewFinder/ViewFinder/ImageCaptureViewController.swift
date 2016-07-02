@@ -52,12 +52,14 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
     var hasBack = false;
     var hasFront = false;
     var back = true;
-    
-    var language = "en"
-    
+
     var celebrityPresent = false
     
     var wordBoxes = [TranslateWordBox]()
+    
+    //State Variables - Which API to call & details about it
+    var camState = 0
+    var camDetails = ":-)"
     
     
     override func viewDidLoad() {
@@ -99,7 +101,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
  /////////////////// CONFIGURE ACTIONS //////////////////
     
     
-    //adds the double tap to the view
+    //adds the double tap and swipe to the view
     func configureTapActions() {
         doubleTap.numberOfTapsRequired = 2
         doubleTap.addTarget(self, action: #selector(ImageCaptureViewController.toggle(_:)))
@@ -169,10 +171,15 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
         menuButton.frame = CGRect(x: self.view.frame.size.width - 60, y: 20, width: 44, height: 44)
         //let menuImage = UIImage(named: "menuButtonSlim2.png")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate)
         //menuButton.setImage(menuImage, forState: .Normal)
-        let index: String.Index = language.startIndex.advancedBy(2) // Swift 2
-        var ss2:String = language.substringToIndex(index) // "Stack"
-        ss2 = ss2.uppercaseString
-        menuButton.setTitle(ss2, forState: .Normal)
+
+        if(camState == 1) {
+            let index: String.Index = camDetails.startIndex.advancedBy(2) // Swift 2
+            var ss2:String = camDetails.substringToIndex(index) // "Stack"
+            ss2 = ss2.uppercaseString
+            menuButton.setTitle(ss2, forState: .Normal)
+        } else {
+            menuButton.setTitle(camDetails, forState: .Normal)
+        }
         menuButton.titleLabel?.textColor = UIColor.blackColor()
         menuButton.titleLabel?.adjustsFontSizeToFitWidth = true
         menuButton.tintColor = UIColor.blackColor()
@@ -191,6 +198,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
         
         var numBoxes = 0
         
+        //safely unwraps the json dictionary returned from the OCR API
         if let regions = dict["regions"] as? NSArray {
             for region in regions {
                 if let lines = region["lines"] as? NSArray {
@@ -216,11 +224,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
             }
         }
     }
-    
-    
-    
-    
-    
+
     //this is called after the analyze image api is used
     func displayAnswers(rs: String) {
         let dict = (convertStringToDictionary(rs)!)
@@ -231,6 +235,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
             } else {
                 print(String(facesInImage.count) + " faces detected")
                 
+                //loops through faces and gives each one a Face Rectangle
                 for face in facesInImage {
                     let caption: String = String(face["age"] as! Int) + " y/o " + (face["gender"] as! String)
                     let x = face["faceRectangle"]!["left"] as! Int
@@ -281,16 +286,21 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
     }
     
     
- /////////////////// CHANGE LANGUAGE ////////////////////
+ /////////////////// CHANGE STATE //////////////////////
     
     //setter method for the language code
-    func changeLanguage(language: String) {
-        self.language = language
+    func changeState(state: Int, details: String) {
+        self.camDetails = details
+        self.camState = state
         
-        let index: String.Index = language.startIndex.advancedBy(2) // Swift 2
-        var ss2:String = language.substringToIndex(index) // "Stack"
-        ss2 = ss2.uppercaseString
-        menuButton.setTitle(ss2, forState: .Normal)
+        if(camState == 1) {
+            let index: String.Index = camDetails.startIndex.advancedBy(2) // Swift 2
+            var ss2:String = camDetails.substringToIndex(index) // "Stack"
+            ss2 = ss2.uppercaseString
+            menuButton.setTitle(ss2, forState: .Normal)
+        } else {
+            menuButton.setTitle(camDetails, forState: .Normal)
+        }
     }
     
     func adaptivePresentationStyleForPresentationController(
@@ -303,7 +313,8 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let controller = storyboard.instantiateViewControllerWithIdentifier("menu") as! MenuViewController
         
-        controller.current = self.language
+        controller.camState = self.camState
+        controller.camDetails = self.camDetails
         controller.preferredContentSize = CGSizeMake(250, 300)
         
         controller.modalPresentationStyle = UIModalPresentationStyle.Popover
@@ -343,10 +354,13 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
                 
                 //UIImageWriteToSavedPhotosAlbum(image!, nil, nil, nil) // saves image
                 
-                
-                self.analyzeImage(image!) //calls analyze image API
-                
-                self.readWords(image!) //calls the OCR API
+                if(self.camState == 0) {
+                    self.analyzeImage(image!) //calls analyze image API
+                    self.captionLabel.text = "Generating Caption..."
+                } else {
+                    self.readWords(image!) //calls the OCR API
+                    self.captionLabel.text = "Getting Translation..."
+                }
                 
                 let width = image!.size.width
                 
@@ -360,7 +374,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
                 
                 self.dismissButton.frame = CGRect(x: 0,y: self.view.frame.size.height - dismissButtonHeight, width: self.view.frame.size.width, height: dismissButtonHeight)
                 self.view.addSubview(self.dismissButton)
-                self.captionLabel.text = "Generating Caption..."
+                
                 self.captionLabel.frame = CGRect(x: 0, y: self.view.frame.size.height - (2 * dismissButtonHeight), width: self.view.frame.size.width, height: dismissButtonHeight + 4)
                 self.view.addSubview(self.captionLabel)
             }
@@ -411,7 +425,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
             picker.dismissViewControllerAnimated(true, completion: nil)
             
             analyzeUploadedImageView = AnalyzeUploadedImageViewController(height: self.view.frame.size.height, width: self.view.frame.size.width, image: image)
-            
+            analyzeUploadedImageView.language = self.camDetails
             self.view.addSubview(analyzeUploadedImageView)
             self.view.addSubview(closeButton)
             swipe.removeTarget(self, action: #selector(ImageCaptureViewController.viewFinder(_:)))
@@ -442,7 +456,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
         
         var responseString = "" as NSString
         
-        let to = language
+        let to = self.camDetails
         
         let encText = text.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())
         
@@ -547,7 +561,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
             dispatch_async(dispatch_get_main_queue()) {
                 let dict = self.convertStringToDictionary(responseString as String)
                 self.translate(dict!)
-                
+                print("!!")
             }
             
         }

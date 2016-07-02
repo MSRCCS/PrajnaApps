@@ -10,21 +10,31 @@ import Foundation
 import UIKit
 
 protocol MenuViewControllerDelegate {
-    func changeLanguage(language: String)
+    func changeState(state: Int, details: String)
 }
 
 class MenuViewController: UITableViewController {
     
     @IBOutlet weak var table: UITableView!
     
-    var apis = [String]()
+    //let apis = [["Faces": faces], ["Translate", languages]]
     
-    var current = String()
+    let apiNames = ["Facial Recognition", "Translation"]
     
-    let languages = [["language": "Arabic", "code": "ar"], ["language": "Chinese", "code": "zh-CHS"], ["language": "English", "code": "en"], ["language": "French", "code": "fr"], ["language": "German", "code": "de"], ["language": "Hebrew", "code": "he"], ["language": "Italian", "code": "it"], ["language": "Japanese", "code": "ja"], ["language": "Korean", "code": "ko"], ["language": "Portuguese", "code": "pt"], ["language": "Russian", "code": "ru"], ["language": "Spanish", "code": "es"], ["language": "Turkish", "code": "tr"]]
+    var apis = [[Dictionary<String, String>]]()
+    
+    let languages = [["name": "Arabic", "code": "ar"], ["name": "Chinese", "code": "zh-CHS"], ["name": "Dutch", "code": "nl"], ["name": "English", "code": "en"], ["name": "French", "code": "fr"], ["name": "German", "code": "de"], ["name": "Hebrew", "code": "he"], ["name": "Hindi", "code": "hi"], ["name": "Indonesian", "code": "id"], ["name": "Italian", "code": "it"], ["name": "Japanese", "code": "ja"], ["name": "Korean", "code": "ko"], ["name": "Portuguese", "code": "pt"], ["name": "Russian", "code": "ru"], ["name": "Spanish", "code": "es"], ["name": "Turkish", "code": "tr"], ["name": "Vietnamese", "code": "vi"]]
+    let faces = [["name": "Standard", "code": ":-)"], ["name": "Celebrity", "code": "B-)"]]
+    
+    var menuState = 0
+    var api = Int()
+    var camState = Int()
+    var camDetails = String()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        apis = [faces, languages]
         
         table.dataSource = self
         table.delegate = self
@@ -40,28 +50,53 @@ class MenuViewController: UITableViewController {
 
         let cell = tableView.dequeueReusableCellWithIdentifier("menuItem", forIndexPath: indexPath)
         
-        if(languages[indexPath.row]["code"] == current) {
-            cell.textLabel!.text = languages[indexPath.row]["language"]! + " *"
+        if(menuState == 0) {
+            cell.textLabel!.text = apiNames[indexPath.row]
+            if(indexPath.row == camState) {
+                cell.textLabel!.text = cell.textLabel!.text! + " *"
+            }
+            
         } else {
-            cell.textLabel!.text = languages[indexPath.row]["language"]!
+            let text = apis[camState][indexPath.row]["name"]
+            let code = apis[camState][indexPath.row]["code"]
+            cell.textLabel!.text = text
+            if(camDetails == code) {
+                cell.textLabel!.text = text! + " *"
+            }
         }
+        
+//        if(languages[indexPath.row]["code"] == camDetails) {
+//            cell.textLabel!.text = languages[indexPath.row]["name"]! + " *"
+//        } else {
+//            cell.textLabel!.text = languages[indexPath.row]["name"]!
+//        }
         
         return cell
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        passDataBackWards(languages[indexPath.row]["code"]!)
-        self.dismissViewControllerAnimated(true, completion: nil)
+        if(menuState == 0) {
+            menuState += 1
+            camState = indexPath.row
+            table.reloadData()
+        } else {
+            passDataBackWards(camState, details: apis[camState][indexPath.row]["code"]!)
+            self.dismissViewControllerAnimated(true, completion: nil)
+        }
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return languages.count
+        if(menuState == 0) {
+            return apis.count
+        } else {
+            return apis[camState].count
+        }
     }
     
     var delegate: MenuViewControllerDelegate?
     
-    func passDataBackWards(language: String) {
-        delegate?.changeLanguage(language)
+    func passDataBackWards(state: Int, details: String) {
+        delegate?.changeState(state, details: details)
     }
     
     

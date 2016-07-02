@@ -1,5 +1,5 @@
 //
-//  ViewFinderViewController.swift
+//  VFVCWC.swift
 //  ViewFinder
 //
 //  Created by Jacob Kohn on 6/23/16.
@@ -12,7 +12,7 @@ import AVFoundation
 import CoreMotion
 import CoreImage
 
-class ViewFinderViewController: UIViewController, UIGestureRecognizerDelegate {
+class VFVCWC: UIViewController, UIGestureRecognizerDelegate {
     
     var trackingImage = UIImage()
     
@@ -30,7 +30,8 @@ class ViewFinderViewController: UIViewController, UIGestureRecognizerDelegate {
     let dismissButton = UIButton()
     var faceBoxes = [FaceDetectionBox]()
     var textBoxes = [TranslateWordBox]()
-    var faces = [ViewFinderViewController.face()]
+    var faces = [VFVCWC.face()]
+    var features = [VFVCWC.faceFeatures()]
     //var faceFeatures
     var totalFacesDetected = 0
     
@@ -65,7 +66,7 @@ class ViewFinderViewController: UIViewController, UIGestureRecognizerDelegate {
     var textContext: CIContext?
     var hasText = false
     var callOcrApi = false
-
+    
     var face = false
     
     override func viewDidLoad() {
@@ -76,13 +77,13 @@ class ViewFinderViewController: UIViewController, UIGestureRecognizerDelegate {
         self.view.addSubview(previewView);
         
         configureTapActions()
-
+        
         setUpFaceDetector()
         
         self.setupAVCapture()
     }
-
-
+    
+    
     override func viewWillAppear(animated: Bool) {
         if !done {
             session.startRunning();
@@ -104,8 +105,55 @@ class ViewFinderViewController: UIViewController, UIGestureRecognizerDelegate {
         }
     }
     
- ///////////////////// STRUCTS ///////////////////////////////
-
+    ///////////////////// STRUCTS ///////////////////////////////
+    
+    struct faceFeatures {
+        
+        var heightRatio = CGFloat()
+        var widthRatio = CGFloat()
+        var description = String()
+        var id = Int()
+        
+        init(heightRatio: CGFloat, widthRatio: CGFloat, id: Int) {
+            self.heightRatio = heightRatio
+            self.widthRatio = widthRatio
+            self.id = id
+            self.description = ""
+        }
+        
+        init() {
+            
+        }
+        
+        mutating func updateDescription(description: String) {
+            self.description = description
+        }
+        
+        func compare(heightRatio: CGFloat, widthRatio: CGFloat) -> Bool {
+            
+            let oldRatio = heightRatio / widthRatio
+            let newRatio = self.heightRatio / self.widthRatio
+            
+            if(fivePercent(oldRatio, new: newRatio)) {
+                return true
+            } else {
+                return false
+            }
+        }
+        
+        func fivePercent(original: CGFloat, new: CGFloat) -> Bool {
+            if(original == new) {
+                return true
+            }
+            let fiveOfOriginal = original * 0.04
+            
+            if(new < (original + fiveOfOriginal) && new > (original - fiveOfOriginal)) {
+                return true
+            }
+            return false
+        }
+    }
+    
     //Stores the information about a face
     struct face {
         var id = Int()
@@ -150,10 +198,10 @@ class ViewFinderViewController: UIViewController, UIGestureRecognizerDelegate {
             if(two == one) {
                 return true
             }
-            if(two + 30 > one && two < one) {
+            if(two + 15 > one && two < one) {
                 return true
             }
-            if(one + 30 > two && one < two) {
+            if(one + 15 > two && one < two) {
                 return true
             }
             return false
@@ -161,7 +209,7 @@ class ViewFinderViewController: UIViewController, UIGestureRecognizerDelegate {
     }
     
     
-////////////////// JSON PARSING ///////////////////////
+    ////////////////// JSON PARSING ///////////////////////
     
     //this is called after the analyze image api is used
     func displayAnswers(rs: String, id: Int) {
@@ -173,13 +221,18 @@ class ViewFinderViewController: UIViewController, UIGestureRecognizerDelegate {
             } else {
                 for face in facesInImage {
                     let caption: String = String(face["age"] as! Int) + " y/o " + (face["gender"] as! String)
-                    for i in 0 ..< faces.count {
-                        if(faces[i].id == id) {
-                            faces[i].caption = caption
+                    print(caption)
+
+                    for box in faceBoxes {
+                        if(box.featureID == id) {
+                            box.caption.text = caption
                         }
                     }
-                    for box in faceBoxes {
-                        box.caption.text = updateBoxText(box)
+                    
+                    for i in 0 ..< self.features.count {
+                        if(self.features[i].id == id) {
+                            self.features[i].updateDescription(caption)
+                        }
                     }
                 }
             }
@@ -188,11 +241,12 @@ class ViewFinderViewController: UIViewController, UIGestureRecognizerDelegate {
         }
     }
     
- ///////////////////// API CALLS /////////////////////////////
+    ///////////////////// API CALLS /////////////////////////////
     
     
     //calls the analyze image API
     func analyzeImage(image: UIImage, id: Int) {
+
         var responseString = "" as NSString
         
         let request = NSMutableURLRequest(URL: NSURL(string: "https://api.projectoxford.ai/vision/v1.0/analyze?visualFeatures=Faces,Description,Categories&details=Celebrities")!)
@@ -220,22 +274,22 @@ class ViewFinderViewController: UIViewController, UIGestureRecognizerDelegate {
                     self.displayAnswers(responseString as String, id: id)
                     
                 } else {
-                
+                    
                 }
             }
             
         }
         task.resume()
     }
-
- ///////////////////// CONFIGURE ACTIONS /////////////////////
+    
+    ///////////////////// CONFIGURE ACTIONS /////////////////////
     
     //adds the double tap to the view
     func configureTapActions() {
         doubleTap.numberOfTapsRequired = 2
-        doubleTap.addTarget(self, action: #selector(ViewFinderViewController.toggle(_:)))
+        doubleTap.addTarget(self, action: #selector(VFVCWC.toggle(_:)))
         
-        let tap = UISwipeGestureRecognizer(target: self, action: #selector(ViewFinderViewController.takeStill(_:)))
+        let tap = UISwipeGestureRecognizer(target: self, action: #selector(VFVCWC.takeStill(_:)))
         tap.delegate = self
         tap.direction = .Left
         self.view.addGestureRecognizer(tap)
@@ -246,7 +300,7 @@ class ViewFinderViewController: UIViewController, UIGestureRecognizerDelegate {
     //adds attributes to the buttons and adds some of them to the view
     func addButtons() {
         toggleButton.frame = CGRectMake(0, 20, 45, 25)
-        toggleButton.addTarget(self, action: #selector(ViewFinderViewController.toggle(_:)), forControlEvents: UIControlEvents.TouchUpInside)
+        toggleButton.addTarget(self, action: #selector(VFVCWC.toggle(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         let flipImage = UIImage(named:"FlipCameraButton.png")?.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate)
         toggleButton.tintColor = UIColor.whiteColor()
         toggleButton.setImage(flipImage, forState: .Normal)
@@ -255,13 +309,13 @@ class ViewFinderViewController: UIViewController, UIGestureRecognizerDelegate {
         
         switchButton.frame = CGRect(x: self.view.frame.size.width - 80, y: self.view.frame.size.height - 60, width: 80, height: 60)
         switchButton.setTitle("PHOTO", forState: .Normal)
-        switchButton.addTarget(self, action: #selector(ViewFinderViewController.takeStill(_:)), forControlEvents: .TouchUpInside)
+        switchButton.addTarget(self, action: #selector(VFVCWC.takeStill(_:)), forControlEvents: .TouchUpInside)
         //switchButton.backgroundColor = UIColor.whiteColor()
         switchButton.setTitleColor(UIColor.grayColor(), forState: .Normal)
         self.view.addSubview(switchButton)
     }
     
- ///////////////////// FACE DETECTOR /////////////////////////
+    ///////////////////// FACE DETECTOR /////////////////////////
     
     
     //sets up the detector to track faces
@@ -282,7 +336,7 @@ class ViewFinderViewController: UIViewController, UIGestureRecognizerDelegate {
     }
     
     
- ///////////////////// CAMERA METHODS ////////////////////////
+    ///////////////////// CAMERA METHODS ////////////////////////
     
     //toggles between the front and back cameras
     func toggle(sender: AnyObject) {
@@ -334,13 +388,72 @@ class ViewFinderViewController: UIViewController, UIGestureRecognizerDelegate {
             self.removeBoxes()
             for face in features {
                 let frame = self.transformFacialFeaturePosition(face.bounds.minX, yPosition: face.bounds.minY, width: face.bounds.width, height: face.bounds.height, videoRect: cleanAperture, previewRect: self.cameraPreview.frame, isMirrored: !(self.back))
-                let box = FaceDetectionBox(frame: frame, caption: "Person")
                 
-                self.faceBoxes.append(box)
+                var featureID = self.getSimilarFeatureSet(face as! CIFaceFeature)
+                
+                if(featureID > 0) {
+                    
+                    var foundBox = false
+                    
+                    for b in self.faceBoxes {
+                        if(b.featureID == featureID) {
+
+                            print("k")
+                            
+                            //b.caption.text = self.features[featureID].description
+                            b.outline.frame = frame
+                            b.caption.frame = CGRect(x: frame.minX, y: frame.maxY, width: frame.width, height: 24)
+                            b.inFrame = true
+                            foundBox = true
+                            break
+                        }
+                    }
+                    if(!foundBox) {
+                        
+                        print("n")
+
+                        let box = FaceDetectionBox(frame: frame, featureID: featureID, inFrame: true)
+                        
+                        box.caption.text = self.features[featureID].description
+                        
+                        self.faceBoxes.append(box)
+                    }
+                    
+                } else {
+                    
+                    print("c")
+
+                    featureID *= -1
+                    
+                    let box = FaceDetectionBox(frame: frame, featureID: featureID, inFrame: true)
+                    self.faceBoxes.append(box)
+                    
+                    self.takePicture(featureID)
+                }
+                
+                var done = false
+                
+                while(!done) {
+                    done = self.removeUnused()
+                }
             }
+            self.drawBoxes()
             
-            self.drawBoxes(features)
+            if(features.count == 0) {
+                self.removeUnused()
+            }
         }
+    }
+    
+    func removeUnused() -> Bool {
+        for i in 0 ..< faceBoxes.count {
+            if(faceBoxes[i].inFrame == false) {
+                faceBoxes[i].removeFromSuperview()
+                faceBoxes.removeAtIndex(i)
+                return false
+            }
+        }
+        return true
     }
     
     func takePicture(id: Int) {
@@ -414,23 +527,16 @@ class ViewFinderViewController: UIViewController, UIGestureRecognizerDelegate {
     
     //gets rid of all the face boxes on the screen
     func removeBoxes() {
-        for box in faceBoxes {
-            box.removeFromSuperview()
-        }
-        
         if(faceBoxes.count == 0) {
-            faces = [ViewFinderViewController.face()]
+            faces = [VFVCWC.face()]
         }
-        
-        faceBoxes = [FaceDetectionBox]()
     }
     
     //draws all face boxes in the faceBoxes array
-    func drawBoxes(features: [CIFeature]) {
+    func drawBoxes() {
         for box in faceBoxes {
-            let name = updateBoxName(box, features: features)
-            box.caption.text = name
             self.view.addSubview(box)
+            box.inFrame = false
         }
     }
     
@@ -445,32 +551,79 @@ class ViewFinderViewController: UIViewController, UIGestureRecognizerDelegate {
     
     func updateBoxName(box: FaceDetectionBox, features: [CIFeature]) -> String {
         
-        if(faces.count > 2) {
-
-        }
-        
-        //uses face comparison method, checks to see if face is within circle w/ radius 21.2 pixels
-        for i in 1 ..< faces.count {
-            if(faces[i].compare(box.outline.frame)) {
-                return faces[i].caption
-            }
-        }
         
         /*
- 
-         Compare to stored faces?????
- 
-        */
+         
+         TO DO
+         
+         Need to figure out way to compare faces on the iPhone so it doesn't need to make so many coparisions
+         
+         Store some version of the facial features and then compare all new faces to the database
+         
+         Tried:
+         Compare ratio of distance between eyes to distance between eyes and mouth
+         Turned out it was very similar for all people - man and woman
+         Tried to see if it was within 1% of a stored value and it varied enough within the detector that
+         it wouldn't even recognize the same face with this method
+         Sometimes recognized wrong face as a different face
+         
+         Ideas:
+         Compare Bitmap
+         Compare Images
+         More complex version of comparing ratios
+         Video Tracking
+         
+         */
         
         let id = totalFacesDetected
         totalFacesDetected += 1
-
-        let f = ViewFinderViewController.face.init(id: id, x: Int(box.outline.frame.minX), y: Int(box.outline.frame.minY))
+        
+        let f = VFVCWC.face.init(id: id, x: Int(box.outline.frame.minX), y: Int(box.outline.frame.minY))
         faces.append(f)
         
         takePicture(id)
         
-        return String(id)
+        return "Person"
+    }
+    
+    func getSimilarFeatureSet(face: CIFaceFeature) -> Int {
+        let ed = face.rightEyePosition.y - face.leftEyePosition.y
+        let etm = face.mouthPosition.x - face.leftEyePosition.x
+        let faceHeight = face.bounds.height
+        let faceWidth = face.bounds.width
+        
+        let heightRatio = etm / faceHeight
+        let widthRatio = ed / faceWidth
+
+        for i in 1 ..< self.features.count {
+            if(self.features[i].compare(heightRatio, widthRatio: widthRatio)) {
+                return self.features[i].id
+            }
+        }
+        
+        let id = self.features.count
+        let set = VFVCWC.faceFeatures(heightRatio: heightRatio, widthRatio: widthRatio, id: id)
+        self.features.append(set)
+        
+        return id * -1
+    }
+    
+    func hasSimilarFeatureSet(face: CIFaceFeature) -> Bool {
+        let ed = face.rightEyePosition.y - face.leftEyePosition.y
+        let etm = face.mouthPosition.x - face.leftEyePosition.x
+        let faceHeight = face.bounds.height
+        let faceWidth = face.bounds.width
+        
+        let heightRatio = etm / faceHeight
+        let widthRatio = ed / faceWidth
+        
+        for i in 1 ..< self.features.count {
+            if(self.features[i].compare(heightRatio, widthRatio: widthRatio)) {
+                return true
+            }
+        }
+        
+        return false
     }
     
     //helper function - converts a json string into a dictionary
@@ -507,7 +660,7 @@ class ViewFinderViewController: UIViewController, UIGestureRecognizerDelegate {
 //////////////////////// CAMERA EXTENSION ///////////////////
 
 // AVCaptureVideoDataOutputSampleBufferDelegate protocol and related methods
-extension ViewFinderViewController:  AVCaptureVideoDataOutputSampleBufferDelegate{
+extension VFVCWC:  AVCaptureVideoDataOutputSampleBufferDelegate{
     func setupAVCapture(){
         session.sessionPreset = AVCaptureSessionPreset640x480;
         
@@ -533,7 +686,7 @@ extension ViewFinderViewController:  AVCaptureVideoDataOutputSampleBufferDelegat
             //break;
         }
     }
-
+    
     
     
     private func getImageFromBuffer(buffer: CMSampleBuffer) -> CIImage {
@@ -625,4 +778,5 @@ extension ViewFinderViewController:  AVCaptureVideoDataOutputSampleBufferDelegat
         return ciImage;
     }
 }
+
 
