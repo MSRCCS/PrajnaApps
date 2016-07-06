@@ -3,8 +3,96 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
+        <!--Translation Table View Controller-->
+        <scene sceneID="JcG-fI-XfI">
+            <objects>
+                <tableViewController storyboardIdentifier="ttvc" id="3Aq-vT-LmK" customClass="TranslationTableViewController" customModule="ViewFinder" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="138" sectionHeaderHeight="28" sectionFooterHeight="28" id="Hbl-ns-Dan">
+                        <rect key="frame" x="0.0" y="0.0" width="300" height="225"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="separatorColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="translationCell" rowHeight="138" id="KMd-Wq-O7C" customClass="TranslationTableCell" customModule="ViewFinder" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="28" width="300" height="138"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KMd-Wq-O7C" id="YPr-Cf-Rxc">
+                                    <rect key="frame" x="0.0" y="0.0" width="300" height="137"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pyo-JB-9n0">
+                                            <rect key="frame" x="22" y="37" width="42" height="21"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wyx-NA-3Tt">
+                                            <rect key="frame" x="8" y="66" width="284" height="1"/>
+                                            <color key="backgroundColor" red="0.18823529410000001" green="0.5568627451" blue="0.94117647059999998" alpha="1" colorSpace="calibratedRGB"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="To:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yzV-3w-eDx">
+                                            <rect key="frame" x="15" y="75" width="24" height="21"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Vva-6r-Kum">
+                                            <rect key="frame" x="22" y="104" width="42" height="21"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="From:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6Ya-8K-yhQ">
+                                            <rect key="frame" x="15" y="8" width="44" height="21"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="Vva-6r-Kum" firstAttribute="top" secondItem="yzV-3w-eDx" secondAttribute="bottom" constant="8" id="Ac5-wf-I5T"/>
+                                        <constraint firstItem="yzV-3w-eDx" firstAttribute="leading" secondItem="YPr-Cf-Rxc" secondAttribute="leadingMargin" id="Lil-6t-xT4"/>
+                                        <constraint firstItem="wyx-NA-3Tt" firstAttribute="trailing" secondItem="YPr-Cf-Rxc" secondAttribute="trailingMargin" constant="100" id="T13-uP-StQ"/>
+                                        <constraint firstItem="6Ya-8K-yhQ" firstAttribute="leading" secondItem="YPr-Cf-Rxc" secondAttribute="leadingMargin" id="WCR-yW-On2"/>
+                                        <constraint firstItem="pyo-JB-9n0" firstAttribute="leading" secondItem="YPr-Cf-Rxc" secondAttribute="leadingMargin" constant="14" id="Z0c-v4-tkV"/>
+                                        <constraint firstAttribute="bottomMargin" secondItem="Vva-6r-Kum" secondAttribute="bottom" constant="4" id="Z4V-6e-OT8"/>
+                                        <constraint firstItem="wyx-NA-3Tt" firstAttribute="top" secondItem="pyo-JB-9n0" secondAttribute="bottom" constant="8" id="hw6-s7-DNC"/>
+                                        <constraint firstItem="yzV-3w-eDx" firstAttribute="top" secondItem="wyx-NA-3Tt" secondAttribute="bottom" constant="8" id="jXx-VW-fH3"/>
+                                        <constraint firstItem="pyo-JB-9n0" firstAttribute="top" secondItem="6Ya-8K-yhQ" secondAttribute="bottom" constant="8" id="npg-tu-l8w"/>
+                                        <constraint firstItem="Vva-6r-Kum" firstAttribute="leading" secondItem="YPr-Cf-Rxc" secondAttribute="leadingMargin" constant="14" id="oyK-18-3Ja"/>
+                                        <constraint firstItem="wyx-NA-3Tt" firstAttribute="leading" secondItem="YPr-Cf-Rxc" secondAttribute="leadingMargin" constant="100" id="pI6-Qk-AFS"/>
+                                        <constraint firstItem="6Ya-8K-yhQ" firstAttribute="top" secondItem="YPr-Cf-Rxc" secondAttribute="topMargin" id="x5l-Lo-hfC"/>
+                                    </constraints>
+                                </tableViewCellContentView>
+                                <connections>
+                                    <outlet property="fromLabel" destination="6Ya-8K-yhQ" id="WfC-GB-p2B"/>
+                                    <outlet property="originalLabel" destination="pyo-JB-9n0" id="c7L-uA-XZH"/>
+                                    <outlet property="toLabel" destination="yzV-3w-eDx" id="5Wp-UD-Bb1"/>
+                                    <outlet property="translatedLabel" destination="Vva-6r-Kum" id="Fxe-fD-HiR"/>
+                                </connections>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="3Aq-vT-LmK" id="wFq-R9-fY5"/>
+                            <outlet property="delegate" destination="3Aq-vT-LmK" id="RsL-oc-Oau"/>
+                        </connections>
+                    </tableView>
+                    <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+                    <size key="freeformSize" width="300" height="225"/>
+                    <connections>
+                        <outlet property="table" destination="Hbl-ns-Dan" id="aT0-7C-sRi"/>
+                    </connections>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Qep-AS-77G" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-303" y="165.5"/>
+        </scene>
         <!--Steady View Finder View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
@@ -20,6 +108,9 @@
                     </view>
                     <connections>
                         <segue destination="WpJ-Za-7Ht" kind="show" identifier="takeStill" id="aRH-bZ-uRN"/>
+                        <segue destination="3Aq-vT-LmK" kind="popoverPresentation" popoverAnchorView="8bC-Xf-vdC" id="c9B-ao-7UQ">
+                            <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
+                        </segue>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -42,6 +133,9 @@
                     <connections>
                         <segue destination="BYZ-38-t0r" kind="show" identifier="viewFinder" id="XPw-oB-4H9"/>
                         <segue destination="FWj-PV-71R" kind="popoverPresentation" identifier="showMenu" popoverAnchorView="h0X-kk-69V" id="kaj-p5-WWx">
+                            <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
+                        </segue>
+                        <segue destination="AH2-JL-4wM" kind="popoverPresentation" identifier="showTranslationDetails" popoverAnchorView="h0X-kk-69V" id="Elt-wF-JAz">
                             <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
                         </segue>
                     </connections>
@@ -83,6 +177,79 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="hcd-iS-W85" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1730" y="-71"/>
+        </scene>
+        <!--Translation Detail View Controller-->
+        <scene sceneID="vZo-gP-k1C">
+            <objects>
+                <viewController storyboardIdentifier="tdc" id="AH2-JL-4wM" customClass="TranslationDetailViewController" customModule="ViewFinder" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="cOB-vo-35U"/>
+                        <viewControllerLayoutGuide type="bottom" id="ydk-yI-9qX"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="fbo-Oy-AM0">
+                        <rect key="frame" x="0.0" y="0.0" width="300" height="150"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="From: " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ut4-ew-hQy">
+                                <rect key="frame" x="8" y="8" width="49" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="F3y-Bz-lAC">
+                                <rect key="frame" x="20" y="37" width="42" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lin-RC-1uB">
+                                <rect key="frame" x="20" y="109" width="42" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="J8Z-wN-vHb">
+                                <rect key="frame" x="8" y="71" width="285" height="1"/>
+                                <color key="backgroundColor" red="0.18823529410000001" green="0.5568627451" blue="0.94117647059999998" alpha="1" colorSpace="calibratedRGB"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="To:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2b9-OG-uW3">
+                                <rect key="frame" x="8" y="80" width="24" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstAttribute="trailingMargin" secondItem="J8Z-wN-vHb" secondAttribute="trailing" constant="-13" id="7hp-q5-eL7"/>
+                            <constraint firstItem="F3y-Bz-lAC" firstAttribute="top" secondItem="Ut4-ew-hQy" secondAttribute="bottom" constant="8" id="FCR-La-PYV"/>
+                            <constraint firstItem="Ut4-ew-hQy" firstAttribute="leading" secondItem="fbo-Oy-AM0" secondAttribute="leadingMargin" constant="-12" id="HhS-sA-QnR"/>
+                            <constraint firstItem="J8Z-wN-vHb" firstAttribute="top" secondItem="F3y-Bz-lAC" secondAttribute="bottom" constant="13" id="Si3-Q9-0Ub"/>
+                            <constraint firstItem="J8Z-wN-vHb" firstAttribute="leading" secondItem="fbo-Oy-AM0" secondAttribute="leadingMargin" constant="-12" id="Sqk-qr-Xjg"/>
+                            <constraint firstItem="lin-RC-1uB" firstAttribute="leading" secondItem="fbo-Oy-AM0" secondAttribute="leadingMargin" id="WrC-9V-BOZ"/>
+                            <constraint firstItem="Ut4-ew-hQy" firstAttribute="top" secondItem="fbo-Oy-AM0" secondAttribute="topMargin" constant="8" id="dl0-fA-6Fo"/>
+                            <constraint firstItem="lin-RC-1uB" firstAttribute="top" secondItem="2b9-OG-uW3" secondAttribute="bottom" constant="8" id="f0P-QM-hn9"/>
+                            <constraint firstItem="F3y-Bz-lAC" firstAttribute="leading" secondItem="fbo-Oy-AM0" secondAttribute="leadingMargin" id="iYQ-JX-Dst"/>
+                            <constraint firstItem="ydk-yI-9qX" firstAttribute="top" secondItem="lin-RC-1uB" secondAttribute="bottom" constant="20" id="jAu-OF-Fh4"/>
+                            <constraint firstItem="2b9-OG-uW3" firstAttribute="top" secondItem="J8Z-wN-vHb" secondAttribute="bottom" constant="8" id="lVb-0s-0RX"/>
+                            <constraint firstItem="2b9-OG-uW3" firstAttribute="leading" secondItem="fbo-Oy-AM0" secondAttribute="leadingMargin" constant="-12" id="vBg-nK-dwn"/>
+                        </constraints>
+                    </view>
+                    <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+                    <size key="freeformSize" width="300" height="150"/>
+                    <connections>
+                        <outlet property="fromLabel" destination="Ut4-ew-hQy" id="3pY-du-LVE"/>
+                        <outlet property="originalTextLabel" destination="F3y-Bz-lAC" id="lFO-AD-hAt"/>
+                        <outlet property="toLabel" destination="2b9-OG-uW3" id="sQc-Wb-X8h"/>
+                        <outlet property="translatedTextLabel" destination="lin-RC-1uB" id="nzi-ec-vhc"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="eV1-Bp-iRe" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1687" y="655"/>
         </scene>
     </scenes>
 </document>

@@ -6,6 +6,15 @@
 //  Copyright © 2016 Microsoft. All rights reserved.
 //
 
+/*
+ * This is the current ViewFinder ViewController
+ * In this ViewFinder, the user must steady the camera 
+ * for a given period of time for it to be able to
+ * recognize what it sees in the image.
+ 
+ 
+*/
+
 import Foundation
 import UIKit
 import CoreImage
@@ -13,7 +22,7 @@ import CoreMotion
 import AVFoundation
 
 
-class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDelegate {
+class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDelegate, UIPopoverPresentationControllerDelegate, MenuViewControllerDelegate {
     
     var trackingImage = UIImage()
     
@@ -32,7 +41,7 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
     var textBoxes = [TranslateWordBox]()
     var faces = [SteadyViewFinderViewController.face()]
     //var faceFeatures
-    var totalFacesDetected = 0
+    var totalFacesDetected = 1          // starts at one so doesn't get initializer. Sets IDs for the faces
     
     //Camera Capture requiered properties
     var videoDataOutput: AVCaptureVideoDataOutput!;
@@ -58,6 +67,7 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
     var context: CIContext?
     var hasFace = false
     var callFaceAPI = false
+    var celebrityPresent = false
     
     //Text Detector
     var textDetector: CIDetector?
@@ -66,15 +76,23 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
     var hasText = false
     var callOcrApi = false
     var translating = false
-
+    
+    let detailButton = UIButton()
+    var translationDetails = [Dictionary<String, String>()]
+    let closeButton = UIButton()
+    let translateActivity = UIActivityIndicatorView()
+    
+    
     //Motion
     let motionManager = CMMotionManager()
     let motionThreshold : Double = 0.15
     var numSteady = 0
     var steady = false
-    
-    //Menu and State Variables
-    var state = 0
+
+    //State Variables - Which API to call & details about it
+    var camState = 0
+    var camDetails = ":-)"
+    var menuButton = UIButton()
     
     
     override func viewDidLoad() {
@@ -85,11 +103,8 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         self.view.addSubview(previewView);
         
         configureTapActions()
-        if(state == 0) {
-            setUpFaceDetector()
-        } else if(state == 1) {
-            setUpTextDetector()
-        }
+        setUpFaceDetector()
+        setUpTextDetector()
         
         self.setupAVCapture()
         
@@ -154,6 +169,11 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
                 return true
             }
             return false
+        }
+        
+        mutating func setTitle(caption: String) {
+            self.caption = caption
+            self.box.caption.text = caption
         }
         
         //This checks to see if two numbers are within fifteen of each other
@@ -225,191 +245,158 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         }
     }
     
-    ////////////////// JSON PARSING /////////////////////////////
+    /////////////////// POPOVERS ////////////////////////////////
     
-    /*
-     *This calls an outside PHP script that handles translation and obtaining of access keys
-     *@param: Dict: JSON returned from the OCR API
-     */
-    func translate(dict: NSDictionary) {
-        
-        var linesToTranslate = [String]()
-        
-        //safely unwraps the json dictionary returned from the OCR API
-        if let regions = dict["regions"] as? NSArray {
-            for region in regions {
-                if let lines = region["lines"] as? NSArray {
-                    for line in lines {
-                        var str = ""
-                        
-                        if let words = line["words"] as? NSArray {
-                            for word in words {
-                                str = str + " " + (word["text"] as! String)
-                            }
-                        }
-                        
-                        linesToTranslate.append(str)
-                        
-                        
-//                        let rect = getFrameFromStr(reg)
-//                        let twb = TranslateWordBox(frame: rect, caption: str)
-//                        self.wordBoxes.append(twb)
-//                        callTranslateAPI(str, boxId: numBoxes)
-//                        self.view.addSubview(twb)
-//                        numBoxes += 1
-                    }
-                }
-            }
-        }
-        
-//        if(linesToTranslate.count > 0) {
-//            callTranslateAPI(<#T##text: String##String#>)
-//        }
+    func adaptivePresentationStyleForPresentationController(
+        controller: UIPresentationController) -> UIModalPresentationStyle {
+        return .None
     }
+    
+    
+    func showTranslations(sender: AnyObject) {
+        
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let controller = storyboard.instantiateViewControllerWithIdentifier("ttvc") as! TranslationTableViewController
+        
+        controller.preferredContentSize = CGSizeMake(300, 225)
+        
+        controller.details = self.translationDetails
+        
+        controller.modalPresentationStyle = UIModalPresentationStyle.Popover
+        
+        let popoverPresentationController = controller.popoverPresentationController
+        
+        popoverPresentationController!.sourceView = self.view
+        popoverPresentationController!.sourceRect = sender.frame
+        
+        popoverPresentationController!.permittedArrowDirections = .Any
+        popoverPresentationController!.delegate = self
+        
+        self.presentViewController(controller, animated: true, completion: nil)
+    }
+    
+    ////////////////// JSON PARSING /////////////////////////////
     
     //this is called after the analyze image api is used
     func displayAnswers(rs: String, ids: [Int], coordinates: [[Int: CGPoint]]) {
         let dict = (convertStringToDictionary(rs)!)
         
-        if let facesInImage = dict["faces"] as? [NSDictionary] {
-            if(facesInImage.isEmpty) {
-                print("No Faces")
-            } else {
-                for face in facesInImage {
-                    let caption: String = String(face["age"] as! Int) + " y/o " + (face["gender"] as! String)
-                    
-                    //checks all the the original points to see which is closest to the point returned from the API, gets back the face id
-                    let id = comparePoints(CGPoint(x: face["faceRectangle"]!["left"] as! Int, y: face["faceRectangle"]!["top"] as! Int), ids: ids, coordinates: coordinates)
-
-                    //loops through all the faces to find the matching face
-                    for i in 0 ..< faces.count {
+        if(self.camState == 0) {
+            if let facesInImage = dict["faces"] as? [NSDictionary] {
+                if(facesInImage.isEmpty) {
+                    print("No Faces")
+                } else {
+                    for face in facesInImage {
+                        let caption: String = String(face["age"] as! Int) + " y/o " + (face["gender"] as! String)
                         
-                        if(faces[i].id == id) {
-                            faces[i].box.caption.text = caption
+                        //checks all the the original points to see which is closest to the point returned from the API, gets back the face id
+                        let id = comparePoints(CGPoint(x: face["faceRectangle"]!["left"] as! Int, y: face["faceRectangle"]!["top"] as! Int), ids: ids, coordinates: coordinates)
+                        
+                        //loops through all the faces to find the matching face
+                        for i in 0 ..< faces.count {
+                            
+                            if(faces[i].id == id) {
+                                
+                                dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0), { () -> Void in
+                                    self.faces[i].setTitle(caption)
+                                    print("ID: \(id). Caption: " + caption)
+                                    
+                                })
+                                
+                                break
+                            }
                         }
                     }
                 }
+                
+                if(celebrityPresent) {
+                    if let categories = dict["categories"] as? NSArray {
+                        for i in 0 ..< categories.count {
+                            if let details = categories[i]["detail"] as? NSDictionary {
+                                if let celebrities = details["celebrities"] as? [NSDictionary] {
+                                    for celeb in celebrities {
+                                        
+                                        let caption: String = (celeb["name"] as! String)
+                                        
+                                        //checks all the the original points to see which is closest to the point returned from the API, gets back the face id
+                                        let id = comparePoints(CGPoint(x: celeb["faceRectangle"]!["left"] as! Int, y: celeb["faceRectangle"]!["top"] as! Int), ids: ids, coordinates: coordinates)
+                                        
+                                        //loops through all the faces to find the matching face
+                                        for i in 0 ..< faces.count {
+                                            
+                                            if(faces[i].id == id) {
+                                                
+                                                dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0), { () -> Void in
+                                                    self.faces[i].setTitle(caption)
+                                                    print("ID: \(id). Caption: " + caption)
+                                                    
+                                                })
+                                                
+                                                break
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                print("Could not get Faces")
             }
-        } else {
-            print("Could not get Faces")
-        }
-    }
-    
-    ///////////////////// API CALLS /////////////////////////////
-    
-    //calls the analyze image API
-    func analyzeImage(image: UIImage, ids: [Int], coordinates: [[Int: CGPoint]]) {
-    
-        var responseString = "" as NSString
-        
-        let request = NSMutableURLRequest(URL: NSURL(string: "https://api.projectoxford.ai/vision/v1.0/analyze?visualFeatures=Faces,Description,Categories&details=Celebrities")!)
-        request.HTTPMethod = "POST"
-        
-        request.allHTTPHeaderFields = ["Ocp-Apim-Subscription-Key": "dca2b686d07a4e18ba81f5731053dbab", "Content-Type": "application/octet-stream"]
-        request.HTTPBody = UIImageJPEGRepresentation(image, 0.9)
-        
-        let task = NSURLSession.sharedSession().dataTaskWithRequest(request) { data, response, error in
-            guard error == nil && data != nil else {            // check for fundamental networking error
-                print("error=\(error)")
-                return
-            }
+        } else if(self.camState == 1) {
             
-            if let httpStatus = response as? NSHTTPURLResponse where httpStatus.statusCode != 200 {  // check for http errors
-                print("statusCode should be 200, but is \(httpStatus.statusCode)")
-                print("response = \(response)")
-            }
-            
-            responseString = NSString(data: data!, encoding: NSUTF8StringEncoding)!
-            print("responseString = \(responseString)")
-            
-            dispatch_async(dispatch_get_main_queue()) {
-                if let httpStatus = response as? NSHTTPURLResponse where httpStatus.statusCode == 200 {
-                    self.displayAnswers(responseString as String, ids: ids, coordinates: coordinates)
-                    
-                } else {
+            var toTranslate = ""
+            var originalText = [String]()
+            //safely unwraps the json dictionary returned from the OCR API
+            if let regions = dict["regions"] as? NSArray {
+                for region in regions {
+                    if let lines = region["lines"] as? NSArray {
+                        for line in lines {
+                            var str = ""
+                            
+                            if let words = line["words"] as? NSArray {
+                                for word in words {
+                                    str = str + " " + (word["text"] as! String)
+                                }
+                            }
+                            
+                            originalText.append(str)
+                            toTranslate = toTranslate + str + "*"
+                        }
+                    }
                     
                 }
             }
-            
-        }
-        task.resume()
-    }
-    
-    /*
-     *This method calls the OCR API
-     *@param: image: Image to call the OCR API on
-     */
-    func readWords(image: UIImage) {
-        var responseString = "" as NSString
-        
-        let request = NSMutableURLRequest(URL: NSURL(string: "https://api.projectoxford.ai/vision/v1.0/ocr")!)
-        request.HTTPMethod = "POST"
-        
-        request.allHTTPHeaderFields = ["Ocp-Apim-Subscription-Key": "dca2b686d07a4e18ba81f5731053dbab", "Content-Type": "application/octet-stream"]
-        request.HTTPBody = UIImageJPEGRepresentation(image, 0.9)
-        
-        let task = NSURLSession.sharedSession().dataTaskWithRequest(request) { data, response, error in
-            guard error == nil && data != nil else {            // check for fundamental networking error
-                print("error=\(error)")
-                return
-            }
-            
-            if let httpStatus = response as? NSHTTPURLResponse where httpStatus.statusCode != 200 {  // check for http errors
-                print("statusCode should be 200, but is \(httpStatus.statusCode)")
-                print("response = \(response)")
-            }
-            
-            responseString = NSString(data: data!, encoding: NSUTF8StringEncoding)!
-            //print("responseString = \(responseString)")
-            
-            dispatch_async(dispatch_get_main_queue()) {
-                let dict = self.convertStringToDictionary(responseString as String)
-                self.translate(dict!)
-            }
-            
-        }
-        task.resume()
-    }
-    
-    /*
-     * This method calls the translate API
-     * @param: text: The text to be translated to
-     * @param: boxId: The TranslateWordBox to add the translated text to
-     */
-    func callTranslateAPI(text: String) {
-        
-        var responseString = "" as NSString
-        
-        let to = "en"
-        
-        let encText = text.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())
-        
-        let url = "https://metrofantasyball.com/translate/getaccesstoken.php?auth=96babypigmangocucumber&text=" + encText! + "&to=" + to
-        
-        let request = NSMutableURLRequest(URL: NSURL(string: url)!)
-        request.HTTPMethod = "POST"
-        
-        let task = NSURLSession.sharedSession().dataTaskWithRequest(request) { data, response, error in
-            guard error == nil && data != nil else {            // check for fundamental networking error
-                print("error=\(error)")
-                return
-            }
-            
-            if let httpStatus = response as? NSHTTPURLResponse where httpStatus.statusCode != 200 {  // check for http errors
-                print("statusCode should be 200, but is \(httpStatus.statusCode)")
-                print("response = \(response)")
-            }
-            
-            responseString = NSString(data: data!, encoding: NSUTF8StringEncoding)!
-            print("responseString = \(responseString)")
-            
-            dispatch_async(dispatch_get_main_queue()) {
+            if(toTranslate != "") {
+                let to = self.camDetails
                 
+                let encText = toTranslate.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())
+                
+                let fields = "?auth=96babypigmangocucumber&text=" + encText! + "&to=" + to
+                
+                let api = API(translate: true, fields: fields)
+                
+                api.callAPI() { (rs: String) in
+                    
+                    let arr = rs.componentsSeparatedByString("&&#")
+                    let from = arr[0]
+                    let translated = arr[1].componentsSeparatedByString("$&$")
+                    for i in 0 ..< originalText.count {
+                        
+                        let packet: Dictionary<String, String> = ["from": from, "original": originalText[i], "to": to, "translated": translated[i]]
+                        self.translationDetails.append(packet)
+                    }
+                    
+                    //Adds Buttons
+                    self.view.addSubview(self.detailButton)
+                    self.view.addSubview(self.closeButton)
+                    self.translateActivity.stopAnimating()
+                }
             }
-            
         }
-        task.resume()
     }
+    
     
     ///////////////////// CONFIGURE ACTIONS /////////////////////
     
@@ -423,7 +410,6 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         tap.direction = .Left
         self.view.addGestureRecognizer(tap)
     }
-    
     
     
     //adds attributes to the buttons and adds some of them to the view
@@ -442,6 +428,36 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         //switchButton.backgroundColor = UIColor.whiteColor()
         switchButton.setTitleColor(UIColor.grayColor(), forState: .Normal)
         self.view.addSubview(switchButton)
+        
+        self.detailButton.frame = CGRect(x: self.view.frame.size.width - 40.0, y: 70.0, width: 34.0, height: 34.0)
+        self.detailButton.setImage(UIImage(named: "detailButton.png"), forState: .Normal)
+        self.detailButton.addTarget(self, action: #selector(SteadyViewFinderViewController.showTranslations(_:)), forControlEvents: .TouchUpInside)
+        
+        self.closeButton.frame = CGRect(x: self.view.frame.size.width - 40.0, y: 110.0, width: 34.0, height: 34.0)
+        self.closeButton.setImage(UIImage(named: "closeButton.png"), forState: .Normal)
+        self.closeButton.addTarget(self, action: #selector(SteadyViewFinderViewController.restartTranslation), forControlEvents: .TouchUpInside)
+        
+        //sets up the Menu Button
+        menuButton.frame = CGRect(x: self.view.frame.size.width - 60, y: 20, width: 44, height: 44)
+        if(camState == 1) {
+            let index: String.Index = camDetails.startIndex.advancedBy(2) // Swift 2
+            var ss2:String = camDetails.substringToIndex(index) // "Stack"
+            ss2 = ss2.uppercaseString
+            menuButton.setTitle(ss2, forState: .Normal)
+        } else {
+            menuButton.setTitle(camDetails, forState: .Normal)
+        }
+        menuButton.titleLabel?.textColor = UIColor.blackColor()
+        menuButton.titleLabel?.adjustsFontSizeToFitWidth = true
+        menuButton.tintColor = UIColor.blackColor()
+        menuButton.addTarget(self, action: #selector(ImageCaptureViewController.showMenu(_:)), forControlEvents: .TouchUpInside)
+        self.view.addSubview(menuButton)
+        
+        translateActivity.center = CGPoint(x: detailButton.frame.midX, y: detailButton.frame.midY)
+        translateActivity.activityIndicatorViewStyle = .Gray
+        translateActivity.hidesWhenStopped = true
+        self.view.addSubview(translateActivity)
+        translateActivity.stopAnimating()
     }
     
     ///////////////////// FACE DETECTOR /////////////////////////
@@ -475,7 +491,57 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         return textDetector!.featuresInImage(image, options: imageOptions)
     }
     
+    func restartTranslation() {
+        closeButton.removeFromSuperview()
+        detailButton.removeFromSuperview()
+        translationDetails = [Dictionary <String,String>()]
+        numSteady = 0
+        steady = false
+        translating = false
+    }
+    
     ////////////////////////// MENU /////////////////////////////
+    
+    //setter method for the language code
+    func changeState(state: Int, details: String) {
+        self.camDetails = details
+        self.camState = state
+        
+        print(camDetails)
+        
+        if(camState == 1) {
+            let index: String.Index = camDetails.startIndex.advancedBy(2) // Swift 2
+            var ss2:String = camDetails.substringToIndex(index) // "Stack"
+            ss2 = ss2.uppercaseString
+            menuButton.setTitle(ss2, forState: .Normal)
+        } else {
+            menuButton.setTitle(camDetails, forState: .Normal)
+        }
+    }
+    
+    //displays the language changing menu
+    func showMenu(sender: AnyObject) {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let controller = storyboard.instantiateViewControllerWithIdentifier("menu") as! MenuViewController
+        
+        controller.camState = self.camState
+        controller.camDetails = self.camDetails
+        controller.preferredContentSize = CGSizeMake(250, 300)
+        
+        controller.modalPresentationStyle = UIModalPresentationStyle.Popover
+        
+        controller.delegate = self
+        
+        let popoverPresentationController = controller.popoverPresentationController
+        
+        popoverPresentationController!.sourceView = self.view
+        popoverPresentationController!.sourceRect = menuButton.frame
+        
+        popoverPresentationController!.permittedArrowDirections = .Any
+        popoverPresentationController!.delegate = self
+        
+        self.presentViewController(controller, animated: true, completion: nil)
+    }
     
     ///////////////////// CAMERA METHODS ////////////////////////
     
@@ -520,9 +586,9 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         
         var features = [CIFeature]()
         
-        if(state == 0) {
+        if(camState == 0) {
             features = self.getFacialFeatures(image)
-        } else if(state == 1) {
+        } else if(camState == 1) {
             features = self.getTextFeatures(image)
         }
         
@@ -538,7 +604,7 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
             //creates and draws face boxes
             dispatch_async(dispatch_get_main_queue()) {
 
-                if(self.state == 0) {
+                if(self.camState == 0) {
                     self.removeBoxes()     //deletes the unused boxes
                     for i in 0 ..< features.count {
                         
@@ -554,11 +620,9 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
                             }
                         }
                         
-
-                        
                         //if the frame couldn't be matched, create a new face
                         if(!foundFace) {
-
+                            
                             let id = self.totalFacesDetected
                             self.totalFacesDetected += 1
                             
@@ -574,10 +638,12 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
                         }
                     }
                     self.drawBoxes()
-                } else if(self.state == 1) {
+                } else if(self.camState == 1) {
                     if(!self.translating) {
                         if(features.count > 0) {
-                            // call translate api
+                            self.translateActivity.startAnimating()
+                            self.takePicture([0], coordinates: [[0: CGPoint(x: 0,y: 0)]])
+                            self.translating = true
                         }
                     }
                 }
@@ -619,7 +685,31 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
                 
                 let image = UIImage(data: imageData)
                 
-                self.analyzeImage(image!, ids: ids, coordinates: coordinates) //calls analyze image API
+                var fields = ""
+                
+                if(self.camState == 0) {
+                    // self.analyzeImage(image!) //calls analyze image API
+                    self.captionLabel.text = "Generating Caption..."
+                    
+                    if(self.camDetails == ":-)") {
+                        fields = "?visualFeatures=Faces,Description,Categories"
+                    } else if(self.camDetails == "B-)") {
+                        fields = "?visualFeatures=Faces,Description,Categories&details=Celebrities"
+                    }
+                } else if(self.camState == 1) {
+                    self.captionLabel.text = "Getting Translation..."
+                }
+                
+                let api = API(state: self.camState, header: ["Ocp-Apim-Subscription-Key": "dca2b686d07a4e18ba81f5731053dbab", "Content-Type": "application/octet-stream"], body: UIImageJPEGRepresentation(image!, 0.9)!, fields: fields)
+                
+                api.callAPI() { (rs: String) in
+                    if(rs.containsString("celebrities")) {
+                        self.celebrityPresent = true
+                    } else {
+                        self.celebrityPresent = false
+                    }
+                    self.displayAnswers(rs, ids: ids, coordinates: coordinates)
+                }
             }
         }
     }
@@ -660,13 +750,12 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         self.focusAtPoint(newPoint)
     }
     
-    
     ///////////////////// HELPER METHODS ////////////////////////
     
     //This method compares one point to an array of type Dictionary<Int: CGPoint>
     //It returns the ID of the point closes to the given point
     func comparePoints(point: CGPoint, ids: [Int], coordinates: [[Int: CGPoint]]) -> Int {
-        
+
         var currentStoretest:CGFloat = 1500.0
         var shortestId = 0
         
@@ -677,12 +766,12 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
             let xDist = abs(point.x - testPoint.x)
             let yDist = abs(point.y - testPoint.y)
             
-            let distance = sqrt((xDist * xDist) + (yDist * yDist))
+            let distance = (xDist * xDist) + (yDist * yDist)
             
             //updates the shortest, keeps track of distance and id of current closest point
             if(i == 0) {
                 currentStoretest = distance
-                shortestId = 0
+                shortestId = ids[0]
             } else if(distance < currentStoretest) {
                 shortestId = ids[i]
                 currentStoretest = distance
@@ -754,8 +843,6 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         }
         return false
     }
-    
-    
 }
 
 
@@ -788,8 +875,6 @@ extension SteadyViewFinderViewController:  AVCaptureVideoDataOutputSampleBufferD
             //break;
         }
     }
-    
-    
     
     private func getImageFromBuffer(buffer: CMSampleBuffer) -> CIImage {
         let pixelBuffer = CMSampleBufferGetImageBuffer(buffer)

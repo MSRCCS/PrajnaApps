@@ -6,10 +6,16 @@
 //  Copyright © 2016 Microsoft. All rights reserved.
 //
 
+/*
+ * This ViewController allows the user to upload an image. 
+ * It checks for words to be translated, faces, and captions
+ * the image.
+*/
+
 import Foundation
 import UIKit
 
-class AnalyzeUploadedImageViewController: UIView {
+class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControllerDelegate {
     
     var image = UIImage()
     var imageView = UIImageView()
@@ -21,6 +27,8 @@ class AnalyzeUploadedImageViewController: UIView {
     
     var faces = [FaceDetectionBox]()
     var lines = [TranslateWordBox]()
+    var translationDetails = [Dictionary<String, String>()]
+    var detailButtons = [UIButton]()
     
     var celebrityPresent = false
     
@@ -38,14 +46,59 @@ class AnalyzeUploadedImageViewController: UIView {
         
         setUpScreen()
         
-        analyzeImage(image)
-        readWords(image)
+        let header = ["Ocp-Apim-Subscription-Key": "dca2b686d07a4e18ba81f5731053dbab", "Content-Type": "application/octet-stream"]
+        let body = UIImageJPEGRepresentation(image, 0.9)!
+        
+        let analyzeAPI = API(state: 0, header: header, body: body, fields: "?visualFeatures=Faces,Description,Categories&details=Celebrities")
+        let ocrAPI = API(state: 1, header: header, body: body, fields: "")
+        
+        analyzeAPI.callAPI() { (rs: String) in
+            self.displayAnswers(rs)
+        }
+        
+        ocrAPI.callAPI() { (rs: String) in
+            self.translate(rs)
+        }
     }
+    
     
 
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+ ////////////////////// POPOVERS //////////////////////////////
+    
+    func showTranslationDetails(sender: UIButton) {
+        
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let controller = storyboard.instantiateViewControllerWithIdentifier("tdc") as! TranslationDetailViewController
+        
+        controller.preferredContentSize = CGSizeMake(300, 150)
+        
+        let details = translationDetails[sender.tag]
+        
+        controller.modalPresentationStyle = UIModalPresentationStyle.Popover
+        
+        let popoverPresentationController = controller.popoverPresentationController
+        
+        popoverPresentationController!.sourceView = self
+        popoverPresentationController!.sourceRect = sender.frame
+        
+        popoverPresentationController!.permittedArrowDirections = .Any
+        popoverPresentationController!.delegate = self
+        
+        controller.to = details["to"]!
+        controller.from = details["from"]!
+        controller.translated = details["translated"]!
+        controller.original = details["original"]!
+    
+    }
+    
+    func adaptivePresentationStyleForPresentationController(
+        controller: UIPresentationController) -> UIModalPresentationStyle {
+        return .None
     }
 
  ////////////////////// CONFIGURE ACTIONS /////////////////////
@@ -85,10 +138,14 @@ class AnalyzeUploadedImageViewController: UIView {
      *This calls an outside PHP script that handles translation and obtaining of access keys
      *@param: Dict: JSON returned from the OCR API
      */
-    func translate(dict: NSDictionary) {
+    func translate(rs: String) {
+        let dict = (convertStringToDictionary(rs)!)
         
         var numBoxes = 0
         
+        var toTranslate = ""
+        var originalText = [String]()
+        //safely unwraps the json dictionary returned from the OCR API
         if let regions = dict["regions"] as? NSArray {
             for region in regions {
                 if let lines = region["lines"] as? NSArray {
@@ -105,14 +162,50 @@ class AnalyzeUploadedImageViewController: UIView {
                         let rect = getFrameFromStr(reg)
                         let twb = TranslateWordBox(frame: rect, caption: str)
                         self.lines.append(twb)
-                        callTranslateAPI(str, boxId: numBoxes)
                         self.addSubview(twb)
                         numBoxes += 1
+                        originalText.append(str)
+                        toTranslate = toTranslate + str + "*"
                     }
                 }
                 
             }
         }
+        if(toTranslate != "") {
+            let to = self.language
+            
+            let encText = toTranslate.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())
+            
+            let fields = "?auth=96babypigmangocucumber&text=" + encText! + "&to=" + to
+            
+            let api = API(translate: true, fields: fields)
+            
+            api.callAPI() { (rs: String) in
+                
+                let arr = rs.componentsSeparatedByString("&&#")
+                let from = arr[0]
+                let translated = arr[1].componentsSeparatedByString("$&$")
+                for i in 0 ..< self.lines.count {
+                    self.lines[i].outline.text = translated[i]
+                    
+                    let packet: Dictionary<String, String> = ["from": from, "original": originalText[i], "to": self.language, "translated": translated[i]]
+                    
+                    //Adds Detail Button
+                    let detailButton = UIButton()
+                    let x = self.lines[i].outline.frame.minX
+                    let y = self.lines[i].outline.frame.minY
+                    let width = self.lines[i].outline.frame.width
+                    detailButton.frame = CGRect(x: x + width, y: y, width: 24.0, height: 24.0)
+                    detailButton.setImage(UIImage(named: "detailButton.png"), forState: .Normal)
+                    detailButton.tag = self.translationDetails.count
+                    detailButton.addTarget(self, action: #selector(ImageCaptureViewController.showTranslationDetails(_:)), forControlEvents: .TouchUpInside)
+                    //self.addSubview(detailButton)     //uncomment when figure out how to display a popover from a uiview
+                    self.detailButtons.append(detailButton)
+                    self.translationDetails.append(packet)
+                }
+            }
+        }
+
     }
     
     //parses the analyze image api json for faces, celebrities, and captions
@@ -179,126 +272,7 @@ class AnalyzeUploadedImageViewController: UIView {
     }
     
  ////////////////////// API CALLS /////////////////////////////
-    
-    //calls the analyze image API
-    func analyzeImage(image: UIImage) {
-        var responseString = "" as NSString
-        
-        let request = NSMutableURLRequest(URL: NSURL(string: "https://api.projectoxford.ai/vision/v1.0/analyze?visualFeatures=Faces,Description,Categories&details=Celebrities")!)
-        request.HTTPMethod = "POST"
-        
-        request.allHTTPHeaderFields = ["Ocp-Apim-Subscription-Key": "dca2b686d07a4e18ba81f5731053dbab", "Content-Type": "application/octet-stream"]
-        request.HTTPBody = UIImageJPEGRepresentation(image, 0.9)
-        
-        
-        let task = NSURLSession.sharedSession().dataTaskWithRequest(request) { data, response, error in
-            guard error == nil && data != nil else {            // check for fundamental networking error
-                print("error=\(error)")
-                return
-            }
-            
-            if let httpStatus = response as? NSHTTPURLResponse where httpStatus.statusCode != 200 {  // check for http errors
-                print("statusCode should be 200, but is \(httpStatus.statusCode)")
-                print("response = \(response)")
-            }
-            
-            responseString = NSString(data: data!, encoding: NSUTF8StringEncoding)!
-            //print("responseString = \(responseString)")
-            
-            dispatch_async(dispatch_get_main_queue()) {
-                if let httpStatus = response as? NSHTTPURLResponse where httpStatus.statusCode == 200 {
-                    if((responseString as String).containsString("celebrities")) {
-                        self.celebrityPresent = true
-                    } else {
-                        self.celebrityPresent = false
-                    }
-                    self.displayAnswers(responseString as String)
-                } else {
-                    self.captionLabel.backgroundColor = UIColor.redColor()
-                    self.captionLabel.text = "Oops! Try again"
-                }
-            }
-            
-        }
-        task.resume()
-    }
-    
-    /*
-     *This method calls the OCR API
-     *@param: image: Image to call the OCR API on
-     */
-    func readWords(image: UIImage) {
-        var responseString = "" as NSString
-        
-        let request = NSMutableURLRequest(URL: NSURL(string: "https://api.projectoxford.ai/vision/v1.0/ocr")!)
-        request.HTTPMethod = "POST"
-        
-        request.allHTTPHeaderFields = ["Ocp-Apim-Subscription-Key": "dca2b686d07a4e18ba81f5731053dbab", "Content-Type": "application/octet-stream"]
-        request.HTTPBody = UIImageJPEGRepresentation(image, 0.9)
-        
-        let task = NSURLSession.sharedSession().dataTaskWithRequest(request) { data, response, error in
-            guard error == nil && data != nil else {            // check for fundamental networking error
-                print("error=\(error)")
-                return
-            }
-            
-            if let httpStatus = response as? NSHTTPURLResponse where httpStatus.statusCode != 200 {  // check for http errors
-                print("statusCode should be 200, but is \(httpStatus.statusCode)")
-                print("response = \(response)")
-            }
-            
-            responseString = NSString(data: data!, encoding: NSUTF8StringEncoding)!
-            //print("responseString = \(responseString)")
-            
-            dispatch_async(dispatch_get_main_queue()) {
-                let dict = self.convertStringToDictionary(responseString as String)
-                self.translate(dict!)
-                
-            }
-            
-        }
-        task.resume()
-    }
-    
-    /*
-     * This method calls the translate API
-     * @param: text: The text to be translated to
-     * @param: boxId: The TranslateWordBox to add the translated text to
-     */
-    func callTranslateAPI(text: String, boxId: Int) {
-        
-        var responseString = "" as NSString
-        
-        let to = language
-        
-        let encText = text.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())
-        
-        let url = "https://metrofantasyball.com/translate/getaccesstoken.php?auth=96babypigmangocucumber&text=" + encText! + "&to=" + to
-        
-        let request = NSMutableURLRequest(URL: NSURL(string: url)!)
-        request.HTTPMethod = "POST"
-        
-        let task = NSURLSession.sharedSession().dataTaskWithRequest(request) { data, response, error in
-            guard error == nil && data != nil else {            // check for fundamental networking error
-                print("error=\(error)")
-                return
-            }
-            
-            if let httpStatus = response as? NSHTTPURLResponse where httpStatus.statusCode != 200 {  // check for http errors
-                print("statusCode should be 200, but is \(httpStatus.statusCode)")
-                print("response = \(response)")
-            }
-            
-            responseString = NSString(data: data!, encoding: NSUTF8StringEncoding)!
-            print("responseString = \(responseString)")
-            
-            dispatch_async(dispatch_get_main_queue()) {
-                self.lines[boxId].outline.text = (responseString as String)
-            }
-            
-        }
-        task.resume()
-    }
+
     
  ////////////////////// HELPER METHODS ////////////////////////
     

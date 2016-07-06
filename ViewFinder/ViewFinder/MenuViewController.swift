@@ -6,6 +6,12 @@
 //  Copyright © 2016 Microsoft. All rights reserved.
 //
 
+/*
+ * This is the menu view controller. It is what the user sees
+ * and changes the state. It sets state variables in a "MenuViewControllerDelegate"
+ * These state variables control what api the app calls. For instance - 
+ * calling the translate api and which language it translates to
+*/
 import Foundation
 import UIKit
 
@@ -16,8 +22,6 @@ protocol MenuViewControllerDelegate {
 class MenuViewController: UITableViewController {
     
     @IBOutlet weak var table: UITableView!
-    
-    //let apis = [["Faces": faces], ["Translate", languages]]
     
     let apiNames = ["Facial Recognition", "Translation"]
     

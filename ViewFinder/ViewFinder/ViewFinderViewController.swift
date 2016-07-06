@@ -6,6 +6,13 @@
 //  Copyright © 2016 Microsoft. All rights reserved.
 //
 
+/*
+ * This is the original and now obsolete ViewFinder. In this verison,
+ * it has the capability for face detection. To track these faces it 
+ * checks to see if the same face is within a certain distance of a 
+ * face it detected in the previous frame.
+ */
+
 import Foundation
 import UIKit
 import AVFoundation
@@ -64,7 +71,9 @@ class ViewFinderViewController: UIViewController, UIGestureRecognizerDelegate {
     var textDetectorOptions: [String : AnyObject]?
     var textContext: CIContext?
     var hasText = false
-    var callOcrApi = false
+    //var callOcrApi = false
+    var hasCalledTranslateAPI = false
+    let indicator = UIActivityIndicatorView()
 
     var face = false
     

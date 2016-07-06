@@ -12,6 +12,7 @@ import UIKit
 class TranslateWordBox: UIView {
     
     let outline = UILabel()
+    let detailButton = UIButton()
     
     init(x: Int, y: Int, height: Int, width: Int, caption: String) {
         super.init(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
@@ -20,6 +21,10 @@ class TranslateWordBox: UIView {
         outline.textColor = UIColor.blackColor()
         outline.adjustsFontSizeToFitWidth = true
         self.addSubview(outline)
+        
+//        detailButton.frame = CGRect(x: x + width, y: y, width: 44, height: 44)
+//        detailButton.setImage(UIImage(named: "detailButton.png"), forState: .Normal)
+//        self.addSubview(detailButton)
     }
     
     init(frame: CGRect, caption: String) {
@@ -34,6 +39,10 @@ class TranslateWordBox: UIView {
         outline.textColor = UIColor.blackColor()
         outline.adjustsFontSizeToFitWidth = true
         self.addSubview(outline)
+        
+//        detailButton.frame = CGRect(x: x + width, y: y, width: 44, height: 44)
+//        detailButton.setImage(UIImage(named: "detailButton.png"), forState: .Normal)
+//        self.addSubview(detailButton)
     }
 
     required init?(coder aDecoder: NSCoder) {
