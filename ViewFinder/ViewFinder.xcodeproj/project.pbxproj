@@ -26,6 +26,12 @@
 		2CE4419F1D21DE16009A7DC1 /* menuButtonSlim2.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CE4419E1D21DE16009A7DC1 /* menuButtonSlim2.png */; };
 		2CE441A71D2485D5009A7DC1 /* VFVCWC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE441A61D2485D5009A7DC1 /* VFVCWC.swift */; };
 		2CE441AB1D2592B7009A7DC1 /* SteadyViewFinderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE441AA1D2592B7009A7DC1 /* SteadyViewFinderViewController.swift */; };
+		2CFF60251D2C25F900C391E4 /* TranslationDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CFF60241D2C25F900C391E4 /* TranslationDetailViewController.swift */; };
+		2CFF60271D2C288100C391E4 /* detailButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CFF60261D2C288100C391E4 /* detailButton.png */; };
+		2CFF60291D2C571200C391E4 /* TranslationTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CFF60281D2C571200C391E4 /* TranslationTableViewController.swift */; };
+		2CFF602B1D2C583C00C391E4 /* TableCells.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CFF602A1D2C583C00C391E4 /* TableCells.swift */; };
+		2CFF602D1D2C622800C391E4 /* closeButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CFF602C1D2C622800C391E4 /* closeButton.png */; };
+		2CFF602F1D2C7A7A00C391E4 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CFF602E1D2C7A7A00C391E4 /* API.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -71,6 +77,12 @@
 		2CE4419E1D21DE16009A7DC1 /* menuButtonSlim2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = menuButtonSlim2.png; sourceTree = "<group>"; };
 		2CE441A61D2485D5009A7DC1 /* VFVCWC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = VFVCWC.swift; path = ../VFVCWC.swift; sourceTree = "<group>"; };
 		2CE441AA1D2592B7009A7DC1 /* SteadyViewFinderViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SteadyViewFinderViewController.swift; sourceTree = "<group>"; };
+		2CFF60241D2C25F900C391E4 /* TranslationDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TranslationDetailViewController.swift; sourceTree = "<group>"; };
+		2CFF60261D2C288100C391E4 /* detailButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = detailButton.png; sourceTree = "<group>"; };
+		2CFF60281D2C571200C391E4 /* TranslationTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TranslationTableViewController.swift; sourceTree = "<group>"; };
+		2CFF602A1D2C583C00C391E4 /* TableCells.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableCells.swift; sourceTree = "<group>"; };
+		2CFF602C1D2C622800C391E4 /* closeButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = closeButton.png; sourceTree = "<group>"; };
+		2CFF602E1D2C7A7A00C391E4 /* API.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,22 +135,28 @@
 			children = (
 				2CE4413F1D19DF73009A7DC1 /* FlipCameraButton.png */,
 				2CE4413D1D19B736009A7DC1 /* CaptureButtonPNG.png */,
+				2CFF60261D2C288100C391E4 /* detailButton.png */,
+				2CFF602C1D2C622800C391E4 /* closeButton.png */,
 				2CE4419E1D21DE16009A7DC1 /* menuButtonSlim2.png */,
 				2CE441941D1D9E01009A7DC1 /* uploadButton.png */,
 				2CE4410A1D18A599009A7DC1 /* AppDelegate.swift */,
 				2CE4410E1D18A599009A7DC1 /* Main.storyboard */,
-				2CE441A61D2485D5009A7DC1 /* VFVCWC.swift */,
+				2CFF60241D2C25F900C391E4 /* TranslationDetailViewController.swift */,
+				2CFF60281D2C571200C391E4 /* TranslationTableViewController.swift */,
 				2CE441AA1D2592B7009A7DC1 /* SteadyViewFinderViewController.swift */,
-				2CE441961D1DA5A4009A7DC1 /* MenuViewController.swift */,
+				2CFF602E1D2C7A7A00C391E4 /* API.swift */,
 				2CE4413B1D18A5F3009A7DC1 /* ImageCaptureViewController.swift */,
-				2CE441901D1C4AFB009A7DC1 /* ViewFinderViewController.swift */,
 				2CE4418C1D1B49DA009A7DC1 /* AnalyzeUploadedImageViewController.swift */,
 				2CE441411D1AF90A009A7DC1 /* FaceDetectionBox.swift */,
 				2CE441981D219A1D009A7DC1 /* TranslateWordBox.swift */,
+				2CE441961D1DA5A4009A7DC1 /* MenuViewController.swift */,
+				2CFF602A1D2C583C00C391E4 /* TableCells.swift */,
 				2CE441141D18A599009A7DC1 /* Assets.xcassets */,
 				2CE441161D18A599009A7DC1 /* LaunchScreen.storyboard */,
 				2CE441191D18A599009A7DC1 /* Info.plist */,
 				2CE441111D18A599009A7DC1 /* ViewFinder.xcdatamodeld */,
+				2CE441A61D2485D5009A7DC1 /* VFVCWC.swift */,
+				2CE441901D1C4AFB009A7DC1 /* ViewFinderViewController.swift */,
 			);
 			path = ViewFinder;
 			sourceTree = "<group>";
@@ -266,8 +284,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2CFF602D1D2C622800C391E4 /* closeButton.png in Resources */,
 				2CE4413E1D19B736009A7DC1 /* CaptureButtonPNG.png in Resources */,
 				2CE4419F1D21DE16009A7DC1 /* menuButtonSlim2.png in Resources */,
+				2CFF60271D2C288100C391E4 /* detailButton.png in Resources */,
 				2CE441401D19DF74009A7DC1 /* FlipCameraButton.png in Resources */,
 				2CE441181D18A599009A7DC1 /* LaunchScreen.storyboard in Resources */,
 				2CE441151D18A599009A7DC1 /* Assets.xcassets in Resources */,
@@ -302,9 +322,13 @@
 				2CE441131D18A599009A7DC1 /* ViewFinder.xcdatamodeld in Sources */,
 				2CE441971D1DA5A4009A7DC1 /* MenuViewController.swift in Sources */,
 				2CE441991D219A1D009A7DC1 /* TranslateWordBox.swift in Sources */,
+				2CFF602B1D2C583C00C391E4 /* TableCells.swift in Sources */,
+				2CFF602F1D2C7A7A00C391E4 /* API.swift in Sources */,
 				2CE441911D1C4AFB009A7DC1 /* ViewFinderViewController.swift in Sources */,
 				2CE4413C1D18A5F3009A7DC1 /* ImageCaptureViewController.swift in Sources */,
+				2CFF60251D2C25F900C391E4 /* TranslationDetailViewController.swift in Sources */,
 				2CE441A71D2485D5009A7DC1 /* VFVCWC.swift in Sources */,
+				2CFF60291D2C571200C391E4 /* TranslationTableViewController.swift in Sources */,
 				2CE4410B1D18A599009A7DC1 /* AppDelegate.swift in Sources */,
 				2CE441AB1D2592B7009A7DC1 /* SteadyViewFinderViewController.swift in Sources */,
 			);

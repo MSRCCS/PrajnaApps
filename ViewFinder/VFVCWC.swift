@@ -6,6 +6,22 @@
 //  Copyright © 2016 Microsoft. All rights reserved.
 //
 
+/*
+ * This View Controller is a ViewFinder ViewController
+ * The difference between this ViewController and other ViewFinder
+ * ViewControllers is that this one makes comparisons bases on
+ * faces that is has detected. When this VF recognizes a face it stores
+ * its "features" in an array called features. Then, whenever
+ * a new face is discovered, it checks the features array to 
+ * see if a similar face has already been discovered.
+ 
+ * The problem with this method of facial recognition is that almost 
+ * all faces have similar bounds and ratios, making it very difficult 
+ * for even the detector to differentiate between the faces.
+*/
+
+
+
 import Foundation
 import UIKit
 import AVFoundation

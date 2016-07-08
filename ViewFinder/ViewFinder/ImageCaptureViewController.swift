@@ -6,6 +6,13 @@
 //  Copyright © 2016 Microsoft. All rights reserved.
 //
 
+/*
+ * This is the ImageCaptureViewController. It enables a user to take
+ * a picture and then call an API on it. It also has button to allow the user
+ * to upload a picture
+ 
+*/
+
 import Foundation
 import UIKit
 import AVFoundation
@@ -56,6 +63,8 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
     var celebrityPresent = false
     
     var wordBoxes = [TranslateWordBox]()
+    var translationDetails = [Dictionary<String, String>()]
+    var detailButtons = [UIButton]()
     
     //State Variables - Which API to call & details about it
     var camState = 0
@@ -186,87 +195,84 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
         menuButton.addTarget(self, action: #selector(ImageCaptureViewController.showMenu(_:)), forControlEvents: .TouchUpInside)
         self.view.addSubview(menuButton)
     }
+    
+    //adds the translation detail view controller to the screen
+    func showTranslationDetails(sender: UIButton) {
+        
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let controller = storyboard.instantiateViewControllerWithIdentifier("tdc") as! TranslationDetailViewController
+        
+        controller.preferredContentSize = CGSizeMake(300, 150)
+        
+        let details = translationDetails[sender.tag]
+
+        controller.modalPresentationStyle = UIModalPresentationStyle.Popover
+        
+        let popoverPresentationController = controller.popoverPresentationController
+        
+        popoverPresentationController!.sourceView = self.view
+        popoverPresentationController!.sourceRect = sender.frame
+        
+        popoverPresentationController!.permittedArrowDirections = .Any
+        popoverPresentationController!.delegate = self
+        
+        controller.to = details["to"]!
+        controller.from = details["from"]!
+        controller.translated = details["translated"]!
+        controller.original = details["original"]!
+
+        
+        self.presentViewController(controller, animated: true, completion: nil)
+    }
 
     
  /////////////////// PARSING JSON ///////////////////////
-    
-    /*
-     *This calls an outside PHP script that handles translation and obtaining of access keys
-     *@param: Dict: JSON returned from the OCR API
-     */
-    func translate(dict: NSDictionary) {
-        
-        var numBoxes = 0
-        
-        //safely unwraps the json dictionary returned from the OCR API
-        if let regions = dict["regions"] as? NSArray {
-            for region in regions {
-                if let lines = region["lines"] as? NSArray {
-                    for line in lines {
-                        let reg = line["boundingBox"] as! String
-                        var str = ""
-                        
-                        if let words = line["words"] as? NSArray {
-                            for word in words {
-                                str = str + " " + (word["text"] as! String)
-                            }
-                        }
-                        
-                        let rect = getFrameFromStr(reg)
-                        let twb = TranslateWordBox(frame: rect, caption: str)
-                        self.wordBoxes.append(twb)
-                        callTranslateAPI(str, boxId: numBoxes)
-                        self.view.addSubview(twb)
-                        numBoxes += 1
-                    }
-                }
-                
-            }
-        }
-    }
 
     //this is called after the analyze image api is used
     func displayAnswers(rs: String) {
         let dict = (convertStringToDictionary(rs)!)
         
-        if let facesInImage = dict["faces"] as? [NSDictionary] {
-            if(facesInImage.isEmpty) {
-                print("No Faces")
-            } else {
-                print(String(facesInImage.count) + " faces detected")
-                
-                //loops through faces and gives each one a Face Rectangle
-                for face in facesInImage {
-                    let caption: String = String(face["age"] as! Int) + " y/o " + (face["gender"] as! String)
-                    let x = face["faceRectangle"]!["left"] as! Int
-                    let y = face["faceRectangle"]!["top"] as! Int
-                    let width = face["faceRectangle"]!["width"] as! Int
-                    let height = face["faceRectangle"]!["height"] as! Int
-                    drawFaceRectangle(x, y: y, height: height, width: width, caption: caption)
+        //parses analzyeimage api results
+        if(self.camState == 0) {
+            if let facesInImage = dict["faces"] as? [NSDictionary] {
+                if(facesInImage.isEmpty) {
+                    print("No Faces")
+                } else {
+                    print(String(facesInImage.count) + " faces detected")
+                    
+                    //loops through faces and gives each one a Face Rectangle
+                    for face in facesInImage {
+                        let caption: String = String(face["age"] as! Int) + " y/o " + (face["gender"] as! String)
+                        let x = face["faceRectangle"]!["left"] as! Int
+                        let y = face["faceRectangle"]!["top"] as! Int
+                        let width = face["faceRectangle"]!["width"] as! Int
+                        let height = face["faceRectangle"]!["height"] as! Int
+                        drawFaceRectangle(x, y: y, height: height, width: width, caption: caption)
+                    }
                 }
-            }
-            
-            //safely unwraps the dictionary to check for celebrities
-            if(celebrityPresent) {
-                if let categories = dict["categories"] as? NSArray {
-                    for i in 0 ..< categories.count {
-                        if let details = categories[i]["detail"] as? NSDictionary {
-                            if let celebrities = details["celebrities"] as? [NSDictionary] {
-                                for celeb in celebrities {
-                                    
-                                    //loops through each celebrity
-                                    
-                                    if let faceR = celeb["faceRectangle"] as? NSDictionary {
-                                        let x = faceR["left"] as! Int
-                                        let y = faceR["top"] as! Int
-                                        for face in faces {
-                                            let resizedHeight = self.view.frame.size.height * (self.view.frame.size.width / 480.0)
-                                            let newX = Int(self.view.frame.size.width * (CGFloat(x) / 480.0))
-                                            let newY = Int(resizedHeight * (CGFloat(y) / 640.0))
-                                            
-                                            //checks each FaceDetectionBox to see if is close to the celebrity face. If the origin point is within fifteen of the celebrity face the 'nametag' is replaced with the celebrity's name
-                                            if(withinFifteen(Int(face.outline.frame.minX), two: newX) && withinFifteen(Int(face.outline.frame.minY), two: newY)) {
-                                                face.caption.text = (celeb["name"] as! String)
+                
+                //safely unwraps the dictionary to check for celebrities
+                if(celebrityPresent) {
+                    if let categories = dict["categories"] as? NSArray {
+                        for i in 0 ..< categories.count {
+                            if let details = categories[i]["detail"] as? NSDictionary {
+                                if let celebrities = details["celebrities"] as? [NSDictionary] {
+                                    for celeb in celebrities {
+                                        
+                                        //loops through each celebrity
+                                        
+                                        if let faceR = celeb["faceRectangle"] as? NSDictionary {
+                                            let x = faceR["left"] as! Int
+                                            let y = faceR["top"] as! Int
+                                            for face in faces {
+                                                let resizedHeight = self.view.frame.size.height * (self.view.frame.size.width / 480.0)
+                                                let newX = Int(self.view.frame.size.width * (CGFloat(x) / 480.0))
+                                                let newY = Int(resizedHeight * (CGFloat(y) / 640.0))
+                                                
+                                                //checks each FaceDetectionBox to see if is close to the celebrity face. If the origin point is within fifteen of the celebrity face the 'nametag' is replaced with the celebrity's name
+                                                if(withinFifteen(Int(face.outline.frame.minX), two: newX) && withinFifteen(Int(face.outline.frame.minY), two: newY)) {
+                                                    face.caption.text = (celeb["name"] as! String)
+                                                }
                                             }
                                         }
                                     }
@@ -275,14 +281,84 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
                         }
                     }
                 }
+            } else {
+                print("Could not get Faces")
             }
-        } else {
-            print("Could not get Faces")
+            
+            let x = (dict["description"] as! NSDictionary)["captions"]![0]["text"]
+            
+            captionLabel.text = (x as! String)
+            
         }
         
-        let x = (dict["description"] as! NSDictionary)["captions"]![0]["text"]
-        
-        captionLabel.text = (x as! String)
+        //parses ocr json and calls translate api
+        if(camState == 1) {
+            
+            var numBoxes = 0
+            
+            var toTranslate = ""
+            var originalText = [String]()
+            //safely unwraps the json dictionary returned from the OCR API
+            if let regions = dict["regions"] as? NSArray {
+                for region in regions {
+                    if let lines = region["lines"] as? NSArray {
+                        for line in lines {
+                            let reg = line["boundingBox"] as! String
+                            var str = ""
+                            
+                            if let words = line["words"] as? NSArray {
+                                for word in words {
+                                    str = str + " " + (word["text"] as! String)
+                                }
+                            }
+                            
+                            let rect = getFrameFromStr(reg)
+                            let twb = TranslateWordBox(frame: rect, caption: str)
+                            self.wordBoxes.append(twb)
+                            self.view.addSubview(twb)
+                            numBoxes += 1
+                            originalText.append(str)
+                            toTranslate = toTranslate + str + "*"
+                        }
+                    }
+                    
+                }
+            }
+            if(toTranslate != "") {
+                let to = self.camDetails
+                
+                let encText = toTranslate.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())
+                
+                let fields = "?auth=96babypigmangocucumber&text=" + encText! + "&to=" + to
+                
+                let api = API(translate: true, fields: fields)
+                
+                api.callAPI() { (rs: String) in
+                    
+                    let arr = rs.componentsSeparatedByString("&&#")
+                    let from = arr[0]
+                    let translated = arr[1].componentsSeparatedByString("$&$")
+                    for i in 0 ..< self.wordBoxes.count {
+                        self.wordBoxes[i].outline.text = translated[i]
+                        
+                        let packet: Dictionary<String, String> = ["from": from, "original": originalText[i], "to": self.camDetails, "translated": translated[i]]
+                        
+                        //Adds Detail Button
+                        let detailButton = UIButton()
+                        let x = self.wordBoxes[i].outline.frame.minX
+                        let y = self.wordBoxes[i].outline.frame.minY
+                        let width = self.wordBoxes[i].outline.frame.width
+                        detailButton.frame = CGRect(x: x + width, y: y, width: 24.0, height: 24.0)
+                        detailButton.setImage(UIImage(named: "detailButton.png"), forState: .Normal)
+                        detailButton.tag = self.translationDetails.count
+                        detailButton.addTarget(self, action: #selector(ImageCaptureViewController.showTranslationDetails(_:)), forControlEvents: .TouchUpInside)
+                        self.view.addSubview(detailButton)
+                        self.detailButtons.append(detailButton)
+                        self.translationDetails.append(packet)
+                    }
+                }
+            }
+        }
     }
     
     
@@ -332,7 +408,6 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
         self.presentViewController(controller, animated: true, completion: nil)
     }
     
-    
  /////////////////// TAKE PICTURE ////////////////////
     
     /*
@@ -354,13 +429,34 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
                 
                 //UIImageWriteToSavedPhotosAlbum(image!, nil, nil, nil) // saves image
                 
+                
+                var fields = ""
+                
                 if(self.camState == 0) {
-                    self.analyzeImage(image!) //calls analyze image API
+                   // self.analyzeImage(image!) //calls analyze image API
                     self.captionLabel.text = "Generating Caption..."
-                } else {
-                    self.readWords(image!) //calls the OCR API
+                    
+                    fields = "?visualFeatures=Faces,Description,Categories&details=Celebrities"
+
+                } else if(self.camState == 1) {
+                
                     self.captionLabel.text = "Getting Translation..."
+
                 }
+                
+                let api = API(state: self.camState, header: ["Ocp-Apim-Subscription-Key": "dca2b686d07a4e18ba81f5731053dbab", "Content-Type": "application/octet-stream"], body: UIImageJPEGRepresentation(image!, 0.9)!, fields: fields)
+                
+                api.callAPI() { (rs: String) in
+                    if(rs.containsString("celebrities")) {
+                        self.celebrityPresent = true
+                    } else {
+                        self.celebrityPresent = false
+                    }
+                    
+                    self.displayAnswers(rs)
+                }
+                
+                
                 
                 let width = image!.size.width
                 
@@ -401,10 +497,15 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
             }
         }
         wordBoxes = [TranslateWordBox]()
+        translationDetails = [Dictionary<String,String>()]
+        if(!(detailButtons.isEmpty)) {
+            for btn in detailButtons {
+                btn.removeFromSuperview()
+            }
+        }
+        
+        detailButtons = [UIButton]()
     }
-    
-    
-    
     
  /////////////////// UPLOADING ///////////////////////
     
@@ -443,134 +544,6 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
         closeButton.removeFromSuperview()
         swipe.addTarget(self, action: #selector(ImageCaptureViewController.viewFinder(_:)))
     }
-    
-    
- /////////////////// API CALLS ///////////////////////
-    
-    /*
-     * This method calls the translate API
-     * @param: text: The text to be translated to
-     * @param: boxId: The TranslateWordBox to add the translated text to
-     */
-    func callTranslateAPI(text: String, boxId: Int) {
-        
-        var responseString = "" as NSString
-        
-        let to = self.camDetails
-        
-        let encText = text.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())
-        
-        let url = "https://metrofantasyball.com/translate/getaccesstoken.php?auth=96babypigmangocucumber&text=" + encText! + "&to=" + to
-        
-        let request = NSMutableURLRequest(URL: NSURL(string: url)!)
-        request.HTTPMethod = "POST"
-        
-        let task = NSURLSession.sharedSession().dataTaskWithRequest(request) { data, response, error in
-            guard error == nil && data != nil else {            // check for fundamental networking error
-                print("error=\(error)")
-                return
-            }
-            
-            if let httpStatus = response as? NSHTTPURLResponse where httpStatus.statusCode != 200 {  // check for http errors
-                print("statusCode should be 200, but is \(httpStatus.statusCode)")
-                print("response = \(response)")
-            }
-            
-            responseString = NSString(data: data!, encoding: NSUTF8StringEncoding)!
-            print("responseString = \(responseString)")
-            
-            dispatch_async(dispatch_get_main_queue()) {
-                self.wordBoxes[boxId].outline.text = (responseString as String)
-            }
-            
-        }
-        task.resume()
-    }
-    
-    /*
-     * Calls the Analyze Image API
-     * @param: image: image sent to Analyze Image API
-     */
-    func analyzeImage(image: UIImage) {
-        var responseString = "" as NSString
-        
-        let request = NSMutableURLRequest(URL: NSURL(string: "https://api.projectoxford.ai/vision/v1.0/analyze?visualFeatures=Faces,Description,Categories&details=Celebrities")!)
-        request.HTTPMethod = "POST"
-        
-        
-        request.allHTTPHeaderFields = ["Ocp-Apim-Subscription-Key": "dca2b686d07a4e18ba81f5731053dbab", "Content-Type": "application/octet-stream"]
-        request.HTTPBody = UIImageJPEGRepresentation(image, 0.9)
-        
-        let task = NSURLSession.sharedSession().dataTaskWithRequest(request) { data, response, error in
-            guard error == nil && data != nil else {            // check for fundamental networking error
-                print("error=\(error)")
-                return
-            }
-            
-            if let httpStatus = response as? NSHTTPURLResponse where httpStatus.statusCode != 200 {  // check for http errors
-                print("statusCode should be 200, but is \(httpStatus.statusCode)")
-                print("response = \(response)")
-            }
-            
-            responseString = NSString(data: data!, encoding: NSUTF8StringEncoding)!
-            //print("responseString = \(responseString)")
-            
-            dispatch_async(dispatch_get_main_queue()) {
-                
-                if((responseString as String).containsString("celebrities")) {
-                    self.celebrityPresent = true
-                } else {
-                    self.celebrityPresent = false
-                }
-                
-                self.displayAnswers(responseString as String)
-                
-            }
-            
-        }
-        task.resume()
-    }
-    
-    /*
-     *This method calls the OCR API
-     *@param: image: Image to call the OCR API on
-     */
-    func readWords(image: UIImage) {
-        var responseString = "" as NSString
-        
-        let request = NSMutableURLRequest(URL: NSURL(string: "https://api.projectoxford.ai/vision/v1.0/ocr")!)
-        request.HTTPMethod = "POST"
-        
-        request.allHTTPHeaderFields = ["Ocp-Apim-Subscription-Key": "dca2b686d07a4e18ba81f5731053dbab", "Content-Type": "application/octet-stream"]
-        request.HTTPBody = UIImageJPEGRepresentation(image, 0.9)
-        
-        let task = NSURLSession.sharedSession().dataTaskWithRequest(request) { data, response, error in
-            guard error == nil && data != nil else {            // check for fundamental networking error
-                print("error=\(error)")
-                return
-            }
-            
-            if let httpStatus = response as? NSHTTPURLResponse where httpStatus.statusCode != 200 {  // check for http errors
-                print("statusCode should be 200, but is \(httpStatus.statusCode)")
-                print("response = \(response)")
-            }
-            
-            responseString = NSString(data: data!, encoding: NSUTF8StringEncoding)!
-            //print("responseString = \(responseString)")
-            
-            dispatch_async(dispatch_get_main_queue()) {
-                let dict = self.convertStringToDictionary(responseString as String)
-                self.translate(dict!)
-                print("!!")
-            }
-            
-        }
-        task.resume()
-    }
-    
-
-    
-    
     
 /////////////////// HELPER METHODS ///////////////////
     
