@@ -6,10 +6,9 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ImageDescriber
+namespace ImageDescriberV3
 {
-
-
+    // LUIS framework class
     public class LUISClient
     {
         public static async Task<ImageLUIS> ParseUserInput(string strInput)
@@ -19,7 +18,7 @@ namespace ImageDescriber
 
             using (var client = new HttpClient())
             {
-                string uri = "https://api.projectoxford.ai/luis/v1/application?id=3284f292-e3e2-40ed-bc77-5690c9c754d6&subscription-key=2a42a9d62d854acc9ea73d82b0c6b4a6&q=" + strEscaped;
+                string uri = "https://api.projectoxford.ai/luis/v1/application?id=3284f292-e3e2-40ed-bc77-5690c9c754d6&subscription-key=fe2ab8e14ebd4ee998853eee4ace4be2&q=" + strEscaped;
                 HttpResponseMessage msg = await client.GetAsync(uri);
 
                 if (msg.IsSuccessStatusCode)

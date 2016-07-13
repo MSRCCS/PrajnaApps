@@ -6,12 +6,13 @@ using System.Threading;
 using System.Runtime.Serialization.Json;
 using System.Collections.Generic;
 
-namespace ImageDescriber
+namespace ImageDescriberV3
 {
+    // class for Microsoft Translator API methods
     class Translate
     {
 
-        public static string TranslateMethod (string authToken, string textIn, string langTo)
+        public static string TranslateMethod(string authToken, string textIn, string langTo)
         {
             string ret = "Not an applicable lanugage. Please try again.";
             string uri = "http://api.microsofttranslator.com/v2/Http.svc/Translate?text=" + WebUtility.UrlEncode(textIn) + "&to=" + langTo;
