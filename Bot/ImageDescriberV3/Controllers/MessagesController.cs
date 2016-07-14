@@ -20,6 +20,9 @@ using Microsoft.ProjectOxford.Emotion.Contract;
 using System.Collections.Generic;
 using System.Web;
 using Newtonsoft.Json.Linq;
+using System.Net.Http.Headers;
+using System.Collections.ObjectModel;
+using System.Globalization;
 
 namespace ImageDescriberV3
 {
@@ -33,7 +36,6 @@ namespace ImageDescriberV3
         /// 
         private static string KeyDes = "cbc1463902284471bf4aaae732da10a0";
         private static string KeyEmo = "ebe3b657187242f684da0318c812c878";
-        private static string KeyFace = "4cb2b28396104278867114638f7a75b0";
         private static string IdTrans = "ImageDescriber";
         private static string SecTrans = "3RDYrwAxYga8hPqbjJXlWDDSL1mJpodCE2lvcGae9Qo=";
         private static string KeyBing = "0fc345553fbc45838e0e3b0ffd431cff";
@@ -45,10 +47,9 @@ namespace ImageDescriberV3
         private static string AzureContainer = "test-luis-v3";
         private static string Date = null;
 
-        private static SemaphoreSlim semaphore = new SemaphoreSlim(1); // only one thread pushing to azure at a time
+        private static SemaphoreSlim semaphore = new SemaphoreSlim(1); // only one task pushing to azure at a time
         private static StateClient stateClient;
-        private static BotState botState;
-        private static BotData userData;
+        private static BotData userData = null;
 
         private static bool misinterpret = false; // expecting labeling errors
         private static bool incorrect = false; // expecting annotation errors
@@ -59,111 +60,105 @@ namespace ImageDescriberV3
             if (message.Type == ActivityTypes.Message)
             {
                 ConnectorClient connector = new ConnectorClient(new Uri(message.ServiceUrl));
+                //await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
 
                 stateClient = message.GetStateClient();
                 userData = await stateClient.BotState.GetUserDataAsync(message.ChannelId, message.From.Id); // acquire all current userData
                 userData.SetProperty<bool>("Message", true); // arbitrary variable - required for userData to function properly
 
-                new Thread(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))).Start(); // log incoming message
+                //await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
 
-                Activity ReplyMessage = new Activity();
+                Activity reply = new Activity();
 
-                if (await CheckAttachments(message, ReplyMessage, connector)) return Request.CreateResponse(HttpStatusCode.OK); // checks if an image or image url has been sent
-                if (await CheckHelpCommand(message, ReplyMessage, connector)) return Request.CreateResponse(HttpStatusCode.OK); // checks if help was requested
-                if (await CheckLabelFeedback(message, ReplyMessage, connector)) return Request.CreateResponse(HttpStatusCode.OK); // checks if reporting LUIS label error
-                if (await CheckAnnotateFeedback(message, ReplyMessage, connector)) return Request.CreateResponse(HttpStatusCode.OK); // checks if identifying annotation error (or button response)
+                if (await CheckAttachments(message, reply, connector)) return Request.CreateResponse(HttpStatusCode.OK); // checks if an image or image url has been sent
+                if (await CheckHelpCommand(message, reply, connector)) return Request.CreateResponse(HttpStatusCode.OK); // checks if help was requested
+                if (await CheckLabelFeedback(message, reply, connector)) return Request.CreateResponse(HttpStatusCode.OK); // checks if reporting LUIS label error
+                if (await CheckAnnotateFeedback(message, reply, connector)) return Request.CreateResponse(HttpStatusCode.OK); // checks if identifying annotation error (or button response)
 
-                ImageLUIS luis = await LUISClient.ParseUserInput(message.Text);
+                ImageLuis luis = await LuisClient.ParseUserInput(message.Text);
                 if (luis.intents.Count() > 0)  // identifying the correct intent from LUIS
                 {
                     switch (luis.intents[0].intent)
                     {
                         case "None":
-                            ReplyMessage = message.CreateReply("I don't understand what you mean. Please enter in another request.");
-                            await SetDataSendMessage(message, ReplyMessage, connector);
+                            reply = message.CreateReply("I don't understand what you mean. Please enter in another request. For a full list of commands, enter \"help\".");
+                            await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
                             return Request.CreateResponse(HttpStatusCode.OK);
                         case "Describe":
-                            ReplyMessage = message.CreateReply(await Describer(message));
+                            reply = message.CreateReply(await Describe(message));
                             userData.SetProperty<string>("PreviousQ", message.Text);
-                            Activity ConfirmMessage = ConfirmButton(message);
-                            await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
-                            await connector.Conversations.ReplyToActivityAsync(ReplyMessage);
-                            await connector.Conversations.ReplyToActivityAsync(ConfirmMessage);
-                            new Thread(async () => await SaveMessage(ReplyMessage, message.Timestamp.ToString().Substring(0, 9))).Start();
-                            new Thread(async () => await SaveMessage(ConfirmMessage, message.Timestamp.ToString().Substring(0, 9))).Start();
+                            Activity confirm = ConfirmButton(message);
+                            await SetDataSendMessage(message, new Collection<Activity>() { reply, confirm }, connector);
                             return Request.CreateResponse(HttpStatusCode.OK);
                         case "Emotion":
-                            if (luis.entities.Count() > 0) ReplyMessage = message.CreateReply(await Emotioner(message, luis.entities[0].entity));
-                            else ReplyMessage = message.CreateReply(await Emotioner(message));
-                            await SetDataSendMessage(message, ReplyMessage, connector);
+                            if (luis.entities.Count() > 0) reply = message.CreateReply(await Emotion(message, luis.entities[0].entity));
+                            else reply = message.CreateReply(await Emotion(message));
+                            await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
                             return Request.CreateResponse(HttpStatusCode.OK);
                         case "Face":
-                            ReplyMessage = message.CreateReply(await Facer(message));
-                            await SetDataSendMessage(message, ReplyMessage, connector);
+                            reply = message.CreateReply(await Face(message));
+                            await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
                             return Request.CreateResponse(HttpStatusCode.OK);
                         case "ActionsAsk":
-                            ReplyMessage = message.CreateReply("This bot provides information about images. After attaching an image or sending an image URL, you can ask the bot about the image's contents, emotions, people, text, and for similar images, using natural language commands. For a full list of functions, enter \"help\".");
-                            Activity Reply2 = message.CreateReply("If the bot misinterprets any of your requests, enter \"wrong\". To help us improve the bot, please correct it if it gives you an inaccurate response to your question.");
-                            Activity Reply3 = message.CreateReply("To get started, enter an image and try asking \"What is this a picture of\"");
-                            new Thread(async () => await SaveMessage(ReplyMessage, message.Timestamp.ToString().Substring(0, 9))).Start();
-                            new Thread(async () => await SaveMessage(Reply2, message.Timestamp.ToString().Substring(0, 9))).Start();
-                            new Thread(async () => await SaveMessage(Reply3, message.Timestamp.ToString().Substring(0, 9))).Start();
-                            await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
-                            await connector.Conversations.ReplyToActivityAsync(ReplyMessage);
-                            await connector.Conversations.ReplyToActivityAsync(Reply2);
-                            await connector.Conversations.ReplyToActivityAsync(Reply3);
+                            reply = message.CreateReply("This bot provides information about images. After attaching an image or sending an image URL, you can ask the bot about the image's contents, emotions, people, text, and for similar images, using natural language commands. For a full list of functions, enter \"help\".");
+                            Activity reply2 = message.CreateReply("If the bot misinterprets any of your requests, enter \"wrong\". To help us improve the bot, please correct it if it gives you an inaccurate response to your question.");
+                            Activity reply3 = message.CreateReply("To get started, enter an image and try asking \"What is this a picture of\".");
+                            await SetDataSendMessage(message, new Collection<Activity>() { reply, reply2, reply3 }, connector);
                             return Request.CreateResponse(HttpStatusCode.OK);
                         case "Age":
-                            ReplyMessage = message.CreateReply(await Ager(message));
-                            await SetDataSendMessage(message, ReplyMessage, connector);
+                            reply = message.CreateReply(await Age(message));
+                            await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
                             return Request.CreateResponse(HttpStatusCode.OK);
                         case "Celebrity":
-                            ReplyMessage = message.CreateReply(await Celebrities(message));
-                            await SetDataSendMessage(message, ReplyMessage, connector);
+                            reply = message.CreateReply(await Celebrities(message));
+                            await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
                             return Request.CreateResponse(HttpStatusCode.OK);
                         case "Gender":
-                            ReplyMessage = message.CreateReply(await Gender(message));
-                            await SetDataSendMessage(message, ReplyMessage, connector);
+                            reply = message.CreateReply(await Gender(message));
+                            await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
                             return Request.CreateResponse(HttpStatusCode.OK);
                         case "Text":
-                            ReplyMessage = message.CreateReply(await Texter(message));
-                            await SetDataSendMessage(message, ReplyMessage, connector);
+                            reply = message.CreateReply(await Text(message));
+                            await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
                             return Request.CreateResponse(HttpStatusCode.OK);
                         case "Translate":
-                            if (luis.entities.Count() > 0) ReplyMessage = message.CreateReply(await Translator(message, luis.entities[0].entity));
-                            else ReplyMessage = message.CreateReply("You need to specify a language to translate to. Please try again.");
-                            await SetDataSendMessage(message, ReplyMessage, connector);
+                            if (luis.entities.Count() > 0) reply = message.CreateReply(await Translator(message, luis.entities[0].entity));
+                            else reply = message.CreateReply("You need to specify a language to translate to. Please try again.");
+                            await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
+                            return Request.CreateResponse(HttpStatusCode.OK);
+
+                        case "Similar":
+                            reply = await Similar(message);
+                            await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
                             return Request.CreateResponse(HttpStatusCode.OK);
                         case "Annotate":
                             if (userData.GetProperty<string>("PreviousQ") != null) // responding without a previous question
                             {
                                 if (luis.entities.Count() > 0) // not identifying the correct annotation
                                 {
-                                    ReplyMessage = message.CreateReply("Thanks for the feedback - we will use it to better train our models. Would you like to know anything else?");
+                                    reply = message.CreateReply("Thanks for the feedback - we will use it to better train our models. Would you like to know anything else?");
                                     StringBuilder sb = new StringBuilder();
                                     foreach (lEntity entity in luis.entities) sb.Append(entity.entity + " ");
                                     userData.SetProperty<string>("Annotation", sb.ToString());
                                 }
                                 else
                                 {
-                                    ReplyMessage = message.CreateReply("Please specify what the correct annotation is.");
+                                    reply = message.CreateReply("Please specify what the correct annotation is.");
                                     incorrect = true;
                                 }
                             }
-                            else ReplyMessage = message.CreateReply("Please first ask the bot about the image.");
+                            else reply = message.CreateReply("Please first ask the bot about the image.");
+                            await connector.Conversations.ReplyToActivityAsync(reply);
+                            await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
+                            await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9)));
                             await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
-                            await connector.Conversations.ReplyToActivityAsync(ReplyMessage);
-                            new Thread(async () => await SaveMessage(ReplyMessage, message.Timestamp.ToString().Substring(0, 9))).Start();
-                            return Request.CreateResponse(HttpStatusCode.OK);
-                        case "Similar":
-                            ReplyMessage = await Similar(message);
-                            await SetDataSendMessage(message, ReplyMessage, connector);
                             return Request.CreateResponse(HttpStatusCode.OK);
                     }
                 }
+                await connector.Conversations.ReplyToActivityAsync(reply);
+                await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
+                await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9))); // never gets to this point
                 await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
-                await connector.Conversations.ReplyToActivityAsync(ReplyMessage);
-                new Thread(async () => await SaveMessage(ReplyMessage, message.Timestamp.ToString().Substring(0, 9))).Start(); // never gets to this point
                 return Request.CreateResponse(HttpStatusCode.OK);
             }
             else
@@ -204,16 +199,17 @@ namespace ImageDescriberV3
         }
 
         // initial method to check if sending attachment or URL
-        public static async Task<bool> CheckAttachments(Activity message, Activity ReplyMessage, ConnectorClient connector)
+        public static async Task<bool> CheckAttachments(Activity message, Activity reply, ConnectorClient connector)
         {
             if (message.Attachments != null && message.Attachments.Count() >= 1 && message.Attachments[0].ContentType.ToString().Contains("image")) // sending image + error catching for facebook link thumbnail
             {
-                ReplyMessage = message.CreateReply("What would you like to know?");
-                userData.SetProperty<string>("ImageStream", message.Attachments[0].ContentUrl); // TODO: skype image attachments do not work because contentUrl is not accessible
+                reply = message.CreateReply("What would you like to know?");
+                userData.SetProperty<Uri>("ImageUrl", new Uri(message.Attachments[0].ContentUrl));
                 userData.SetProperty<int>("Attachment", 11); // 11 for attachment, 22 for url
+                await connector.Conversations.ReplyToActivityAsync(reply);
+                await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
+                await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9)));
                 await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
-                await connector.Conversations.ReplyToActivityAsync(ReplyMessage);
-                new Thread(async () => await SaveMessage(ReplyMessage, message.Timestamp.ToString().Substring(0, 9))).Start();
                 return true;
             }
 
@@ -221,21 +217,23 @@ namespace ImageDescriberV3
             {
                 if (message.Text.ToLower().Contains("png") || message.Text.ToLower().Contains("jpg") || message.Text.ToLower().Contains("gif")) // sending url
                 {
-                    ReplyMessage = message.CreateReply("What would you like to know?");
-                    if (!message.ChannelId.Equals("skype")) userData.SetProperty<string>("ImageUrl", message.Text);
-                    else userData.SetProperty<string>("ImageUrl", SkypeUrl(message.Text));
+                    reply = message.CreateReply("What would you like to know?");
+                    if (!message.ChannelId.Equals("skype")) userData.SetProperty<Uri>("ImageUrl", new Uri(message.Text));
+                    else userData.SetProperty<Uri>("ImageUrl", SkypeUrl(message.Text));
                     userData.SetProperty<int>("Attachment", 22);// 11 for attachment, 22 for url
+                    await connector.Conversations.ReplyToActivityAsync(reply);
+                    await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
+                    new Thread(async () => await SaveMessage(reply, message.Timestamp.ToString().ToString().Substring(0, 9))).Start();
                     await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
-                    await connector.Conversations.ReplyToActivityAsync(ReplyMessage);
-                    new Thread(async () => await SaveMessage(ReplyMessage, message.Timestamp.ToString().ToString().Substring(0, 9))).Start();
                     return true;
                 }
                 else
                 {
-                    ReplyMessage = message.CreateReply("Please attach a direct link to the image. The link should end in .jpg, .png, or .gif.");
+                    reply = message.CreateReply("Please attach a direct link to the image. The link should end in .jpg, .png, or .gif.");
+                    await connector.Conversations.ReplyToActivityAsync(reply);
+                    await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
+                    await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9)));
                     await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
-                    await connector.Conversations.ReplyToActivityAsync(ReplyMessage);
-                    new Thread(async () => await SaveMessage(ReplyMessage, message.Timestamp.ToString().Substring(0, 9))).Start();
                     return true;
                 }
             }
@@ -243,68 +241,72 @@ namespace ImageDescriberV3
         }
 
         // initial method to see if help is requested
-        public static async Task<bool> CheckHelpCommand(Activity message, Activity ReplyMessage, ConnectorClient connector)
+        public static async Task<bool> CheckHelpCommand(Activity message, Activity reply, ConnectorClient connector)
         {
             if (message.Text.ToLower().Contains("help") || message.Text.ToLower().Contains("functionality") || message.Text.ToLower().Contains("commands"))
             {
-                ReplyMessage = message.CreateReply("Full capabilities: image description, primary emotion, levels of emotions, number of faces, age of people, genders, celebrity recognition, image text detection, image text translation, similar images. To use the bot in a different language, enter \"use\" followed by your language.");
+                reply = message.CreateReply("Full capabilities: image description, primary emotion, levels of emotions, number of faces, age of people, genders, celebrity recognition, image text detection, image text translation, similar images. To use the bot in a different language, enter \"use\" followed by your language.");
+                await connector.Conversations.ReplyToActivityAsync(reply);
+                await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
+                await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9)));
                 await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
-                await connector.Conversations.ReplyToActivityAsync(ReplyMessage);
-                new Thread(async () => await SaveMessage(ReplyMessage, message.Timestamp.ToString().Substring(0, 9))).Start();
                 return true;
             }
             return false;
         }
 
         // initial method to see is LUIS label feedback is being given
-        public static async Task<bool> CheckLabelFeedback(Activity message, Activity ReplyMessage, ConnectorClient connector)
+        public static async Task<bool> CheckLabelFeedback(Activity message, Activity reply, ConnectorClient connector)
         {
             if (message.Text.ToLower().Contains("wrong")) // wants to report incorrect labeling
             {
-                ReplyMessage = message.CreateReply("Sorry about that. Which of the following describes your intended request: describe, emotion, face, age, gender, celebrity, text, translate. If it is none of these, enter \"none\"");
+                reply = message.CreateReply("Sorry about that. Which of the following describes your intended request: describe, emotion, face, age, gender, celebrity, text, translate, similar. If it is none of these, enter \"none\"");
                 misinterpret = true;
+                await connector.Conversations.ReplyToActivityAsync(reply);
+                await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
+                await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9)));
                 await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
-                await connector.Conversations.ReplyToActivityAsync(ReplyMessage);
-                new Thread(async () => await SaveMessage(ReplyMessage, message.Timestamp.ToString().Substring(0, 9))).Start();
                 return true;
             }
 
             if (misinterpret) // identifying correct labeling
             {
-                string[] options = { "None", "Describe", "Emotion", "Face", "Age", "Gender", "Celebrity", "Text", "Translate" }; // possible intents
+                string[] options = { "None", "Describe", "Emotion", "Face", "Age", "Gender", "Celebrity", "Text", "Translate", "Similar" }; // possible intents
                 foreach (string opt in options)
                 {
                     if (message.Text.ToLower().Contains(opt.ToLower()))
                     {
-                        ReplyMessage = message.CreateReply("Thanks for the feedback. We will categorize the request as " + opt.ToLower() + " next time. Would you like to know anything else?");
+                        reply = message.CreateReply("Thanks for the feedback. We will categorize the request as " + opt.ToLower() + " next time. Would you like to know anything else?");
                         misinterpret = false;
-                        //ReplyMessage.SetBotConversationData("PreviousQ", message.GetBotConversationData<string>("PreviousQ")); - may not need if data persists
+                        await connector.Conversations.ReplyToActivityAsync(reply);
+                        await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
+                        await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9)));
                         await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
-                        await connector.Conversations.ReplyToActivityAsync(ReplyMessage);
-                        new Thread(async () => await SaveMessage(ReplyMessage, message.Timestamp.ToString().Substring(0, 9))).Start();
                         return true;
                     }
                 }
-                ReplyMessage = message.CreateReply("Not a valid option. Which of the following describes your intended request: describe, emotion, face, age, gender, celebrity, text, translate. If it is none of these, enter \"none\"");
+                reply = message.CreateReply("Not a valid option. Which of the following describes your intended request: describe, emotion, face, age, gender, celebrity, text, translate, similar. If it is none of these, enter \"none\"");
+                await connector.Conversations.ReplyToActivityAsync(reply);
+                await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
+                await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9)));
                 await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
-                await connector.Conversations.ReplyToActivityAsync(ReplyMessage);
-                new Thread(async () => await SaveMessage(ReplyMessage, message.Timestamp.ToString().Substring(0, 9))).Start();
                 return true;
             }
             return false;
         }
 
         // initial method to see if annotation result feedback is being given
-        public static async Task<bool> CheckAnnotateFeedback(Activity message, Activity ReplyMessage, ConnectorClient connector)
+        public static async Task<bool> CheckAnnotateFeedback(Activity message, Activity reply, ConnectorClient connector)
         {
             if (incorrect) // identifying only correct annotation (after Annotate intent)
             {
-                ReplyMessage = message.CreateReply("Thanks for the feedback - we will use it to better train our models. Would you like to know anything else?");
+                reply = message.CreateReply("Thanks for the feedback - we will use it to better train our models. Would you like to know anything else?");
                 userData.SetProperty<string>("Annotation", message.Text);
                 incorrect = false;
+                await connector.Conversations.ReplyToActivityAsync(reply);
+                await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
+                await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9)));
                 await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
-                await connector.Conversations.ReplyToActivityAsync(ReplyMessage);
-                new Thread(async () => await SaveMessage(ReplyMessage, message.Timestamp.ToString().Substring(0, 9))).Start();
                 return true;
             }
 
@@ -314,19 +316,21 @@ namespace ImageDescriberV3
                 {
                     confirm = false;
 
-                    if (message.Text.Contains("yes")) ReplyMessage = message.CreateReply("Great! Would you like to know anything else?"); // "yes"
-                    else if (message.Text.Contains("no")) ReplyMessage = message.CreateReply("Thanks for the feedback! Would you like to know anything else?"); // "no"
+                    if (message.Text.Contains("yes")) reply = message.CreateReply("Great! Would you like to know anything else?"); // "yes"
+                    else if (message.Text.Contains("no")) reply = message.CreateReply("Thanks for the feedback! Would you like to know anything else?"); // "no"
+                    await connector.Conversations.ReplyToActivityAsync(reply);
+                    await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
+                    await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9)));
                     await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
-                    await connector.Conversations.ReplyToActivityAsync(ReplyMessage);
-                    new Thread(async () => await SaveMessage(ReplyMessage, message.Timestamp.ToString().Substring(0, 9))).Start();
                     return true;
                 }
                 else // not expecting button response
                 {
-                    ReplyMessage = message.CreateReply("You already responded to this! Would you like to anything else?");
+                    reply = message.CreateReply("You already responded to this! Would you like to anything else?");
+                    await connector.Conversations.ReplyToActivityAsync(reply);
+                    await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
+                    await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9)));
                     await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
-                    await connector.Conversations.ReplyToActivityAsync(ReplyMessage);
-                    new Thread(async () => await SaveMessage(ReplyMessage, message.Timestamp.ToString().Substring(0, 9))).Start();
                     return true;
                 }
             }
@@ -334,37 +338,61 @@ namespace ImageDescriberV3
         }
 
         // general method to set userData and send reply message
-        public static async Task SetDataSendMessage(Activity message, Activity ReplyMessage, ConnectorClient connector)
+        public static async Task SetDataSendMessage(Activity message, Collection<Activity> replies, ConnectorClient connector)
         {
             userData.SetProperty<string>("PreviousQ", message.Text);
+            foreach (Activity reply in replies) await connector.Conversations.ReplyToActivityAsync(reply);
+            await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
+            foreach (Activity reply in replies) await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9))); // log outgoing message
             await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
-            await connector.Conversations.ReplyToActivityAsync(ReplyMessage);
-            new Thread(async () => await SaveMessage(ReplyMessage, message.Timestamp.ToString().Substring(0, 9))).Start(); // log outgoing message
+        }
+
+        // processes skype attachment url
+        public static async Task<byte[]> SkypeMessage(Activity activity, Uri url)
+        {
+            using (var connectorClient = new ConnectorClient(new Uri(activity.ServiceUrl)))
+            {
+                var token = await (connectorClient.Credentials as MicrosoftAppCredentials).GetTokenAsync();
+                using (var httpClient = new HttpClient())
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/octet-stream"));
+
+                    byte[] ret = await httpClient.GetByteArrayAsync(url);
+                    return ret;
+                }
+            }
         }
 
         // converts message text to URL for skype
-        public static string SkypeUrl(string text) // gets image url from skype message
+        public static Uri SkypeUrl(string text) // gets image url from skype message
         {
+            if (text == null) return null;
             string full = text.Substring(text.IndexOf('>'));
-            return full.Substring(1, full.Length - 5);
+            return new Uri(full.Substring(1, full.Length - 5));
+        }
+
+        // converts attachment url to a stream
+        public static async Task<Stream> AttachmentStream(Activity message, Uri url)
+        {
+            if (message.ChannelId.Equals("skype")) return new MemoryStream(await SkypeMessage(message, url));
+            else return new MemoryStream(await new WebClient().DownloadDataTaskAsync(url));
         }
 
         // returns description using CV API call
-        public static async Task<string> Describer(Activity message)
+        public static async Task<string> Describe(Activity message)
         {
             VisionServiceClient VisionServiceClient = new VisionServiceClient(KeyDes);
             string ret = "Please first attach an image or enter an image URL.";
             if (userData.GetProperty<int>("Attachment") == 11)
             {
-                WebRequest req = WebRequest.Create(userData.GetProperty<string>("ImageStream"));
-                WebResponse response = req.GetResponse();
-                Stream stream = response.GetResponseStream();
-                AnalysisResult analysisResult = await VisionServiceClient.DescribeAsync(stream, 1);
+                AnalysisResult analysisResult = await VisionServiceClient.DescribeAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")));
+
                 ret = analysisResult.Description.Captions[0].Text + ". Would you like to know anything else?";
             }
             else if (userData.GetProperty<int>("Attachment") == 22)
             {
-                Uri imageUri = new Uri(userData.GetProperty<string>("ImageUrl"));
+                Uri imageUri = userData.GetProperty<Uri>("ImageUrl");
                 AnalysisResult analysisResult = await VisionServiceClient.DescribeAsync(imageUri.AbsoluteUri, 1);
                 ret = analysisResult.Description.Captions[0].Text + ". Would you like to know anything else?";
             }
@@ -372,33 +400,30 @@ namespace ImageDescriberV3
         }
 
         // returns primary emotion using Emotion API call
-        public static async Task<string> Emotioner(Activity message)
+        public static async Task<string> Emotion(Activity message)
         {
             EmotionServiceClient emotionServiceClient = new EmotionServiceClient(KeyEmo);
             string ret = "Please first attach an image or enter an image URL.";
             if (userData.GetProperty<int>("Attachment") == 11)
             {
-                WebRequest req = WebRequest.Create(userData.GetProperty<string>("ImageStream"));
-                WebResponse response = req.GetResponse();
-                Stream stream = response.GetResponseStream();
-                Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(stream);
-                ret = CalcEmotion(emotionResult);
+                Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")));
+                ret = GetEmotion(emotionResult);
             }
             else if (userData.GetProperty<int>("Attachment") == 22)
             {
-                Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(userData.GetProperty<string>("ImageUrl"));
-                ret = CalcEmotion(emotionResult);
+                Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(userData.GetProperty<Uri>("ImageUrl").ToString());
+                ret = GetEmotion(emotionResult);
             }
             return ret;
         }
 
         // helper method that calculates primary emotion
-        public static string CalcEmotion(Emotion[] emotionResult)
+        public static string GetEmotion(Emotion[] emotionResult)
         {
             string ret = "There is no emotion detected. Would you like to know anything else?";
             float[] sums = new float[8];
             string[] emotions = { "anger", "contempt", "disgust", "fear", "happiness", "neutral", "sadness", "surpise" };
-            if (emotionResult.Length > 0)
+            if (emotionResult != null && emotionResult.Length > 0)
             {
                 foreach (Emotion emotion in emotionResult)
                 {
@@ -417,23 +442,20 @@ namespace ImageDescriberV3
         }
 
         // returns the percentage of a certain emotion using Emotion API call
-        public static async Task<string> Emotioner(Activity message, string which)
+        public static async Task<string> Emotion(Activity message, string which)
         {
             EmotionServiceClient emotionServiceClient = new EmotionServiceClient(KeyEmo);
             string ret = "Please first attach an image or enter an image URL.";
             if (null == ValidEmo(which)) return "Not a valid emotion. Valid emotions are anger, contempt, disgust, fear, happiness, neutral, sadness, and surprise. Please try again.";
             if (userData.GetProperty<int>("Attachment") == 11)
             {
-                WebRequest req = WebRequest.Create(userData.GetProperty<string>("ImageStream"));
-                WebResponse response = req.GetResponse();
-                Stream stream = response.GetResponseStream();
-                Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(stream);
-                ret = CalcEmotion(emotionResult, ValidEmo(which));
+                Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")));
+                ret = GetEmotion(emotionResult, ValidEmo(which));
             }
             else if (userData.GetProperty<int>("Attachment") == 22)
             {
-                Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(userData.GetProperty<string>("ImageUrl"));
-                ret = CalcEmotion(emotionResult, ValidEmo(which));
+                Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(userData.GetProperty<Uri>("ImageUrl").ToString());
+                ret = GetEmotion(emotionResult, ValidEmo(which));
             }
             return ret;
         }
@@ -441,29 +463,31 @@ namespace ImageDescriberV3
         // helper method that checks whether user input is one that is supported
         public static string ValidEmo(string which)
         {
+            if (which == null) return null;
             string ret = null;
-            string[,] allEmotions = new string[,] { { "anger", "angry", "angered" }, { "contempt", "contemptuous", "contempted" }, { "disgust", "disgusted", "disgustedness" }, { "fear", "scared", "scaredness" },
-                                                    {"happiness", "happy", "joy" }, {"neutral", "neutrality", "neutralness" }, {"sadness", "sad", "sorrow" }, {"surprise", "surprised", "surprisedness" } };
-            for (int i = 0; i < 8; i++)
+            string[][] allEmotions = { new string[] { "anger", "angry", "angered" }, new string[] { "contempt", "contemptuous", "contempted" }, new string[]{ "disgust", "disgusted", "disgustedness" }, new string[] { "fear", "scared", "scaredness" },
+                                                    new string[] {"happiness", "happy", "joy" }, new string[] {"neutral", "neutrality", "neutralness" }, new string[] {"sadness", "sad", "sorrow" }, new string[] {"surprise", "surprised", "surprisedness" } };
+            for (int i = 0; i < allEmotions.GetLength(0); i++)
             {
-                for (int k = 0; k < 3; k++)
+                for (int k = 0; k < allEmotions[i].Length; k++)
                 {
-                    if (which.Equals(allEmotions[i, k])) return allEmotions[i, 0];
+                    if (which.Equals(allEmotions[i][k])) return allEmotions[i][0];
                 }
             }
             return ret;
         }
 
         // helper method that calculates the percentage of a certain emotion
-        public static string CalcEmotion(Emotion[] emotionResult, string which)
+        public static string GetEmotion(Emotion[] emotionResult, string which)
         {
+            if (which == null) return null;
             string ret = "There is no emotion detected. Would you like to know anything else?";
             float val = 0.0F;
-            if (emotionResult.Length > 0)
+            if (emotionResult != null && emotionResult.Length > 0)
             {
                 foreach (Emotion emotion in emotionResult)
                 {
-                    switch (which.ToLower())
+                    switch (which.ToLower(CultureInfo.CurrentCulture))
                     {
                         case "anger":
                             val += emotion.Scores.Anger;
@@ -497,59 +521,53 @@ namespace ImageDescriberV3
         }
 
         // returns number of faces using Emotion API call
-        public static async Task<string> Facer(Activity message)
+        public static async Task<string> Face(Activity message)
         {
             EmotionServiceClient emotionServiceClient = new EmotionServiceClient(KeyEmo);
             string ret = "Please first attach an image or enter an image URL.";
             if (userData.GetProperty<int>("Attachment") == 11)
             {
-                WebRequest req = WebRequest.Create(userData.GetProperty<string>("ImageStream"));
-                WebResponse response = req.GetResponse();
-                Stream stream = response.GetResponseStream();
-                Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(stream);
+                Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")));
                 ret = "There are " + emotionResult.Length + " faces. Would you like to know anything else?";
             }
             else if (userData.GetProperty<int>("Attachment") == 22)
             {
-                Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(userData.GetProperty<string>("ImageUrl"));
+                Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(userData.GetProperty<Uri>("ImageUrl").ToString());
                 ret = "There are " + emotionResult.Length + " faces. Would you like to know anything else?";
             }
             return ret;
         }
 
         // returns age of people using CV API call
-        public static async Task<string> Ager(Activity message)
+        public static async Task<string> Age(Activity message)
         {
             VisionServiceClient VisionServiceClient = new VisionServiceClient(KeyDes);
             string ret = "Please first attach an image or enter an image URL.";
             if (userData.GetProperty<int>("Attachment") == 11)
             {
-                WebRequest req = WebRequest.Create(userData.GetProperty<string>("ImageStream"));
-                WebResponse response = req.GetResponse();
-                Stream stream = response.GetResponseStream();
                 VisualFeature[] visualFeatures = new VisualFeature[] { VisualFeature.Faces };
-                AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(stream, visualFeatures);
-                ret = CalcAge(analysisResult);
+                AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")), visualFeatures);
+                ret = GetAge(analysisResult);
             }
             else if (userData.GetProperty<int>("Attachment") == 22)
             {
-                Uri imageUri = new Uri(userData.GetProperty<string>("ImageUrl"));
+                Uri imageUri = userData.GetProperty<Uri>("ImageUrl");
                 VisualFeature[] visualFeatures = new VisualFeature[] { VisualFeature.Faces };
                 AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(imageUri.AbsoluteUri, visualFeatures);
-                ret = CalcAge(analysisResult);
+                ret = GetAge(analysisResult);
             }
             return ret;
         }
 
         // helper method that calculates ages
-        public static string CalcAge(AnalysisResult analysisResult)
+        public static string GetAge(AnalysisResult analysisResult)
         {
             string ret = "No person detected. Would you like to know anything else?";
-            if (analysisResult.Faces.Length == 1)
+            if (analysisResult != null && analysisResult.Faces.Length == 1)
             {
                 ret = "The person's age is " + analysisResult.Faces[0].Age + " years old. Would you like to know anything else?";
             }
-            else if (analysisResult.Faces.Length > 1)
+            else if (analysisResult != null && analysisResult.Faces.Length > 1)
             {
                 StringBuilder sb = new StringBuilder();
                 sb.Append("The ages from left to right are: ");
@@ -584,34 +602,31 @@ namespace ImageDescriberV3
             string ret = "Please first attach an image or enter an image URL.";
             if (userData.GetProperty<int>("Attachment") == 11)
             {
-                WebRequest req = WebRequest.Create(userData.GetProperty<string>("ImageStream"));
-                WebResponse response = req.GetResponse();
-                Stream stream = response.GetResponseStream();
-                AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(stream, null, new string[] { "celebrities" });
-                ret = CalcCeleb(analysisResult);
+                AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")), null, new string[] { "celebrities" });
+                ret = GetCeleb(analysisResult);
             }
             else if (userData.GetProperty<int>("Attachment") == 22)
             {
-                Uri imageUri = new Uri(userData.GetProperty<string>("ImageUrl"));
+                Uri imageUri = userData.GetProperty<Uri>("ImageUrl");
                 AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(imageUri.AbsoluteUri, null, new string[] { "celebrities" });
-                ret = CalcCeleb(analysisResult);
+                ret = GetCeleb(analysisResult);
             }
             return ret;
         }
 
         // helper method that calculates which celebrities are present
-        public static string CalcCeleb(AnalysisResult analysisResult)  // need to sort by lefts
+        public static string GetCeleb(AnalysisResult analysisResult)  // need to sort by lefts
         {
             string ret = "No celebrity detected. Would you like to know anything else?";
-            if (null != analysisResult.Categories && analysisResult.Categories.Length > 0 && analysisResult.Categories[0].Name.Contains("people") && analysisResult.Categories[0].Detail.ToString().Length > 25) // based on number of characters
+            if (analysisResult != null && null != analysisResult.Categories && analysisResult.Categories.Length > 0 && analysisResult.Categories[0].Name.Contains("people") && analysisResult.Categories[0].Detail.ToString().Length > 25) // based on number of characters
             {
                 string total = analysisResult.Categories[0].Detail.ToString();
                 int start = 0;
                 List<string> names = new List<string>();
-                while (total.IndexOf("name", start) != -1)
+                while (total.IndexOf("name", start, StringComparison.CurrentCulture) != -1)
                 {
-                    start = total.IndexOf("name", start) + 8;
-                    int len = total.IndexOf(",", start) - start - 1;
+                    start = total.IndexOf("name", start, StringComparison.CurrentCulture) + 8;
+                    int len = total.IndexOf(",", start, StringComparison.CurrentCulture) - start - 1;
                     names.Add(total.Substring(start, len));
                 }
                 if (names.Count == 1) ret = "This person is [" + names[0] + "](http://en.wikipedia.org/wiki/" + ReplaceSpace(names[0]) + "). Would you like to know anything else?";
@@ -639,6 +654,7 @@ namespace ImageDescriberV3
         // replaces spaces with underscores for wikipedia
         public static string ReplaceSpace(string input)
         {
+            if (input == null) return null;
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < input.Length; i++)
             {
@@ -655,32 +671,29 @@ namespace ImageDescriberV3
             string ret = "Please first attach an image or enter an image URL.";
             if (userData.GetProperty<int>("Attachment") == 11)
             {
-                WebRequest req = WebRequest.Create(userData.GetProperty<string>("ImageStream"));
-                WebResponse response = req.GetResponse();
-                Stream stream = response.GetResponseStream();
                 VisualFeature[] visualFeatures = new VisualFeature[] { VisualFeature.Faces };
-                AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(stream, visualFeatures);
-                ret = CalcGender(analysisResult);
+                AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")), visualFeatures);
+                ret = GetGender(analysisResult);
             }
             else if (userData.GetProperty<int>("Attachment") == 22)
             {
-                Uri imageUri = new Uri(userData.GetProperty<string>("ImageUrl"));
+                Uri imageUri = userData.GetProperty<Uri>("ImageUrl");
                 VisualFeature[] visualFeatures = new VisualFeature[] { VisualFeature.Faces };
                 AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(imageUri.AbsoluteUri, visualFeatures);
-                ret = CalcGender(analysisResult);
+                ret = GetGender(analysisResult);
             }
             return ret;
         }
 
         // helper method that calculates gender
-        public static string CalcGender(AnalysisResult analysisResult)
+        public static string GetGender(AnalysisResult analysisResult)
         {
             string ret = "No person detected. Would you like to know anything else?";
-            if (analysisResult.Faces.Length == 1)
+            if (analysisResult != null && analysisResult.Faces.Length == 1)
             {
                 ret = "The person's gender is " + analysisResult.Faces[0].Gender + ". Would you like to know anything else?";
             }
-            else if (analysisResult.Faces.Length > 1)
+            else if (analysisResult != null && analysisResult.Faces.Length > 1)
             {
                 StringBuilder sb = new StringBuilder().Append("The genders from left to right are: ");
                 List<string> genders = new List<string>();
@@ -708,29 +721,26 @@ namespace ImageDescriberV3
         }
 
         // returns OCR using CV API
-        public static async Task<string> Texter(Activity message)
+        public static async Task<string> Text(Activity message)
         {
             VisionServiceClient VisionServiceClient = new VisionServiceClient(KeyDes);
             string ret = "Please first attach an image or enter an image URL.";
             if (userData.GetProperty<int>("Attachment") == 11)
             {
-                WebRequest req = WebRequest.Create(userData.GetProperty<string>("ImageStream"));
-                WebResponse response = req.GetResponse();
-                Stream stream = response.GetResponseStream();
-                OcrResults analysisResult = await VisionServiceClient.RecognizeTextAsync(stream);
-                ret = CalcText(analysisResult);
+                OcrResults analysisResult = await VisionServiceClient.RecognizeTextAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")));
+                ret = GetText(analysisResult);
             }
             else if (userData.GetProperty<int>("Attachment") == 22)
             {
-                Uri imageUri = new Uri(userData.GetProperty<string>("ImageUrl"));
+                Uri imageUri = userData.GetProperty<Uri>("ImageUrl");
                 OcrResults analysisResult = await VisionServiceClient.RecognizeTextAsync(imageUri.AbsoluteUri);
-                ret = CalcText(analysisResult);
+                ret = GetText(analysisResult);
             }
             return ret;
         }
 
         // helper method that calculates the text
-        public static string CalcText(OcrResults analysisResult)
+        public static string GetText(OcrResults analysisResult)
         {
             string ret = "No text detected. Would you like to know anything else?";
             if (analysisResult != null && analysisResult.Regions != null && analysisResult.Regions.Length > 0)
@@ -788,26 +798,28 @@ namespace ImageDescriberV3
             {
                 for (int k = 0; k < propertiesMC.Length; k++)
                 {
-                    if (propertiesM[i].Name.ToLower().Equals(propertiesMC[k].Name.ToLower()))
+                    if (propertiesM[i].Name.ToLower(CultureInfo.CurrentCulture).Equals(propertiesMC[k].Name.ToLower(CultureInfo.CurrentCulture)))
                     {
                         var value = propertiesM[i].GetValue(message);
                         propertiesMC[k].SetValue(output, value);
                     }
                 }
             }
-            if (userData.GetProperty<string>("Annotation") != null) output.userData.Annotation = userData.GetProperty<string>("Annotation");
-            if (userData.GetProperty<int>("Attachment") > 10) output.userData.Attachment = userData.GetProperty<int>("Attachment");
-            if (userData.GetProperty<string>("ImageStream") != null) output.userData.ImageStream = userData.GetProperty<string>("ImageStream");
-            if (userData.GetProperty<string>("ImageUrl") != null) output.userData.ImageUrl = userData.GetProperty<string>("ImageUrl");
-            if (userData.GetProperty<string>("PreviousQ") != null) output.userData.PreviousQ = userData.GetProperty<string>("PreviousQ");
-
+            output.UserData = new UserData();
+            if (userData != null)
+            {
+                if (userData.GetProperty<string>("Annotation") != null) output.UserData.Annotation = userData.GetProperty<string>("Annotation");
+                if (userData.GetProperty<int>("Attachment") > 10) output.UserData.Attachment = userData.GetProperty<int>("Attachment");
+                if (userData.GetProperty<Uri>("ImageUrl") != null) output.UserData.ImageUrl = userData.GetProperty<Uri>("ImageUrl");
+                if (userData.GetProperty<string>("PreviousQ") != null) output.UserData.PreviousQ = userData.GetProperty<string>("PreviousQ");
+            }
             return JsonConvert.SerializeObject(output, Formatting.Indented);
         }
 
         // returns translation of text within a message to a specified language using Microsoft Translator API call
         public static async Task<string> Translator(Activity message, string to)
         {
-            string text = await Texter(message);
+            string text = await Text(message);
             string ret = text;
             if (ret.Contains("No text detected") || ret.Contains("Please first attach")) return ret;
             else
@@ -836,6 +848,7 @@ namespace ImageDescriberV3
         // returns an activity with a button to confirm accuracy of caption
         public static Activity ConfirmButton(Activity message)
         {
+            if (message == null) return null;
             confirm = true;
             if (message.ChannelId.Equals("facebook")) return FacebookButton(message);
             return CreateButton(message);
@@ -844,6 +857,7 @@ namespace ImageDescriberV3
         // helper method to create accuracy confirming button
         public static Activity CreateButton(Activity message) // works for skype (POSTBACK buttons not yet supported), emulator 
         {
+            if (message == null) return null;
             Activity replyToConversation = message.CreateReply("Is this correct?");
             replyToConversation.Recipient = message.From;
             replyToConversation.Type = "message";
@@ -880,15 +894,18 @@ namespace ImageDescriberV3
         // helper method to create accuracy confirming button
         public static Activity FacebookButton(Activity input) // works for facebook
         {
+            if (input == null) return null;
             Activity reply = input.CreateReply("");
             FacebookMessage message = new FacebookMessage();
-            message.notification_type = "REGULAR";
-            message.attachment.type = "template";
-            message.attachment.payload.template_type = "button";
-            message.attachment.payload.text = "Is this correct?";
-            message.attachment.payload.buttons = new List<Button>();
-            message.attachment.payload.buttons.Add(new Button("postback", "postbackyes", "Yes")); // correct caption
-            message.attachment.payload.buttons.Add(new Button("postback", "postbackno", "No")); // incorrect caption
+            message.NotificationType = "REGULAR";
+            message.Attachment = new Attachments();
+            message.Attachment.Type = "template";
+            message.Attachment.Payload = new Payload();
+            message.Attachment.Payload.TemplateType = "button";
+            message.Attachment.Payload.Text = "Is this correct?";
+            message.Attachment.Payload.Buttons = new Collection<Button>();
+            message.Attachment.Payload.Buttons.Add(new Button("postback", "postbackyes", "Yes")); // correct caption
+            message.Attachment.Payload.Buttons.Add(new Button("postback", "postbackno", "No")); // incorrect caption
             reply.ChannelData = message;
             return reply;
         }
@@ -899,16 +916,13 @@ namespace ImageDescriberV3
             VisionServiceClient VisionServiceClient = new VisionServiceClient(KeyDes);
             if (userData.GetProperty<int>("Attachment") == 11)
             {
-                WebRequest req = WebRequest.Create(userData.GetProperty<string>("ImageStream"));
-                WebResponse response = req.GetResponse();
-                Stream stream = response.GetResponseStream();
-                AnalysisResult analysisResult = await VisionServiceClient.DescribeAsync(stream, 1);
+                AnalysisResult analysisResult = await VisionServiceClient.DescribeAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")), 1);
                 if (message.ChannelId.Equals("facebook")) return await FacebookCarousel(message, analysisResult.Description.Captions[0].Text);
                 else return await CreateCarousel(message, analysisResult.Description.Captions[0].Text);
             }
             else if (userData.GetProperty<int>("Attachment") == 22)
             {
-                Uri imageUri = new Uri(userData.GetProperty<string>("ImageUrl"));
+                Uri imageUri = userData.GetProperty<Uri>("ImageUrl");
                 AnalysisResult analysisResult = await VisionServiceClient.DescribeAsync(imageUri.AbsoluteUri, 1);
                 if (message.ChannelId.Equals("facebook")) return await FacebookCarousel(message, analysisResult.Description.Captions[0].Text);
                 else return await CreateCarousel(message, analysisResult.Description.Captions[0].Text);
@@ -967,12 +981,14 @@ namespace ImageDescriberV3
         {
             Activity reply = input.CreateReply("");
             FacebookMessage message = new FacebookMessage();
-            message.notification_type = "REGULAR";
-            message.attachment.type = "template";
-            message.attachment.payload.template_type = "generic";
-            message.attachment.payload.elements = new List<Element>();
+            message.NotificationType = "REGULAR";
+            message.Attachment = new Attachments();
+            message.Attachment.Type = "template";
+            message.Attachment.Payload = new Payload();
+            message.Attachment.Payload.TemplateType = "generic";
+            message.Attachment.Payload.Elements = new Collection<Element>();
             JObject json = await SimilarPictures(query);
-            for (int i = 0; i < 5; i++) message.attachment.payload.elements.Add(new Element((json["value"][i]["name"]).ToString(), (json["value"][i]["contentUrl"]).ToString()/*, (json["value"][i]["hostPageUrl"]).ToString()*/));
+            for (int i = 0; i < 5; i++) message.Attachment.Payload.Elements.Add(new Element((json["value"][i]["name"]).ToString(), (new Uri((json["value"][i]["contentUrl"]).ToString()))));
             reply.ChannelData = message;
             return reply;
         }

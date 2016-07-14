@@ -1,53 +1,76 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+using System.Collections.ObjectModel;
 
 namespace ImageDescriberV3
 {
     // class for representing Facebook rich media attachments
     public class FacebookMessage
     {
-        public string notification_type;
-        public Attachments attachment = new Attachments();
+        [JsonProperty(PropertyName = "notification_type")]
+        public string NotificationType { get; set; }
+
+        [JsonProperty(PropertyName = "attachment")]
+        public Attachments Attachment { get; set; }
     }
+
     public class Attachments
     {
-        public string type;
-        public Payload payload = new Payload();
+        [JsonProperty(PropertyName = "type")]
+        public string Type { get; set; }
+
+        [JsonProperty(PropertyName = "payload")]
+        public Payload Payload { get; set; }
     }
     public class Payload
     {
-        public string template_type;
-        public string text;
-        public List<Button> buttons;
-        public List<Element> elements;
+        [JsonProperty(PropertyName = "template_type")]
+        public string TemplateType { get; set; }
+
+        [JsonProperty(PropertyName = "text")]
+        public string Text { get; set; }
+
+        [JsonProperty(PropertyName = "buttons")]
+        public Collection<Button> Buttons { get; set; }
+
+        [JsonProperty(PropertyName = "elements")]
+        public Collection<Element> Elements { get; set; }
     }
     public class Element
     {
-        public Element (string title, string image_url)
+        public Element(string title, Uri imageUrl)
         {
-            this.title = title;
-            this.image_url = image_url;
+            this.Title = title;
+            this.ImageUrl = imageUrl;
         }
-        public string title;
-        public string image_url;
-        public string item_url;
-        public string subtitle;
-        public List<Button> buttons;
+        [JsonProperty(PropertyName = "title")]
+        public string Title { get; set; }
+        [JsonProperty(PropertyName = "image_url")]
+        public Uri ImageUrl { get; set; }
+        [JsonProperty(PropertyName = "item_url")]
+        public Uri ItemUrl { get; set; }
+        [JsonProperty(PropertyName = "subtitle")]
+        public string Subtitle { get; set; }
+        [JsonProperty(PropertyName = "buttons")]
+        public Collection<Button> Buttons { get; set; }
     }
     public class Button
     {
-        public Button (string type, string payload, string title)
+        public Button(string type, string payload, string title)
         {
-            this.type = type;
-            this.payload = payload;
-            this.title = title;
+            this.Type = type;
+            this.Payload = payload;
+            this.Title = title;
         }
-        public string type;
-        public string url;
-        public string title;
-        public string payload;
+        [JsonProperty(PropertyName = "type")]
+        public string Type { get; set; }
+        [JsonProperty(PropertyName = "url")]
+        public Uri Url { get; set; }
+        [JsonProperty(PropertyName = "title")]
+        public string Title { get; set; }
+        [JsonProperty(PropertyName = "payload")]
+        public string Payload { get; set; }
     }
 
 }

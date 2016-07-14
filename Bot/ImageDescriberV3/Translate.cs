@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading;
 using System.Runtime.Serialization.Json;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace ImageDescriberV3
 {
@@ -71,7 +72,7 @@ namespace ImageDescriberV3
                 List<string> languageNames = (List<string>)dcs.ReadObject(stream);
                 for (int i = 0; i < languageNames.Count; i++)
                 {
-                    if (languageNames[i].ToLower().Contains(to.ToLower()) || codes[i].ToLower().Equals(to.ToLower())) return codes[i];
+                    if (languageNames[i].ToLower(CultureInfo.CurrentCulture).Contains(to.ToLower(CultureInfo.CurrentCulture)) || codes[i].ToLower(CultureInfo.CurrentCulture).Equals(to.ToLower(CultureInfo.CurrentCulture))) return codes[i];
                 }
             }
             return null;
@@ -96,9 +97,7 @@ namespace ImageDescriberV3
         private string clientSecret;
         private string request;
         private AdmAccessToken token;
-        private Timer accessTokenRenewer;
         //Access token expires every 10 minutes. Renew it every 9 minutes only.
-        private const int RefreshTokenDuration = 9;
 
         public AdmAuthentication(string clientId, string clientSecret)
         {
@@ -108,23 +107,10 @@ namespace ImageDescriberV3
             this.request = string.Format("grant_type=client_credentials&client_id={0}&client_secret={1}&scope=http://api.microsofttranslator.com", WebUtility.UrlEncode(clientId), WebUtility.UrlEncode(clientSecret));
             this.token = HttpPost(DatamarketAccessUri, this.request);
             //renew the token every specified minutes
-            accessTokenRenewer = new Timer(new TimerCallback(OnTokenExpiredCallback), this, TimeSpan.FromMinutes(RefreshTokenDuration), TimeSpan.FromMilliseconds(-1));
         }
         public AdmAccessToken GetAccessToken()
         {
             return this.token;
-        }
-        private void RenewAccessToken()
-        {
-            AdmAccessToken newAccessToken = HttpPost(DatamarketAccessUri, this.request);
-            //swap the new token with old one
-            //Note: the swap is thread unsafe
-            this.token = newAccessToken;
-            Console.WriteLine(string.Format("Renewed token for user: {0} is: {1}", this.clientId, this.token.access_token));
-        }
-        private void OnTokenExpiredCallback(object stateInfo)
-        {
-            RenewAccessToken();
         }
 
         private AdmAccessToken HttpPost(string DatamarketAccessUri, string requestDetails)
@@ -143,8 +129,7 @@ namespace ImageDescriberV3
             {
                 DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(AdmAccessToken));
                 //Get deserialized object from JSON stream
-                AdmAccessToken token = (AdmAccessToken)serializer.ReadObject(webResponse.GetResponseStream());
-                return token;
+                return (AdmAccessToken)serializer.ReadObject(webResponse.GetResponseStream());
             }
         }
 

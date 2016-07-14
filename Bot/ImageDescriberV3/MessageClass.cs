@@ -1,12 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using Microsoft.Bot.Connector;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -47,7 +41,7 @@ namespace ImageDescriberV3
 
         [JsonProperty(PropertyName = "locale")]
         public string Locale { get; set; }
- 
+
         [JsonProperty(PropertyName = "membersAdded")]
         public IList<ChannelAccount> MembersAdded { get; set; }
 
@@ -85,17 +79,15 @@ namespace ImageDescriberV3
         public string Type { get; set; }
 
         [JsonProperty(PropertyName = "userData")]
-        public UserData userData = new UserData();
+        public UserData UserData { get; set; }
 
     }
 
     public class UserData
     {
-        [JsonProperty(PropertyName = "imageStream")]
-        public string ImageStream { get; set; }
 
         [JsonProperty(PropertyName = "imageUrl")]
-        public string ImageUrl { get; set; }
+        public Uri ImageUrl { get; set; }
 
         [JsonProperty(PropertyName = "attachment")]
         public int Attachment { get; set; }
