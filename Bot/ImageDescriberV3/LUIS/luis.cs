@@ -6,26 +6,27 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ImageDescriber
+namespace ImageDescriberV3
 {
-
-
-    public class LUISClient
+    // LUIS framework class
+    public sealed class LuisClient
     {
-        public static async Task<ImageLUIS> ParseUserInput(string strInput)
+        private LuisClient() { }
+
+        public static async Task<ImageLuis> ParseUserInput(string input)
         {
-            string strRet = string.Empty;
-            string strEscaped = Uri.EscapeDataString(strInput);
+            string ret = string.Empty;
+            string escaped = Uri.EscapeDataString(input);
 
             using (var client = new HttpClient())
             {
-                string uri = "https://api.projectoxford.ai/luis/v1/application?id=3284f292-e3e2-40ed-bc77-5690c9c754d6&subscription-key=2a42a9d62d854acc9ea73d82b0c6b4a6&q=" + strEscaped;
+                string uri = "https://api.projectoxford.ai/luis/v1/application?id=3284f292-e3e2-40ed-bc77-5690c9c754d6&subscription-key=fe2ab8e14ebd4ee998853eee4ace4be2&q=" + escaped;
                 HttpResponseMessage msg = await client.GetAsync(uri);
 
                 if (msg.IsSuccessStatusCode)
                 {
                     var jsonResponse = await msg.Content.ReadAsStringAsync();
-                    var _Data = JsonConvert.DeserializeObject<ImageLUIS>(jsonResponse);
+                    var _Data = JsonConvert.DeserializeObject<ImageLuis>(jsonResponse);
                     return _Data;
                 }
             }
@@ -33,7 +34,7 @@ namespace ImageDescriber
         }
     }
 
-    public class ImageLUIS
+    public class ImageLuis
     {
         public string query { get; set; }
         public lIntent[] intents { get; set; }

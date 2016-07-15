@@ -5,6 +5,12 @@
   "culture": "en-us",
   "intents": [
     {
+      "name": "Similar"
+    },
+    {
+      "name": "Annotate"
+    },
+    {
       "name": "Age"
     },
     {
@@ -41,6 +47,9 @@
     },
     {
       "name": "WhichEmotion"
+    },
+    {
+      "name": "Annotation"
     }
   ],
   "composites": [],
@@ -523,7 +532,7 @@
     },
     {
       "text": "who are in the picture",
-      "intent": "Describe",
+      "intent": "Celebrity",
       "entities": []
     },
     {
@@ -1621,6 +1630,508 @@
           "endPos": 0
         }
       ]
+    },
+    {
+      "text": "string",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "what color is it",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "how many orangutans",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "what are the names of the celebrities from l to r",
+      "intent": "Celebrity",
+      "entities": []
+    },
+    {
+      "text": "what is 2 times 4",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "what is the time",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "what color is that",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "i think that it is really 4 faces",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 6,
+          "endPos": 6
+        },
+        {
+          "entity": "Annotation",
+          "startPos": 7,
+          "endPos": 7
+        }
+      ]
+    },
+    {
+      "text": "it really is a blue dog",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 4,
+          "endPos": 4
+        },
+        {
+          "entity": "Annotation",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "it is actually a plate on the floor",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 4,
+          "endPos": 4
+        },
+        {
+          "entity": "Annotation",
+          "startPos": 5,
+          "endPos": 5
+        },
+        {
+          "entity": "Annotation",
+          "startPos": 6,
+          "endPos": 6
+        },
+        {
+          "entity": "Annotation",
+          "startPos": 7,
+          "endPos": 7
+        }
+      ]
+    },
+    {
+      "text": "it really is a green rabbit",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 4,
+          "endPos": 4
+        },
+        {
+          "entity": "Annotation",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "i think it is a cookie on the wall",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 5,
+          "endPos": 5
+        },
+        {
+          "entity": "Annotation",
+          "startPos": 6,
+          "endPos": 6
+        },
+        {
+          "entity": "Annotation",
+          "startPos": 7,
+          "endPos": 7
+        },
+        {
+          "entity": "Annotation",
+          "startPos": 8,
+          "endPos": 8
+        }
+      ]
+    },
+    {
+      "text": "i think it is a black cat",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 5,
+          "endPos": 5
+        },
+        {
+          "entity": "Annotation",
+          "startPos": 6,
+          "endPos": 6
+        }
+      ]
+    },
+    {
+      "text": "it is actually a group of people",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 4,
+          "endPos": 4
+        },
+        {
+          "entity": "Annotation",
+          "startPos": 5,
+          "endPos": 5
+        },
+        {
+          "entity": "Annotation",
+          "startPos": 6,
+          "endPos": 6
+        }
+      ]
+    },
+    {
+      "text": "it is actually a red horse",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 4,
+          "endPos": 4
+        },
+        {
+          "entity": "Annotation",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "it is really a can of soda",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 4,
+          "endPos": 6
+        }
+      ]
+    },
+    {
+      "text": "it is actually a black dog",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 4,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "it is actually a piece of gum",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 4,
+          "endPos": 6
+        }
+      ]
+    },
+    {
+      "text": "it is really a group of people posing for a picture",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 4,
+          "endPos": 10
+        }
+      ]
+    },
+    {
+      "text": "it is actually a trash can",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 4,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "it is actually a desktop monitor",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 4,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "it is really a phone on a table",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 4,
+          "endPos": 7
+        }
+      ]
+    },
+    {
+      "text": "it is really a pair of sunglasses",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 4,
+          "endPos": 6
+        }
+      ]
+    },
+    {
+      "text": "why is the sky blue",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "what is the meaning of life",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "how many are there",
+      "intent": "Face",
+      "entities": []
+    },
+    {
+      "text": "why are circles round",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "what is todays date",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "hi",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "hello/",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "hey",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "whats up",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "yo",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "how many elephants are there",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "no. it is actually a carton of eggs",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 6,
+          "endPos": 8
+        }
+      ]
+    },
+    {
+      "text": "it is really a basket of flowers",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 4,
+          "endPos": 6
+        }
+      ]
+    },
+    {
+      "text": "thats wrong it is a flag",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "correction - it is a flower",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 5,
+          "endPos": 5
+        }
+      ]
+    },
+    {
+      "text": "it is actually a stack of papers",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 4,
+          "endPos": 6
+        }
+      ]
+    },
+    {
+      "text": "no it is bill gates",
+      "intent": "Annotate",
+      "entities": [
+        {
+          "entity": "Annotation",
+          "startPos": 3,
+          "endPos": 4
+        }
+      ]
+    },
+    {
+      "text": "what is cow",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "full functionality",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "all commands",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "user guide",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "all methods",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what is the full functionality",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what are all of the possible questions",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what will you reply to",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what can you tell me the answer to",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what is everything i can ask",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what are all of the methods",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what can be asked",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "how many potatoes are there",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "how many cans",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "what are pictures similar to this",
+      "intent": "Similar",
+      "entities": []
+    },
+    {
+      "text": "show me pictures like this",
+      "intent": "Similar",
+      "entities": []
+    },
+    {
+      "text": "show me more pictures of him",
+      "intent": "Similar",
+      "entities": []
+    },
+    {
+      "text": "show me more photos like this",
+      "intent": "Similar",
+      "entities": []
+    },
+    {
+      "text": "show me other photos like this",
+      "intent": "Similar",
+      "entities": []
+    },
+    {
+      "text": "show me more images of this",
+      "intent": "Similar",
+      "entities": []
+    },
+    {
+      "text": "show me other pictures like this one",
+      "intent": "Similar",
+      "entities": []
     }
   ]
 }
