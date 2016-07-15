@@ -20,6 +20,7 @@ import CoreImage
 import MobileCoreServices
 
 
+
 class ImageCaptureViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIGestureRecognizerDelegate, MenuViewControllerDelegate, UIPopoverPresentationControllerDelegate {
     
     var toggleButton = UIButton()
@@ -69,7 +70,6 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
     //State Variables - Which API to call & details about it
     var camState = 0
     var camDetails = ":-)"
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -199,7 +199,11 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
     //adds the translation detail view controller to the screen
     func showTranslationDetails(sender: UIButton) {
         
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        #if TENSORFLOW
+            let storyboard = UIStoryboard(name: "Tensorflow", bundle: nil)
+        #else
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        #endif
         let controller = storyboard.instantiateViewControllerWithIdentifier("tdc") as! TranslationDetailViewController
         
         controller.preferredContentSize = CGSizeMake(300, 150)
@@ -386,7 +390,16 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
     
     //displays the language changing menu
     func showMenu(sender: AnyObject) {
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        
+        var storyboard = UIStoryboard()
+        
+        //checks to see if the target has a key set for tensorflow. Sets correct storyboard
+        #if TENSORFLOW
+            storyboard = UIStoryboard(name: "Tensorflow", bundle: nil)
+        #else
+            storyboard = UIStoryboard(name: "Main", bundle: nil)
+        #endif
+    
         let controller = storyboard.instantiateViewControllerWithIdentifier("menu") as! MenuViewController
         
         controller.camState = self.camState

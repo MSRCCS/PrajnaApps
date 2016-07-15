@@ -4,6 +4,11 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>ViewFinder copy.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
 		<key>ViewFinder.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -12,6 +17,11 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>2C72D95A1D2EFD8D00C3D707</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>2CE441061D18A599009A7DC1</key>
 		<dict>
 			<key>primary</key>

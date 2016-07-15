@@ -3,7 +3,7 @@
 //  ViewFinder
 //
 //  Created by Jacob Kohn on 7/5/16.
-//  Copyright © 2016 Jacob Kohn. All rights reserved.
+//  Copyright © 2016 Microsoft. All rights reserved.
 //
 
 import Foundation
