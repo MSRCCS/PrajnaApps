@@ -1,5 +1,5 @@
 //
-//  SteadyViewFinderViewController.swift
+//  TensorflowViewController.swift
 //  ViewFinder
 //
 //  Created by Jacob Kohn on 6/30/16.
@@ -7,12 +7,7 @@
 //
 
 /*
- * This is the current ViewFinder ViewController
- * In this ViewFinder, the user must steady the camera 
- * for a given period of time for it to be able to
- * recognize what it sees in the image.
- 
- 
+ * This is the ViewFinder View Controller with Tensorflow Incorporated.
 */
 
 import Foundation
@@ -22,10 +17,8 @@ import CoreMotion
 import AVFoundation
 
 
-class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDelegate, UIPopoverPresentationControllerDelegate, MenuViewControllerDelegate {
-    
-    var trackingImage = UIImage()
-    
+class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, UIPopoverPresentationControllerDelegate, TensorflowMenuDelegate {
+
     var toggleButton = UIButton()
     var switchButton = UIButton()
     
@@ -39,7 +32,7 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
     let captionLabel = UILabel()
     let dismissButton = UIButton()
     var textBoxes = [TranslateWordBox]()
-    var faces = [SteadyViewFinderViewController.face()]
+    var faces = [TensorflowViewController.face()]
     //var faceFeatures
     var totalFacesDetected = 1          // starts at one so doesn't get initializer. Sets IDs for the faces
     
@@ -73,15 +66,12 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
     var textDetector: CIDetector?
     var textDetectorOptions: [String : AnyObject]?
     var textContext: CIContext?
-    var hasText = false
-    var callOcrApi = false
     var translating = false
     
     let detailButton = UIButton()
     var translationDetails = [Dictionary<String, String>()]
     let closeButton = UIButton()
     let translateActivity = UIActivityIndicatorView()
-    
     
     //Motion
     let motionManager = CMMotionManager()
@@ -90,10 +80,18 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
     var steady = false
 
     //State Variables - Which API to call & details about it
-    var camState = 0
-    var camDetails = ":-)"
+    var camState = 2
+    var camDetails = "tf"
     var menuButton = UIButton()
     
+    //Tensorflow
+    var labels = [ObjectCaptionLabel]()
+    var loaded = false
+    var numLabels = 0
+    let debugImageView = UIImageView()
+    let debugButton = UIButton()
+    let dismissDebugImageButton = UIButton()
+    var currentImage: CGImage!;
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -109,6 +107,8 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         self.setupAVCapture()
         
         setUpMotionDetector()
+        
+        setUpTensorflow()
     }
     
     
@@ -133,6 +133,164 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         }
     }
     
+    ///////////////////// TENSORFLOW ////////////////////////////
+    
+    //loads neural network for tensorflow and adds labels to the view
+    func setUpTensorflow() {
+        var loadedModel = false
+        var loadedlabels = false
+        
+        if(self.LoadModel("tensorflow_inception_graph", second: "pb")) {
+            print("Loaded Model")
+            loadedModel = true
+        } else {
+            print("Failed to load Model")
+        }
+        
+        if(self.LoadLabel("imagenet_comp_graph_label_strings", second: "txt")) {
+            print("Loaded Labels")
+            loadedlabels = true
+        } else {
+            print("Failed to load Labels")
+        }
+        
+        if(loadedModel && loadedlabels) {
+            self.loaded = true
+        }
+        
+        for i in 0..<5 {
+            let ocl = ObjectCaptionLabel(pos: i, caption: "", value: 0.0)
+            labels.append(ocl)
+        }
+    }
+    
+    //displays/removes the object detection labels from tensorflow
+    func displayLabels(dictionary: NSMutableDictionary) {
+        var count = 0
+        var remove = true
+        
+        var values = dictionary.allValues as! [Float]
+        values.sortInPlace()
+        values = values.reverse()
+        
+        for value in values {
+            for d in dictionary {
+                if(d.value as! Float == value) {
+                    //setValue(value * 100.0, forKey: prediction.key as! String)
+                    
+                    if(count < 5) {
+                        self.labels[count].captionLabel.text = String(d.key)
+                        
+                        var valueString = String(value * 100.0)
+                        valueString = valueString.substringToIndex(valueString.startIndex.advancedBy(4))
+                        
+                        self.labels[count].valueLabel.text = String(valueString)
+                        
+                        if(count >= numLabels - 1) {
+                            self.view.addSubview(self.labels[count])
+                            remove = false
+                        }
+                        count += 1
+                    }
+                    
+                    break
+                }
+            }
+        }
+        
+        if(remove) {
+            for i in count..<numLabels {
+                self.labels[i].removeFromSuperview()
+            }
+        }
+        numLabels = count
+        
+        if(camState != 2) {
+            for label in labels {
+                label.removeFromSuperview()
+            }
+            numLabels = 0
+        }
+    }
+    
+    //samples and displays the image that is running through the tensorflow neural network
+    func debugImage(sender: UIButton) {
+        
+        stopCamera()
+        self.view.addSubview(debugImageView)
+        self.view.addSubview(dismissDebugImageButton)
+        
+        //samples image like Tensorflow does
+        
+        let inputCGImage = currentImage
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let width = CGImageGetWidth(inputCGImage)
+        let height = CGImageGetHeight(inputCGImage)
+        let bytesPerPixel = 4
+        let bitsPerComponent = 8
+        let bytesPerRow = bytesPerPixel * width
+        let bitmapInfo = RGBA32.bitmapInfo
+
+        let context = CGBitmapContextCreate(nil, width, height, bitsPerComponent, bytesPerRow, colorSpace, bitmapInfo)
+        
+        CGContextDrawImage(context, CGRectMake(0, 0, CGFloat(width), CGFloat(height)), inputCGImage)
+
+        let resizedContext = CGBitmapContextCreate(nil, 224, 224, bitsPerComponent, 224 * bytesPerPixel, colorSpace, bitmapInfo)
+
+        let ogPixelBuffer = UnsafeMutablePointer<RGBA32>(CGBitmapContextGetData(context))
+        let outPixelBuffer = UnsafeMutablePointer<RGBA32>(CGBitmapContextGetData(resizedContext))
+        
+        for y in 0 ..< 224 {
+            for x in 0 ..< 224 {
+                let in_x = (y * width) / 224
+                let in_y = (x * height) / 224
+                let ogPixel = ogPixelBuffer + ((in_y * width) + (in_x))
+                let outPixel = outPixelBuffer + 224 + (y * 224 - x)
+                let color = RGBA32(red: (ogPixel.memory.red()), green: (ogPixel.memory.green()), blue: (ogPixel.memory.blue()), alpha: 255)
+                outPixel.memory = color
+            }
+        }
+
+        let outputCGImage = CGBitmapContextCreateImage(resizedContext)
+        let outImage = UIImage(CGImage: outputCGImage!)
+        
+        debugImageView.image = outImage
+        //set image for image view
+        //show labels
+    }
+    
+    struct RGBA32 {
+        var color: UInt32
+        
+        func red() -> UInt8 {
+            return UInt8((color >> 24) & 255)
+        }
+        
+        func green() -> UInt8 {
+            return UInt8((color >> 16) & 255)
+        }
+        
+        func blue() -> UInt8 {
+            return UInt8((color >> 8) & 255)
+        }
+        
+        func alpha() -> UInt8 {
+            return UInt8((color >> 0) & 255)
+        }
+        
+        init(red: UInt8, green: UInt8, blue: UInt8, alpha: UInt8) {
+            color = (UInt32(red) << 24) | (UInt32(green) << 16) | (UInt32(blue) << 8) | (UInt32(alpha) << 0)
+        }
+        
+        static let bitmapInfo = CGImageAlphaInfo.PremultipliedLast.rawValue | CGBitmapInfo.ByteOrder32Little.rawValue
+    }
+    
+    func doneDebugging(sender: AnyObject) {
+        debugImageView.removeFromSuperview()
+        dismissDebugImageButton.removeFromSuperview()
+        restartCamera()
+    }
+    
     ///////////////////// STRUCTS ///////////////////////////////
     
     //Stores the information about a face
@@ -149,7 +307,6 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
             self.caption = caption
             self.id = id
             self.inFrame = true
-            
         }
         
         init() {
@@ -159,7 +316,7 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         mutating func update(frame: CGRect) {
             self.box.outline.frame = frame
             self.box.caption.frame = CGRect(x: frame.minX, y: frame.maxY, width: frame.width, height: 24)
-            self.inFrame = true
+            inFrame = true
         }
         
         mutating func compare(frame: CGRect) -> Bool {
@@ -216,8 +373,7 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         })
     }
     
-    func outputAccelerationData(acceleration:CMAcceleration)
-    {
+    func outputAccelerationData(acceleration:CMAcceleration) {
         
         if(acceleration.x < motionThreshold && acceleration.y < motionThreshold && acceleration.z < motionThreshold) {
             numSteady += 1
@@ -232,8 +388,7 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         
     }
     
-    func outputRotationData(rotation:CMRotationRate)
-    {
+    func outputRotationData(rotation:CMRotationRate) {
         if(rotation.x < motionThreshold && rotation.y < motionThreshold && rotation.z < motionThreshold) {
             numSteady += 1
             if(!steady && (numSteady == 10 || numSteady == 11)) {
@@ -253,10 +408,9 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         return .None
     }
     
-    
     func showTranslations(sender: AnyObject) {
         
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let storyboard = UIStoryboard(name: "Tensorflow", bundle: nil)
         let controller = storyboard.instantiateViewControllerWithIdentifier("ttvc") as! TranslationTableViewController
         
         controller.preferredContentSize = CGSizeMake(300, 225)
@@ -350,6 +504,7 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
                 for region in regions {
                     if let lines = region["lines"] as? NSArray {
                         for line in lines {
+                            print("BoundingBox: \(line["boundingBox"])")
                             var str = ""
                             
                             if let words = line["words"] as? NSArray {
@@ -393,24 +548,24 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
             }
         }
     }
+    
     ///////////////////// CONFIGURE ACTIONS /////////////////////
     
     //adds the double tap to the view
     func configureTapActions() {
         doubleTap.numberOfTapsRequired = 2
-        doubleTap.addTarget(self, action: #selector(SteadyViewFinderViewController.toggle(_:)))
+        doubleTap.addTarget(self, action: #selector(TensorflowViewController.toggle(_:)))
         
-        let tap = UISwipeGestureRecognizer(target: self, action: #selector(SteadyViewFinderViewController.takeStill(_:)))
+        let tap = UISwipeGestureRecognizer(target: self, action: #selector(TensorflowViewController.takeStill(_:)))
         tap.delegate = self
         tap.direction = .Left
         self.view.addGestureRecognizer(tap)
     }
     
-    
     //adds attributes to the buttons and adds some of them to the view
     func addButtons() {
         toggleButton.frame = CGRectMake(0, 20, 45, 25)
-        toggleButton.addTarget(self, action: #selector(SteadyViewFinderViewController.toggle(_:)), forControlEvents: UIControlEvents.TouchUpInside)
+        toggleButton.addTarget(self, action: #selector(TensorflowViewController.toggle(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         let flipImage = UIImage(named:"FlipCameraButton.png")?.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate)
         toggleButton.tintColor = UIColor.whiteColor()
         toggleButton.setImage(flipImage, forState: .Normal)
@@ -419,24 +574,24 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         
         switchButton.frame = CGRect(x: self.view.frame.size.width - 80, y: self.view.frame.size.height - 60, width: 80, height: 60)
         switchButton.setTitle("PHOTO", forState: .Normal)
-        switchButton.addTarget(self, action: #selector(SteadyViewFinderViewController.takeStill(_:)), forControlEvents: .TouchUpInside)
+        switchButton.addTarget(self, action: #selector(TensorflowViewController.takeStill(_:)), forControlEvents: .TouchUpInside)
         //switchButton.backgroundColor = UIColor.whiteColor()
         switchButton.setTitleColor(UIColor.grayColor(), forState: .Normal)
         self.view.addSubview(switchButton)
         
         self.detailButton.frame = CGRect(x: self.view.frame.size.width - 40.0, y: 70.0, width: 34.0, height: 34.0)
         self.detailButton.setImage(UIImage(named: "detailButton.png"), forState: .Normal)
-        self.detailButton.addTarget(self, action: #selector(SteadyViewFinderViewController.showTranslations(_:)), forControlEvents: .TouchUpInside)
+        self.detailButton.addTarget(self, action: #selector(TensorflowViewController.showTranslations(_:)), forControlEvents: .TouchUpInside)
         
         self.closeButton.frame = CGRect(x: self.view.frame.size.width - 40.0, y: 110.0, width: 34.0, height: 34.0)
         self.closeButton.setImage(UIImage(named: "closeButton.png"), forState: .Normal)
-        self.closeButton.addTarget(self, action: #selector(SteadyViewFinderViewController.restartTranslation), forControlEvents: .TouchUpInside)
+        self.closeButton.addTarget(self, action: #selector(TensorflowViewController.restartTranslation), forControlEvents: .TouchUpInside)
         
         //sets up the Menu Button
         menuButton.frame = CGRect(x: self.view.frame.size.width - 60, y: 20, width: 44, height: 44)
-        if(camState == 1) {
-            let index: String.Index = camDetails.startIndex.advancedBy(2) // Swift 2
-            var ss2:String = camDetails.substringToIndex(index) // "Stack"
+        if(camState == 1 || camState == 2) {
+            let index: String.Index = camDetails.startIndex.advancedBy(2)
+            var ss2:String = camDetails.substringToIndex(index)
             ss2 = ss2.uppercaseString
             menuButton.setTitle(ss2, forState: .Normal)
         } else {
@@ -445,7 +600,7 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         menuButton.titleLabel?.textColor = UIColor.blackColor()
         menuButton.titleLabel?.adjustsFontSizeToFitWidth = true
         menuButton.tintColor = UIColor.blackColor()
-        menuButton.addTarget(self, action: #selector(ImageCaptureViewController.showMenu(_:)), forControlEvents: .TouchUpInside)
+        menuButton.addTarget(self, action: #selector(TensorflowViewController.showMenu(_:)), forControlEvents: .TouchUpInside)
         self.view.addSubview(menuButton)
         
         translateActivity.center = CGPoint(x: detailButton.frame.midX, y: detailButton.frame.midY)
@@ -453,6 +608,24 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         translateActivity.hidesWhenStopped = true
         self.view.addSubview(translateActivity)
         translateActivity.stopAnimating()
+
+        debugButton.frame = CGRect(x: 0, y: self.view.frame.size.height - 44, width: 80, height: 44)
+        debugButton.titleLabel?.textColor = UIColor.blackColor()
+        debugButton.setTitleColor(UIColor.blackColor(), forState: .Normal)
+        debugButton.setTitle("DEBUG", forState: .Normal)
+        debugButton.addTarget(self, action: #selector(self.debugImage(_:)), forControlEvents: .TouchUpInside)
+        if(camState == 2) {
+            //#if DEBUG
+                self.view.addSubview(debugButton)
+            //#endif
+        }
+        
+        debugImageView.frame = CGRect(x: 0, y: self.view.frame.size.height - 268, width: 224, height: 224)
+        
+        dismissDebugImageButton.frame = CGRect(x: 0, y: self.view.frame.size.height - 44, width: 80, height: 44)
+        dismissDebugImageButton.backgroundColor = UIColor.redColor()
+        dismissDebugImageButton.setTitle("DISMISS", forState: .Normal)
+        dismissDebugImageButton.addTarget(self, action: #selector(TensorflowViewController.doneDebugging(_:)), forControlEvents: .TouchUpInside)
     }
     
     ///////////////////// FACE DETECTOR /////////////////////////
@@ -462,7 +635,6 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         context = CIContext()
         options = [String : AnyObject]()
         options![CIDetectorAccuracy] = CIDetectorAccuracyLow
-        options![CIDetectorTracking] = true
         
         detector = CIDetector(ofType: CIDetectorTypeFace, context: context, options: options)
     }
@@ -472,18 +644,18 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
      If it is not empty then there are as many faces as the return array.count */
     func getFacialFeatures(image: CIImage) -> [CIFeature] {
         let imageOptions = [CIDetectorImageOrientation : 6]
-
         return detector!.featuresInImage(image, options: imageOptions)
     }
     
     ///////////////////// TEXT DETECTOR /////////////////////////
     
     func setUpTextDetector() {
-        textDetector = CIDetector(ofType: CIDetectorTypeText, context: nil, options: [CIDetectorAccuracy: CIDetectorAccuracyHigh])
+        textDetector = CIDetector(ofType: CIDetectorTypeText, context: nil, options: [CIDetectorAccuracy: CIDetectorAccuracyLow])
     }
     
     func getTextFeatures(image: CIImage) -> [CIFeature] {
         let imageOptions = [CIDetectorImageOrientation : 6]
+
         return textDetector!.featuresInImage(image, options: imageOptions)
     }
     
@@ -500,12 +672,24 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
     
     //setter method for the language code
     func changeState(state: Int, details: String) {
+        
+        //remove tensorflow objects from the screen
+        if(camState == 2) {
+            for label in labels {
+                label.removeFromSuperview()
+            }
+            steady = false
+            numSteady = 0
+            numLabels = 0
+            //#if DEBUG
+                debugButton.removeFromSuperview()
+            //#endif
+        }
+        
         self.camDetails = details
         self.camState = state
         
-        print(camDetails)
-        
-        if(camState == 1) {
+        if(camState == 1 || camState == 2) {
             let index: String.Index = camDetails.startIndex.advancedBy(2) // Swift 2
             var ss2:String = camDetails.substringToIndex(index) // "Stack"
             ss2 = ss2.uppercaseString
@@ -513,29 +697,30 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         } else {
             menuButton.setTitle(camDetails, forState: .Normal)
         }
+        
+        if(camState == 2) {
+            self.view.addSubview(debugButton)
+        }
     }
     
     //displays the language changing menu
     func showMenu(sender: AnyObject) {
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let controller = storyboard.instantiateViewControllerWithIdentifier("menu") as! MenuViewController
-        
+
+        let storyboard = UIStoryboard(name: "Tensorflow", bundle: nil)
+        let controller = storyboard.instantiateViewControllerWithIdentifier("tfmenu") as! TensorflowMenu
+
         controller.camState = self.camState
         controller.camDetails = self.camDetails
         controller.preferredContentSize = CGSizeMake(250, 300)
-        
         controller.modalPresentationStyle = UIModalPresentationStyle.Popover
-        
+
         controller.delegate = self
         
         let popoverPresentationController = controller.popoverPresentationController
-        
         popoverPresentationController!.sourceView = self.view
         popoverPresentationController!.sourceRect = menuButton.frame
-        
         popoverPresentationController!.permittedArrowDirections = .Any
         popoverPresentationController!.delegate = self
-        
         self.presentViewController(controller, animated: true, completion: nil)
     }
     
@@ -580,89 +765,109 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         
         let image = getImageFromBuffer(sampleBuffer)
         
-        var features = [CIFeature]()
+        let context = CIContext(options: nil)
         
-        if(camState == 0) {
-            features = self.getFacialFeatures(image)
-        } else if(camState == 1) {
-            features = self.getTextFeatures(image)
-        }
+        self.currentImage = context.createCGImage(image, fromRect: image.extent)
         
-        let formatDescription = CMSampleBufferGetFormatDescription(sampleBuffer)
-        
-        let cleanAperture = CMVideoFormatDescriptionGetCleanAperture(formatDescription!, false)
-        
-        var ids = [Int]()
-        var coords = [[Int: CGPoint]]()
-        
-        if(steady) {
+        if(camState == 2) {
+            if(loaded) {
 
-            //creates and draws face boxes
-            dispatch_async(dispatch_get_main_queue()) {
+                let pb : CVPixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)!
+                
+                if let dict = runCNNOnFrame(pb) {
+                    dispatch_async(dispatch_get_main_queue(), {
+                        self.displayLabels(dict)
+                    })
+                } else {
+                    print("Couldn't get results")
+                }
+            }
+        } else {
+            
+            var features = [CIFeature]()
+            
+            if(camState == 0) {
+                features = self.getFacialFeatures(image)
+            } else if(camState == 1) {
+                features = self.getTextFeatures(image)
+            }
+            
+            let formatDescription = CMSampleBufferGetFormatDescription(sampleBuffer)
+            
+            let cleanAperture = CMVideoFormatDescriptionGetCleanAperture(formatDescription!, false)
+            
+            var ids = [Int]()
+            var coords = [[Int: CGPoint]]()
 
-                if(self.camState == 0) {
-                    self.removeBoxes()     //deletes the unused boxes
-                    for i in 0 ..< features.count {
-                        
-                        var found = false
-                        
-                        let frame = self.transformFacialFeaturePosition(features[i].bounds.minX, yPosition: features[i].bounds.minY, width: features[i].bounds.width, height: features[i].bounds.height, videoRect: cleanAperture, previewRect: self.cameraPreview.frame, isMirrored: !(self.back))
-                        
-                        for l in 1 ..< self.faces.count {
-
-                            if (self.faces[l].id == Int((features as! [CIFaceFeature])[i].trackingID)) {
-
-                                self.faces[l].update(frame)
-                                found = true
+            if(steady) {
+                
+                //creates and draws face boxes
+                dispatch_async(dispatch_get_main_queue()) {
+                    
+                    if(self.camState == 0) {
+                        self.removeBoxes()     //deletes the unused boxes
+                        for i in 0 ..< features.count {
+                            
+                            var found = false
+                            
+                            let frame = self.transformFacialFeaturePosition(features[i].bounds.minX, yPosition: features[i].bounds.minY, width: features[i].bounds.width, height: features[i].bounds.height, videoRect: cleanAperture, previewRect: self.cameraPreview.frame, isMirrored: !(self.back))
+                            
+                            for l in 1 ..< self.faces.count {
+                                
+                                if (self.faces[l].id == Int((features as! [CIFaceFeature])[i].trackingID)) {
+                                    
+                                    self.faces[l].update(frame)
+                                    found = true
+                                }
+                                // add face, turn on call to API
                             }
-                            // add face, turn on call to API
+                            
+                            if(!found) {
+                                let id = Int((features as! [CIFaceFeature])[i].trackingID)
+                                
+                                let f = TensorflowViewController.face(id: id, frame: frame, caption: "Person")
+                                self.faces.append(f)
+                                
+                                ids.append(id)
+                                coords.append([id: frame.origin])
+                                
+                                if(i == features.count - 1) {
+                                    self.takePicture(ids, coordinates: coords)
+                                }
+                            }
                         }
-                        
-                        if(!found) {
-                            let id = Int((features as! [CIFaceFeature])[i].trackingID)
-                            
-                            let f = SteadyViewFinderViewController.face(id: id, frame: frame, caption: "Person")
-                            self.faces.append(f)
-                            
-                            ids.append(id)
-                            coords.append([id: frame.origin])
-                            
-                            if(i == features.count - 1) {
-                                self.takePicture(ids, coordinates: coords)
+                        self.drawBoxes()
+                    } else if(self.camState == 1) {
+                        if(!self.translating) {
+                            if(features.count > 0) {
+                                self.translateActivity.startAnimating()
+                                self.takePicture([0], coordinates: [[0: CGPoint(x: 0,y: 0)]])
+                                self.translating = true
+                            }
+                        }
+                    }
+                }
+            } else if(faces.count > 1) {
+                
+                //If the camera isn't steady but it's detected a face that is in the frame, this code will run. Updates boxes for already
+                //  discovered faces without discovering a new one
+                
+                //creates and draws face boxes
+                dispatch_async(dispatch_get_main_queue()) {
+                    
+                    self.removeBoxes()
+                    for face in features {
+                        let frame = self.transformFacialFeaturePosition(face.bounds.minX, yPosition: face.bounds.minY, width: face.bounds.width, height: face.bounds.height, videoRect: cleanAperture, previewRect: self.cameraPreview.frame, isMirrored: !(self.back))
+                        for i in 1 ..< self.faces.count {
+                            if(Int((face as! CIFaceFeature).trackingID) == self.faces[i].id) {
+                                self.faces[i].update(frame)
                             }
                         }
                     }
                     self.drawBoxes()
-                } else if(self.camState == 1) {
-                    if(!self.translating) {
-                        if(features.count > 0) {
-                            self.translateActivity.startAnimating()
-                            self.takePicture([0], coordinates: [[0: CGPoint(x: 0,y: 0)]])
-                            self.translating = true
-                        }
-                    }
                 }
             }
-        } else if(faces.count > 1) {
-           
-            //If the camera isn't steady but it's detected a face that is in the frame, this code will run. Updates boxes for already
-            //  discovered faces without discovering a new one
-            
-            //creates and draws face boxes
-            dispatch_async(dispatch_get_main_queue()) {
-                
-                self.removeBoxes()
-                for face in features {
-                    let frame = self.transformFacialFeaturePosition(face.bounds.minX, yPosition: face.bounds.minY, width: face.bounds.width, height: face.bounds.height, videoRect: cleanAperture, previewRect: self.cameraPreview.frame, isMirrored: !(self.back))
-                    for i in 1 ..< self.faces.count {
-                        if(Int((face as! CIFaceFeature).trackingID) == self.faces[i].id) {
-                            self.faces[i].update(frame)
-                        }
-                    }
-                }
-                
-                self.drawBoxes()
-            }
+
         }
     }
     
@@ -840,11 +1045,10 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
     }
 }
 
-
 //////////////////////// CAMERA EXTENSION ///////////////////
 
 // AVCaptureVideoDataOutputSampleBufferDelegate protocol and related methods
-extension SteadyViewFinderViewController:  AVCaptureVideoDataOutputSampleBufferDelegate{
+extension TensorflowViewController:  AVCaptureVideoDataOutputSampleBufferDelegate{
     func setupAVCapture(){
         session.sessionPreset = AVCaptureSessionPreset640x480;
         
@@ -901,12 +1105,13 @@ extension SteadyViewFinderViewController:  AVCaptureVideoDataOutputSampleBufferD
         self.videoDataOutput = AVCaptureVideoDataOutput();
         self.videoDataOutput.alwaysDiscardsLateVideoFrames=true;
         self.videoDataOutputQueue = dispatch_queue_create("VideoDataOutputQueue", DISPATCH_QUEUE_SERIAL);
+        
         self.videoDataOutput.setSampleBufferDelegate(self, queue:self.videoDataOutputQueue);
         if session.canAddOutput(self.videoDataOutput){
             session.addOutput(self.videoDataOutput);
         }
         self.videoDataOutput.connectionWithMediaType(AVMediaTypeVideo).enabled = true;
-        
+        self.videoDataOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey:Int(kCVPixelFormatType_32BGRA)]
         self.previewLayer = AVCaptureVideoPreviewLayer(session: self.session);
         self.previewLayer.videoGravity = AVLayerVideoGravityResizeAspect;
         
@@ -935,6 +1140,14 @@ extension SteadyViewFinderViewController:  AVCaptureVideoDataOutputSampleBufferD
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
             self.session.stopRunning()
             self.done = false;
+        }
+    }
+    
+    // clean up AVCapture
+    func restartCamera(){
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+            self.session.startRunning()
+            self.done = true;
         }
     }
     

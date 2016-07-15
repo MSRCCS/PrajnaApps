@@ -203,3 +203,6 @@ docs/content/release-notes.md
 
 # Visual Studio Code Files
 .vscode/
+
+# Tensorflow files
+*.pb
