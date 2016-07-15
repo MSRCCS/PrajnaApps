@@ -16,7 +16,7 @@ namespace ImageDescriberV3
         public string AttachmentLayout { get; set; }
 
         [JsonProperty(PropertyName = "attachments")]
-        public IList<Attachment> Attachments { get; set; }
+        public IList<Attachment> Attachments { get; }
 
         [JsonProperty(PropertyName = "channelData")]
         public object ChannelData { get; set; }
@@ -28,7 +28,7 @@ namespace ImageDescriberV3
         public ConversationAccount Conversation { get; set; }
 
         [JsonProperty(PropertyName = "entities")]
-        public IList<Entity> Entities { get; set; }
+        public IList<Entity> Entities { get;  }
 
         [JsonProperty(PropertyName = "from")]
         public ChannelAccount From { get; set; }
@@ -43,13 +43,13 @@ namespace ImageDescriberV3
         public string Locale { get; set; }
 
         [JsonProperty(PropertyName = "membersAdded")]
-        public IList<ChannelAccount> MembersAdded { get; set; }
+        public IList<ChannelAccount> MembersAdded { get;  }
 
         [JsonProperty(PropertyName = "membersRemoved")]
-        public IList<ChannelAccount> MembersRemoved { get; set; }
+        public IList<ChannelAccount> MembersRemoved { get;  }
 
         [JsonExtensionData(ReadData = true, WriteData = true)]
-        public JObject Properties { get; set; }
+        public JObject Properties { get;  }
 
         [JsonProperty(PropertyName = "recipient")]
         public ChannelAccount Recipient { get; set; }
@@ -57,6 +57,7 @@ namespace ImageDescriberV3
         [JsonProperty(PropertyName = "replyToId")]
         public string ReplyToId { get; set; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings")]
         [JsonProperty(PropertyName = "serviceUrl")]
         public string ServiceUrl { get; set; }
 

@@ -36,12 +36,21 @@ namespace ImageDescriberV3
 
     public class ImageLuis
     {
-        public string query { get; set; }
-        public lIntent[] intents { get; set; }
-        public lEntity[] entities { get; set; }
+        [JsonProperty(PropertyName = "query")]
+        public string Query { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
+        // Follow Luis Convention
+        [JsonProperty(PropertyName = "intents")]
+        public IIntent[] Intent { get; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
+        // Follow Luis Convention
+        [JsonProperty(PropertyName = "entities")]
+        public lEntity[] Entities { get; set; }
     }
 
-    public class lIntent
+    public class IIntent
     {
         public string intent { get; set; }
         public float score { get; set; }
