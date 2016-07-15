@@ -76,9 +76,9 @@ namespace ImageDescriberV3
                 if (await CheckAnnotateFeedback(message, reply, connector)) return Request.CreateResponse(HttpStatusCode.OK); // checks if identifying annotation error (or button response)
 
                 ImageLuis luis = await LuisClient.ParseUserInput(message.Text);
-                if (luis.intents.Count() > 0)  // identifying the correct intent from LUIS
+                foreach ( IIntent intent in luis.Intent ) // identifying the correct intent from LUIS
                 {
-                    switch (luis.intents[0].intent)
+                    switch (intent.intent)
                     {
                         case "None":
                             reply = message.CreateReply("I don't understand what you mean. Please enter in another request. For a full list of commands, enter \"help\".");
@@ -91,7 +91,8 @@ namespace ImageDescriberV3
                             await SetDataSendMessage(message, new Collection<Activity>() { reply, confirm }, connector);
                             return Request.CreateResponse(HttpStatusCode.OK);
                         case "Emotion":
-                            if (luis.entities.Count() > 0) reply = message.CreateReply(await Emotion(message, luis.entities[0].entity));
+                            // Please change the code to deal with multiple emotions. 
+                            if (luis.Entities.Count() > 0) reply = message.CreateReply(await Emotion(message, luis.Entities[0].entity));
                             else reply = message.CreateReply(await Emotion(message));
                             await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
                             return Request.CreateResponse(HttpStatusCode.OK);
@@ -122,8 +123,14 @@ namespace ImageDescriberV3
                             await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
                             return Request.CreateResponse(HttpStatusCode.OK);
                         case "Translate":
-                            if (luis.entities.Count() > 0) reply = message.CreateReply(await Translator(message, luis.entities[0].entity));
-                            else reply = message.CreateReply("You need to specify a language to translate to. Please try again.");
+                            // We will translate into first language 
+                            if (luis.Entities.Count() == 1)
+                                reply = message.CreateReply(await Translator(message, luis.Entities[0].entity));
+                            else if ( luis.Entities.Count() == 0 ) 
+                                reply = message.CreateReply("You need to specify a language to translate to. Please try again.");
+                            else 
+                                reply = message.CreateReply("You can't specify more than one language to translate to. Please try again.");
+
                             await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
                             return Request.CreateResponse(HttpStatusCode.OK);
 
@@ -134,16 +141,21 @@ namespace ImageDescriberV3
                         case "Annotate":
                             if (userData.GetProperty<string>("PreviousQ") != null) // responding without a previous question
                             {
-                                if (luis.entities.Count() > 0) // not identifying the correct annotation
+                                if (luis.Entities.Count() == 1) // not identifying the correct annotation
                                 {
                                     reply = message.CreateReply("Thanks for the feedback - we will use it to better train our models. Would you like to know anything else?");
                                     StringBuilder sb = new StringBuilder();
-                                    foreach (lEntity entity in luis.entities) sb.Append(entity.entity + " ");
+                                    foreach (lEntity entity in luis.Entities) sb.Append(entity.entity + " ");
                                     userData.SetProperty<string>("Annotation", sb.ToString());
+                                }
+                                else if (luis.Entities.Count() == 0)
+                                {
+                                    reply = message.CreateReply("Please identify what the correct annotation is.");
+                                    incorrect = true;
                                 }
                                 else
                                 {
-                                    reply = message.CreateReply("Please specify what the correct annotation is.");
+                                    reply = message.CreateReply("You specify more than one annotations, that confuses me. ");
                                     incorrect = true;
                                 }
                             }
@@ -169,7 +181,7 @@ namespace ImageDescriberV3
             return Request.CreateResponse(HttpStatusCode.OK);
         }
 
-        private Activity HandleSystemMessage(Activity message)
+        private static Activity HandleSystemMessage(Activity message)
         {
             if (message.Type == ActivityTypes.DeleteUserData)
             {
@@ -855,6 +867,7 @@ namespace ImageDescriberV3
         }
 
         // helper method to create accuracy confirming button
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Microsoft.Bot.Connector.Activity.CreateReply(System.String,System.String)")]
         public static Activity CreateButton(Activity message) // works for skype (POSTBACK buttons not yet supported), emulator 
         {
             if (message == null) return null;
@@ -892,6 +905,7 @@ namespace ImageDescriberV3
         }
 
         // helper method to create accuracy confirming button
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "ImageDescriberV3.Payload.set_Text(System.String)")]
         public static Activity FacebookButton(Activity input) // works for facebook
         {
             if (input == null) return null;
@@ -899,11 +913,10 @@ namespace ImageDescriberV3
             FacebookMessage message = new FacebookMessage();
             message.NotificationType = "REGULAR";
             message.Attachment = new Attachments();
-            message.Attachment.Type = "template";
+            message.Attachment.TypeOfAttachment = "template";
             message.Attachment.Payload = new Payload();
             message.Attachment.Payload.TemplateType = "button";
             message.Attachment.Payload.Text = "Is this correct?";
-            message.Attachment.Payload.Buttons = new Collection<Button>();
             message.Attachment.Payload.Buttons.Add(new Button("postback", "postbackyes", "Yes")); // correct caption
             message.Attachment.Payload.Buttons.Add(new Button("postback", "postbackno", "No")); // incorrect caption
             reply.ChannelData = message;
@@ -983,10 +996,9 @@ namespace ImageDescriberV3
             FacebookMessage message = new FacebookMessage();
             message.NotificationType = "REGULAR";
             message.Attachment = new Attachments();
-            message.Attachment.Type = "template";
+            message.Attachment.TypeOfAttachment = "template";
             message.Attachment.Payload = new Payload();
             message.Attachment.Payload.TemplateType = "generic";
-            message.Attachment.Payload.Elements = new Collection<Element>();
             JObject json = await SimilarPictures(query);
             for (int i = 0; i < 5; i++) message.Attachment.Payload.Elements.Add(new Element((json["value"][i]["name"]).ToString(), (new Uri((json["value"][i]["contentUrl"]).ToString()))));
             reply.ChannelData = message;

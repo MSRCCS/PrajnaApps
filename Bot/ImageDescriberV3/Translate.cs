@@ -82,6 +82,8 @@ namespace ImageDescriberV3
     public class AdmAccessToken
     {
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "access")]
+        // follow sample code https://msdn.microsoft.com/en-us/library/hh454950.aspx
         public string access_token { get; set; }
 
         public string token_type { get; set; }

@@ -18,7 +18,7 @@ namespace ImageDescriberV3
     public class Attachments
     {
         [JsonProperty(PropertyName = "type")]
-        public string Type { get; set; }
+        public string TypeOfAttachment { get; set; }
 
         [JsonProperty(PropertyName = "payload")]
         public Payload Payload { get; set; }
@@ -32,10 +32,10 @@ namespace ImageDescriberV3
         public string Text { get; set; }
 
         [JsonProperty(PropertyName = "buttons")]
-        public Collection<Button> Buttons { get; set; }
+        public Collection<Button> Buttons { get; } = new Collection<Button>();
 
         [JsonProperty(PropertyName = "elements")]
-        public Collection<Element> Elements { get; set; }
+        public Collection<Element> Elements { get; } = new Collection<Element>(); 
     }
     public class Element
     {
@@ -53,18 +53,18 @@ namespace ImageDescriberV3
         [JsonProperty(PropertyName = "subtitle")]
         public string Subtitle { get; set; }
         [JsonProperty(PropertyName = "buttons")]
-        public Collection<Button> Buttons { get; set; }
+        public Collection<Button> Buttons { get; } = new Collection<Button>(); 
     }
     public class Button
     {
         public Button(string type, string payload, string title)
         {
-            this.Type = type;
+            this.TypeOfButton = type;
             this.Payload = payload;
             this.Title = title;
         }
         [JsonProperty(PropertyName = "type")]
-        public string Type { get; set; }
+        public string TypeOfButton { get; set; }
         [JsonProperty(PropertyName = "url")]
         public Uri Url { get; set; }
         [JsonProperty(PropertyName = "title")]
