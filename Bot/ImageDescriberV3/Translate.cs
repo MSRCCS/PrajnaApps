@@ -10,7 +10,7 @@ using System.Globalization;
 namespace ImageDescriberV3
 {
     // class for Microsoft Translator API methods
-    class Translate
+    static class Translate
     {
 
         public static string TranslateMethod(string authToken, string textIn, string langTo)
@@ -93,24 +93,15 @@ namespace ImageDescriberV3
     public class AdmAuthentication
     {
         public static readonly string DatamarketAccessUri = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13";
-        private string clientId;
-        private string clientSecret;
         private string request;
-        private AdmAccessToken token;
-        //Access token expires every 10 minutes. Renew it every 9 minutes only.
+        public AdmAccessToken token { get; }
 
         public AdmAuthentication(string clientId, string clientSecret)
         {
-            this.clientId = clientId;
-            this.clientSecret = clientSecret;
             //If clientid or client secret has special characters, encode before sending request
             this.request = string.Format("grant_type=client_credentials&client_id={0}&client_secret={1}&scope=http://api.microsofttranslator.com", WebUtility.UrlEncode(clientId), WebUtility.UrlEncode(clientSecret));
             this.token = HttpPost(DatamarketAccessUri, this.request);
             //renew the token every specified minutes
-        }
-        public AdmAccessToken GetAccessToken()
-        {
-            return this.token;
         }
 
         private AdmAccessToken HttpPost(string DatamarketAccessUri, string requestDetails)

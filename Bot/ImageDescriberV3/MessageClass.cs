@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Microsoft.Bot.Connector;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Collections;
+using System.Linq;
 
 namespace ImageDescriberV3
 {
@@ -15,6 +17,8 @@ namespace ImageDescriberV3
         [JsonProperty(PropertyName = "attachmentLayout")]
         public string AttachmentLayout { get; set; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        // Usage of Reflection to assign properties requires them to be able to be set
         [JsonProperty(PropertyName = "attachments")]
         public IList<Attachment> Attachments { get; set; }
 
@@ -27,8 +31,9 @@ namespace ImageDescriberV3
         [JsonProperty(PropertyName = "conversation")]
         public ConversationAccount Conversation { get; set; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         [JsonProperty(PropertyName = "entities")]
-        public IList<Entity> Entities { get; set; }
+        internal IList<Entity> Entities { get; set; }
 
         [JsonProperty(PropertyName = "from")]
         public ChannelAccount From { get; set; }
@@ -42,12 +47,15 @@ namespace ImageDescriberV3
         [JsonProperty(PropertyName = "locale")]
         public string Locale { get; set; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         [JsonProperty(PropertyName = "membersAdded")]
         public IList<ChannelAccount> MembersAdded { get; set; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         [JsonProperty(PropertyName = "membersRemoved")]
         public IList<ChannelAccount> MembersRemoved { get; set; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         [JsonExtensionData(ReadData = true, WriteData = true)]
         public JObject Properties { get; set; }
 
@@ -57,6 +65,8 @@ namespace ImageDescriberV3
         [JsonProperty(PropertyName = "replyToId")]
         public string ReplyToId { get; set; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings")]
+        // Identifier is of type string in Activity class
         [JsonProperty(PropertyName = "serviceUrl")]
         public string ServiceUrl { get; set; }
 

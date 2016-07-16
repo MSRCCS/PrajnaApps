@@ -18,7 +18,7 @@ namespace ImageDescriberV3
     public class Attachments
     {
         [JsonProperty(PropertyName = "type")]
-        public string Type { get; set; }
+        public string TypeOfAttachment { get; set; }
 
         [JsonProperty(PropertyName = "payload")]
         public Payload Payload { get; set; }
@@ -32,10 +32,10 @@ namespace ImageDescriberV3
         public string Text { get; set; }
 
         [JsonProperty(PropertyName = "buttons")]
-        public Collection<Button> Buttons { get; set; }
+        internal Collection<Button> Buttons;
 
         [JsonProperty(PropertyName = "elements")]
-        public Collection<Element> Elements { get; set; }
+        internal Collection<Element> Elements;
     }
     public class Element
     {
@@ -44,31 +44,37 @@ namespace ImageDescriberV3
             this.Title = title;
             this.ImageUrl = imageUrl;
         }
+
         [JsonProperty(PropertyName = "title")]
         public string Title { get; set; }
+
         [JsonProperty(PropertyName = "image_url")]
         public Uri ImageUrl { get; set; }
+
         [JsonProperty(PropertyName = "item_url")]
         public Uri ItemUrl { get; set; }
+
         [JsonProperty(PropertyName = "subtitle")]
         public string Subtitle { get; set; }
-        [JsonProperty(PropertyName = "buttons")]
-        public Collection<Button> Buttons { get; set; }
     }
     public class Button
     {
         public Button(string type, string payload, string title)
         {
-            this.Type = type;
+            this.TypeOfButton = type;
             this.Payload = payload;
             this.Title = title;
         }
+
         [JsonProperty(PropertyName = "type")]
-        public string Type { get; set; }
+        public string TypeOfButton { get; set; }
+
         [JsonProperty(PropertyName = "url")]
         public Uri Url { get; set; }
+
         [JsonProperty(PropertyName = "title")]
         public string Title { get; set; }
+
         [JsonProperty(PropertyName = "payload")]
         public string Payload { get; set; }
     }

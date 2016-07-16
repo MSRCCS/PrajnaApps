@@ -60,13 +60,10 @@ namespace ImageDescriberV3
             if (message.Type == ActivityTypes.Message)
             {
                 ConnectorClient connector = new ConnectorClient(new Uri(message.ServiceUrl));
-                //await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
 
                 stateClient = message.GetStateClient();
                 userData = await stateClient.BotState.GetUserDataAsync(message.ChannelId, message.From.Id); // acquire all current userData
                 userData.SetProperty<bool>("Message", true); // arbitrary variable - required for userData to function properly
-
-                //await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
 
                 Activity reply = new Activity();
 
@@ -76,9 +73,9 @@ namespace ImageDescriberV3
                 if (await CheckAnnotateFeedback(message, reply, connector)) return Request.CreateResponse(HttpStatusCode.OK); // checks if identifying annotation error (or button response)
 
                 ImageLuis luis = await LuisClient.ParseUserInput(message.Text);
-                if (luis.intents.Count() > 0)  // identifying the correct intent from LUIS
+                if (luis.Intents.Count() > 0)  // identifying the correct intent from LUIS
                 {
-                    switch (luis.intents[0].intent)
+                    switch (luis.Intents[0].Intent)
                     {
                         case "None":
                             reply = message.CreateReply("I don't understand what you mean. Please enter in another request. For a full list of commands, enter \"help\".");
@@ -91,7 +88,7 @@ namespace ImageDescriberV3
                             await SetDataSendMessage(message, new Collection<Activity>() { reply, confirm }, connector);
                             return Request.CreateResponse(HttpStatusCode.OK);
                         case "Emotion":
-                            if (luis.entities.Count() > 0) reply = message.CreateReply(await Emotion(message, luis.entities[0].entity));
+                            if (luis.Entities.Count() > 0) reply = message.CreateReply(await Emotion(message, luis.Entities[0].Entity));
                             else reply = message.CreateReply(await Emotion(message));
                             await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
                             return Request.CreateResponse(HttpStatusCode.OK);
@@ -122,7 +119,7 @@ namespace ImageDescriberV3
                             await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
                             return Request.CreateResponse(HttpStatusCode.OK);
                         case "Translate":
-                            if (luis.entities.Count() > 0) reply = message.CreateReply(await Translator(message, luis.entities[0].entity));
+                            if (luis.Entities.Count() > 0) reply = message.CreateReply(await Translator(message, luis.Entities[0].Entity));
                             else reply = message.CreateReply("You need to specify a language to translate to. Please try again.");
                             await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
                             return Request.CreateResponse(HttpStatusCode.OK);
@@ -134,11 +131,11 @@ namespace ImageDescriberV3
                         case "Annotate":
                             if (userData.GetProperty<string>("PreviousQ") != null) // responding without a previous question
                             {
-                                if (luis.entities.Count() > 0) // not identifying the correct annotation
+                                if (luis.Entities.Count() > 0) // not identifying the correct annotation
                                 {
                                     reply = message.CreateReply("Thanks for the feedback - we will use it to better train our models. Would you like to know anything else?");
                                     StringBuilder sb = new StringBuilder();
-                                    foreach (lEntity entity in luis.entities) sb.Append(entity.entity + " ");
+                                    foreach (LEntity entity in luis.Entities) sb.Append(entity.Entity + " ");
                                     userData.SetProperty<string>("Annotation", sb.ToString());
                                 }
                                 else
@@ -169,7 +166,7 @@ namespace ImageDescriberV3
             return Request.CreateResponse(HttpStatusCode.OK);
         }
 
-        private Activity HandleSystemMessage(Activity message)
+        private static Activity HandleSystemMessage(Activity message)
         {
             if (message.Type == ActivityTypes.DeleteUserData)
             {
@@ -829,7 +826,7 @@ namespace ImageDescriberV3
                 AdmAccessToken admToken;
                 string headerValue;
                 AdmAuthentication admAuth = new AdmAuthentication(IdTrans, SecTrans);
-                admToken = admAuth.GetAccessToken();
+                admToken = admAuth.token;
                 headerValue = "Bearer " + admToken.access_token;
                 string langTo = Translate.CheckLanguage(headerValue, to);
 
@@ -899,7 +896,7 @@ namespace ImageDescriberV3
             FacebookMessage message = new FacebookMessage();
             message.NotificationType = "REGULAR";
             message.Attachment = new Attachments();
-            message.Attachment.Type = "template";
+            message.Attachment.TypeOfAttachment = "template";
             message.Attachment.Payload = new Payload();
             message.Attachment.Payload.TemplateType = "button";
             message.Attachment.Payload.Text = "Is this correct?";
@@ -983,11 +980,11 @@ namespace ImageDescriberV3
             FacebookMessage message = new FacebookMessage();
             message.NotificationType = "REGULAR";
             message.Attachment = new Attachments();
-            message.Attachment.Type = "template";
+            message.Attachment.TypeOfAttachment = "template";
             message.Attachment.Payload = new Payload();
             message.Attachment.Payload.TemplateType = "generic";
-            message.Attachment.Payload.Elements = new Collection<Element>();
             JObject json = await SimilarPictures(query);
+            message.Attachment.Payload.Elements = new Collection<Element>();
             for (int i = 0; i < 5; i++) message.Attachment.Payload.Elements.Add(new Element((json["value"][i]["name"]).ToString(), (new Uri((json["value"][i]["contentUrl"]).ToString()))));
             reply.ChannelData = message;
             return reply;

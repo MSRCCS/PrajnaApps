@@ -11,7 +11,7 @@ namespace ImageDescriberV3
     {
         protected void Application_Start()
         {
-            GlobalConfiguration.Configure(WebApiConfig.Register);
+            GlobalConfiguration.Configure(WebConfig.Register);
         }
     }
 }

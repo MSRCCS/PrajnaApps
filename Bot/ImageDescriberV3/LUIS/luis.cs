@@ -32,28 +32,45 @@ namespace ImageDescriberV3
             }
             return null;
         }
-    }
+    } 
 
     public class ImageLuis
     {
-        public string query { get; set; }
-        public lIntent[] intents { get; set; }
-        public lEntity[] entities { get; set; }
+        [JsonProperty(PropertyName = "query")]
+        public string Query { get; set; }
+
+        [JsonProperty(PropertyName = "intents")]
+        public LIntent[] Intents { get; set; }
+
+        [JsonProperty(PropertyName = "entities")]
+        public LEntity[] Entities { get; set; }
     }
 
-    public class lIntent
+    public class LIntent
     {
-        public string intent { get; set; }
-        public float score { get; set; }
+        [JsonProperty(PropertyName = "intent")]
+        public string Intent { get; set; }
+
+        [JsonProperty(PropertyName = "score")]
+        public float Score { get; set; }
     }
 
-    public class lEntity
+    public class LEntity
     {
-        public string entity { get; set; }
-        public string type { get; set; }
-        public int startIndex { get; set; }
-        public int endIndex { get; set; }
-        public float score { get; set; }
+        [JsonProperty(PropertyName = "entity")]
+        public string Entity { get; set; }
+
+        [JsonProperty(PropertyName = "type")]
+        public string EntityType { get; set; }
+
+        [JsonProperty(PropertyName = "startIndex")]
+        public int StartIndex { get; set; }
+
+        [JsonProperty(PropertyName = "endIndex")]
+        public int EndIndex { get; set; }
+
+        [JsonProperty(PropertyName = "score")]
+        public float Score { get; set; }
     }
 
 }

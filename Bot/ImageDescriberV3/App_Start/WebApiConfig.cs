@@ -7,11 +7,12 @@ using System.Web.Http;
 
 namespace ImageDescriberV3
 {
-    public static class WebApiConfig
+    public static class WebConfig
     {
         public static void Register(HttpConfiguration config)
         {
             // Json settings
+            if (config == null) throw new ArgumentNullException("config", "HttpConfiguration is null");
             config.Formatters.JsonFormatter.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
             config.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             config.Formatters.JsonFormatter.SerializerSettings.Formatting = Formatting.Indented;
