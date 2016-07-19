@@ -21,10 +21,6 @@ class TranslateWordBox: UIView {
         outline.textColor = UIColor.blackColor()
         outline.adjustsFontSizeToFitWidth = true
         self.addSubview(outline)
-        
-//        detailButton.frame = CGRect(x: x + width, y: y, width: 44, height: 44)
-//        detailButton.setImage(UIImage(named: "detailButton.png"), forState: .Normal)
-//        self.addSubview(detailButton)
     }
     
     init(frame: CGRect, caption: String) {
@@ -39,10 +35,6 @@ class TranslateWordBox: UIView {
         outline.textColor = UIColor.blackColor()
         outline.adjustsFontSizeToFitWidth = true
         self.addSubview(outline)
-        
-//        detailButton.frame = CGRect(x: x + width, y: y, width: 44, height: 44)
-//        detailButton.setImage(UIImage(named: "detailButton.png"), forState: .Normal)
-//        self.addSubview(detailButton)
     }
 
     required init?(coder aDecoder: NSCoder) {

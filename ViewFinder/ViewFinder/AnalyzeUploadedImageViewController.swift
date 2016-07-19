@@ -72,7 +72,13 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
     
     func showTranslationDetails(sender: UIButton) {
         
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        #if TENSORFLOW
+            let storyboard = UIStoryboard(name: "Tensorflow", bundle: nil)
+        #else
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        #endif
+        
+        
         let controller = storyboard.instantiateViewControllerWithIdentifier("tdc") as! TranslationDetailViewController
         
         controller.preferredContentSize = CGSizeMake(300, 150)

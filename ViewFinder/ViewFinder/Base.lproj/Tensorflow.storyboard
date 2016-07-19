@@ -9,14 +9,14 @@
         <!--Translation Table View Controller-->
         <scene sceneID="JcG-fI-XfI">
             <objects>
-                <tableViewController storyboardIdentifier="ttvc" id="3Aq-vT-LmK" customClass="TranslationTableViewController" customModule="ViewFinder" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="ttvc" id="3Aq-vT-LmK" customClass="TranslationTableViewController" customModule="ViewFinderTensorflow" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="138" sectionHeaderHeight="28" sectionFooterHeight="28" id="Hbl-ns-Dan">
                         <rect key="frame" x="0.0" y="0.0" width="300" height="225"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <color key="separatorColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="translationCell" rowHeight="138" id="KMd-Wq-O7C" customClass="TranslationTableCell" customModule="ViewFinder" customModuleProvider="target">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="translationCell" rowHeight="138" id="KMd-Wq-O7C" customClass="TranslationTableCell" customModule="ViewFinderTensorflow" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="28" width="300" height="138"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KMd-Wq-O7C" id="YPr-Cf-Rxc">
@@ -91,12 +91,12 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Qep-AS-77G" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-358" y="183.5"/>
+            <point key="canvasLocation" x="-264" y="390.5"/>
         </scene>
-        <!--Steady View Finder View Controller-->
+        <!--Tensorflow View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="SteadyViewFinderViewController" customModule="ViewFinder" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="TensorflowViewController" customModule="ViewFinderTensorflow" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
@@ -108,7 +108,7 @@
                     </view>
                     <connections>
                         <segue destination="WpJ-Za-7Ht" kind="show" identifier="takeStill" id="aRH-bZ-uRN"/>
-                        <segue destination="3Aq-vT-LmK" kind="popoverPresentation" popoverAnchorView="8bC-Xf-vdC" id="c9B-ao-7UQ">
+                        <segue destination="3Aq-vT-LmK" kind="popoverPresentation" identifier="translationMenuPopover" popoverAnchorView="8bC-Xf-vdC" id="c9B-ao-7UQ">
                             <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
                         </segue>
                     </connections>
@@ -120,7 +120,7 @@
         <!--Image Capture View Controller-->
         <scene sceneID="Rfe-tk-8tn">
             <objects>
-                <viewController id="WpJ-Za-7Ht" customClass="ImageCaptureViewController" customModule="ViewFinder" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="WpJ-Za-7Ht" customClass="ImageCaptureViewController" customModule="ViewFinderTensorflow" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="MVu-qO-2O7"/>
                         <viewControllerLayoutGuide type="bottom" id="Ojs-Nh-aJJ"/>
@@ -142,12 +142,12 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="fzA-o9-vBa" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1075" y="353"/>
+            <point key="canvasLocation" x="1075" y="362"/>
         </scene>
         <!--menu-->
         <scene sceneID="Ifx-sk-G8G">
             <objects>
-                <tableViewController storyboardIdentifier="menu" title="menu" id="FWj-PV-71R" customClass="MenuViewController" customModule="ViewFinder" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="menu" title="menu" id="FWj-PV-71R" customClass="MenuViewController" customModule="ViewFinderTensorflow" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="fsk-Og-7yD">
                         <rect key="frame" x="0.0" y="0.0" width="250" height="300"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -176,12 +176,12 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="hcd-iS-W85" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1730" y="-71"/>
+            <point key="canvasLocation" x="1800" y="-39"/>
         </scene>
         <!--Translation Detail View Controller-->
         <scene sceneID="vZo-gP-k1C">
             <objects>
-                <viewController storyboardIdentifier="tdc" id="AH2-JL-4wM" customClass="TranslationDetailViewController" customModule="ViewFinder" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="tdc" id="AH2-JL-4wM" customClass="TranslationDetailViewController" customModule="ViewFinderTensorflow" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="cOB-vo-35U"/>
                         <viewControllerLayoutGuide type="bottom" id="ydk-yI-9qX"/>
@@ -250,6 +250,40 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="eV1-Bp-iRe" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1687" y="655"/>
+        </scene>
+        <!--menu-->
+        <scene sceneID="hwh-3f-uxi">
+            <objects>
+                <tableViewController storyboardIdentifier="tfmenu" title="menu" id="bt1-dM-NRC" customClass="TensorflowMenu" customModule="ViewFinderTensorflow" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="4HB-3q-0KM">
+                        <rect key="frame" x="0.0" y="0.0" width="250" height="300"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" restorationIdentifier="menuItem" selectionStyle="default" indentationWidth="10" reuseIdentifier="menuItem" id="Ta7-5U-edL">
+                                <rect key="frame" x="0.0" y="28" width="250" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Ta7-5U-edL" id="QQI-Ii-KpB">
+                                    <rect key="frame" x="0.0" y="0.0" width="250" height="43"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="bt1-dM-NRC" id="Ziy-gN-EA8"/>
+                            <outlet property="delegate" destination="bt1-dM-NRC" id="0e3-EA-2lO"/>
+                        </connections>
+                    </tableView>
+                    <value key="contentSizeForViewInPopover" type="size" width="250" height="300"/>
+                    <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+                    <size key="freeformSize" width="250" height="300"/>
+                    <connections>
+                        <outlet property="table" destination="4HB-3q-0KM" id="C4f-Pd-fDn"/>
+                    </connections>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="oaY-Tq-I2q" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-239" y="2"/>
         </scene>
     </scenes>
 </document>

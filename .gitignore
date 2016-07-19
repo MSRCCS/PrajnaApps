@@ -203,3 +203,7 @@ docs/content/release-notes.md
 
 # Visual Studio Code Files
 .vscode/
+
+# Tensorflow files
+*.pb
+ViewFinder/ViewFinder/TranslateWordBox.swift

@@ -81,9 +81,15 @@ namespace ImageDescriberV3
 
     public class AccessToken
     {
+<<<<<<< HEAD
         // Translator API sample code follows this format. 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+=======
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "access")]
+        // follow sample code https://msdn.microsoft.com/en-us/library/hh454950.aspx
+>>>>>>> refs/remotes/MSRCCS/master
         public string access_token { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
