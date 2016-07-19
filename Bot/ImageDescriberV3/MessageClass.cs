@@ -85,6 +85,8 @@ namespace ImageDescriberV3
         [JsonProperty(PropertyName = "topicName")]
         public string TopicName { get; set; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods")]
+        // Type is the bot framework identifier
         [JsonProperty(PropertyName = "type")]
         public string Type { get; set; }
 

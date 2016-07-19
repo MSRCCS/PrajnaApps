@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -40,10 +41,10 @@ namespace ImageDescriberV3
         public string Query { get; set; }
 
         [JsonProperty(PropertyName = "intents")]
-        public LIntent[] Intents { get; set; }
+        internal Collection<LIntent> Intents;
 
         [JsonProperty(PropertyName = "entities")]
-        public LEntity[] Entities { get; set; }
+        internal Collection<LEntity> Entities;
     }
 
     public class LIntent
