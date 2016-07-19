@@ -55,18 +55,17 @@ namespace ImageDescriberV3
         private static bool incorrect = false; // expecting annotation errors
         private static bool confirm = false; // expecting button response
 
+        private static string messageEnding = " Would you like to know anything else?";
+
         public async Task<HttpResponseMessage> Post([FromBody]Activity message)
         {
             if (message.Type == ActivityTypes.Message)
             {
                 ConnectorClient connector = new ConnectorClient(new Uri(message.ServiceUrl));
-                //await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
 
                 stateClient = message.GetStateClient();
                 userData = await stateClient.BotState.GetUserDataAsync(message.ChannelId, message.From.Id); // acquire all current userData
                 userData.SetProperty<bool>("Message", true); // arbitrary variable - required for userData to function properly
-
-                //await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
 
                 Activity reply = new Activity();
 
@@ -76,6 +75,13 @@ namespace ImageDescriberV3
                 if (await CheckAnnotateFeedback(message, reply, connector)) return Request.CreateResponse(HttpStatusCode.OK); // checks if identifying annotation error (or button response)
 
                 ImageLuis luis = await LuisClient.ParseUserInput(message.Text);
+<<<<<<< HEAD
+
+                for (int i = 0; i < luis.Intents.Count(); i++)
+                {
+                    if (i == 0 || (i > 0 && luis.Intents[i].Score > 0.75)) await ChooseIntent(message, connector, luis, luis.Intents[i].Intent); // rarely detects multiple intents due to nature of LUIS
+                    else break;
+=======
                 foreach ( IIntent intent in luis.Intent ) // identifying the correct intent from LUIS
                 {
                     switch (intent.intent)
@@ -166,11 +172,8 @@ namespace ImageDescriberV3
                             await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
                             return Request.CreateResponse(HttpStatusCode.OK);
                     }
+>>>>>>> refs/remotes/MSRCCS/master
                 }
-                await connector.Conversations.ReplyToActivityAsync(reply);
-                await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
-                await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9))); // never gets to this point
-                await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
                 return Request.CreateResponse(HttpStatusCode.OK);
             }
             else
@@ -210,6 +213,7 @@ namespace ImageDescriberV3
             return null;
         }
 
+        //////////// INITIAL MESSAGE CHECKS ////////////
         // initial method to check if sending attachment or URL
         public static async Task<bool> CheckAttachments(Activity message, Activity reply, ConnectorClient connector)
         {
@@ -288,12 +292,13 @@ namespace ImageDescriberV3
                 {
                     if (message.Text.ToLower().Contains(opt.ToLower()))
                     {
-                        reply = message.CreateReply("Thanks for the feedback. We will categorize the request as " + opt.ToLower() + " next time. Would you like to know anything else?");
+                        reply = message.CreateReply("Thanks for the feedback. We will categorize the request as " + opt.ToLower() + " next time. Here's your intended request: ");
                         misinterpret = false;
                         await connector.Conversations.ReplyToActivityAsync(reply);
                         await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
                         await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9)));
-                        await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
+
+                        await ChooseIntent(message, connector, await LuisClient.ParseUserInput(userData.GetProperty<string>("PreviousQ")), opt);
                         return true;
                     }
                 }
@@ -312,7 +317,7 @@ namespace ImageDescriberV3
         {
             if (incorrect) // identifying only correct annotation (after Annotate intent)
             {
-                reply = message.CreateReply("Thanks for the feedback - we will use it to better train our models. Would you like to know anything else?");
+                reply = message.CreateReply("Thanks for the feedback - we will use it to better train our models." + messageEnding);
                 userData.SetProperty<string>("Annotation", message.Text);
                 incorrect = false;
                 await connector.Conversations.ReplyToActivityAsync(reply);
@@ -328,8 +333,8 @@ namespace ImageDescriberV3
                 {
                     confirm = false;
 
-                    if (message.Text.Contains("yes")) reply = message.CreateReply("Great! Would you like to know anything else?"); // "yes"
-                    else if (message.Text.Contains("no")) reply = message.CreateReply("Thanks for the feedback! Would you like to know anything else?"); // "no"
+                    if (message.Text.Contains("yes")) reply = message.CreateReply("Great!" + messageEnding); // "yes"
+                    else if (message.Text.Contains("no")) reply = message.CreateReply("Thanks for the feedback!" + messageEnding); // "no"
                     await connector.Conversations.ReplyToActivityAsync(reply);
                     await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
                     await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9)));
@@ -338,7 +343,7 @@ namespace ImageDescriberV3
                 }
                 else // not expecting button response
                 {
-                    reply = message.CreateReply("You already responded to this! Would you like to anything else?");
+                    reply = message.CreateReply("You already responded to this!" + messageEnding);
                     await connector.Conversations.ReplyToActivityAsync(reply);
                     await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
                     await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9)));
@@ -349,48 +354,159 @@ namespace ImageDescriberV3
             return false;
         }
 
-        // general method to set userData and send reply message
-        public static async Task SetDataSendMessage(Activity message, Collection<Activity> replies, ConnectorClient connector)
+        //////////// INTENT CHECKING ////////////
+        public static async Task ChooseIntent(Activity message, ConnectorClient connector, ImageLuis luis, string intent)
         {
-            userData.SetProperty<string>("PreviousQ", message.Text);
-            foreach (Activity reply in replies) await connector.Conversations.ReplyToActivityAsync(reply);
-            await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
-            foreach (Activity reply in replies) await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9))); // log outgoing message
-            await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
-        }
-
-        // processes skype attachment url
-        public static async Task<byte[]> SkypeMessage(Activity activity, Uri url)
-        {
-            using (var connectorClient = new ConnectorClient(new Uri(activity.ServiceUrl)))
+            switch (intent)
             {
-                var token = await (connectorClient.Credentials as MicrosoftAppCredentials).GetTokenAsync();
-                using (var httpClient = new HttpClient())
-                {
-                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/octet-stream"));
-
-                    byte[] ret = await httpClient.GetByteArrayAsync(url);
-                    return ret;
-                }
+                case "None":
+                    await NoneIntent(message, connector, luis);
+                    break;
+                case "Describe":
+                    await DescribeIntent(message, connector, luis);
+                    break;
+                case "Emotion":
+                    await EmotionIntent(message, connector, luis);
+                    break;
+                case "Face":
+                    await FaceIntent(message, connector, luis);
+                    break;
+                case "ActionsAsk":
+                    await ActionsAskIntent(message, connector, luis);
+                    break;
+                case "Age":
+                    await AgeIntent(message, connector, luis);
+                    break;
+                case "Celebrity":
+                    await CelebrityIntent(message, connector, luis);
+                    break;
+                case "Gender":
+                    await GenderIntent(message, connector, luis);
+                    break;
+                case "Text":
+                    await TextIntent(message, connector, luis);
+                    break;
+                case "Translate":
+                    await TranslateIntent(message, connector, luis);
+                    break;
+                case "Similar":
+                    await SimilarIntent(message, connector, luis);
+                    break;
+                case "Annotate":
+                    await AnnotateIntent(message, connector, luis);
+                    break;
             }
         }
 
-        // converts message text to URL for skype
-        public static Uri SkypeUrl(string text) // gets image url from skype message
+        public static async Task NoneIntent(Activity message, ConnectorClient connector, ImageLuis luis)
         {
-            if (text == null) return null;
-            string full = text.Substring(text.IndexOf('>'));
-            return new Uri(full.Substring(1, full.Length - 5));
+            Activity reply = message.CreateReply("I don't understand what you mean. Please enter in another request. For a full list of commands, enter \"help\".");
+            await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector);
         }
 
-        // converts attachment url to a stream
-        public static async Task<Stream> AttachmentStream(Activity message, Uri url)
+        public static async Task DescribeIntent(Activity message, ConnectorClient connector, ImageLuis luis)
         {
-            if (message.ChannelId.Equals("skype")) return new MemoryStream(await SkypeMessage(message, url));
-            else return new MemoryStream(await new WebClient().DownloadDataTaskAsync(url));
+            Activity reply = message.CreateReply(await Describe(message));
+            Activity confirm = ConfirmButton(message);
+            await SetDataSendMessage(message, new Collection<Activity>() { reply, confirm }, connector);
         }
 
+        public static async Task EmotionIntent(Activity message, ConnectorClient connector, ImageLuis luis)
+        {
+            Activity reply = new Activity();
+            if (luis.Entities.Count() > 0)
+            {
+                Collection<string> emotions = new Collection<string>();
+                foreach (LEntity entity in luis.Entities) emotions.Add(entity.Entity);
+                reply = message.CreateReply(await Emotion(message, emotions));
+            }
+            else reply = message.CreateReply(await Emotion(message));
+            await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector);
+        }
+
+        public static async Task FaceIntent(Activity message, ConnectorClient connector, ImageLuis luis)
+        {
+            Activity reply = message.CreateReply(await Face(message));
+            await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector);
+        }
+
+        public static async Task ActionsAskIntent(Activity message, ConnectorClient connector, ImageLuis luis)
+        {
+            Activity reply = message.CreateReply("This bot provides information about images. After attaching an image or sending an image URL, you can ask the bot about the image's contents, emotions, people, text, and for similar images, using natural language commands. For a full list of functions, enter \"help\".");
+            Activity reply2 = message.CreateReply("If the bot misinterprets any of your requests, enter \"wrong\". To help us improve the bot, please correct it if it gives you an inaccurate response to your question.");
+            Activity reply3 = message.CreateReply("To get started, enter an image and try asking \"What is this a picture of\".");
+            await SetDataSendMessage(message, new Collection<Activity>() { reply, reply2, reply3 }, connector);
+        }
+
+        public static async Task AgeIntent(Activity message, ConnectorClient connector, ImageLuis luis)
+        {
+            Activity reply = message.CreateReply(await Age(message));
+            await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector);
+        }
+        public static async Task CelebrityIntent(Activity message, ConnectorClient connector, ImageLuis luis)
+        {
+            Activity reply = message.CreateReply(await Celebrities(message));
+            await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector);
+        }
+
+        public static async Task GenderIntent(Activity message, ConnectorClient connector, ImageLuis luis)
+        {
+            Activity reply = message.CreateReply(await Gender(message));
+            await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector);
+        }
+
+        public static async Task TextIntent(Activity message, ConnectorClient connector, ImageLuis luis)
+        {
+            Activity reply = message.CreateReply(await Text(message));
+            await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector);
+        }
+        public static async Task TranslateIntent(Activity message, ConnectorClient connector, ImageLuis luis)
+        {
+            // We will translate into first language   
+            Activity reply = new Activity();
+            if (luis.Entities.Count() == 1) reply = message.CreateReply(await Translator(message, luis.Entities[0].Entity));
+            else if (luis.Entities.Count() == 0) reply = message.CreateReply("You need to specify a language to translate to. Please try again.");
+            else reply = message.CreateReply("You can't specify more than one language to translate to. Please try again.");
+            await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector);
+        }
+
+        public static async Task SimilarIntent(Activity message, ConnectorClient connector, ImageLuis luis)
+        {
+            Activity reply = await Similar(message);
+            await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector);
+        }
+
+        public static async Task AnnotateIntent(Activity message, ConnectorClient connector, ImageLuis luis)
+        {
+            Activity reply = new Activity();
+            if (userData.GetProperty<string>("PreviousQ") != null) // responding without a previous question
+            {
+                if (luis.Entities.Count() == 1) // identifying the correct annotation
+                {
+                    reply = message.CreateReply("Thanks for the feedback - we will use it to better train our models." + messageEnding);
+                    StringBuilder sb = new StringBuilder();
+                    foreach (LEntity entity in luis.Entities) sb.Append(entity.Entity + " ");
+                    userData.SetProperty<string>("Annotation", sb.ToString());
+                }
+                else if (luis.Entities.Count() == 0) // not identifying correct annotation
+                {
+                    reply = message.CreateReply("Please enter what the correct annotation is.");
+                    incorrect = true;
+                }
+                else // identifying more than 1 annotation
+                {
+                    reply = message.CreateReply("Please enter just one correct annotation.");
+                    incorrect = true;
+                }
+            }
+            else reply = message.CreateReply("Please first ask the bot about the image.");
+            await connector.Conversations.ReplyToActivityAsync(reply);
+            await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
+            await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9)));
+            await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
+        }
+
+        //////////// BASE API CALLS ////////////
         // returns description using CV API call
         public static async Task<string> Describe(Activity message)
         {
@@ -400,13 +516,13 @@ namespace ImageDescriberV3
             {
                 AnalysisResult analysisResult = await VisionServiceClient.DescribeAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")));
 
-                ret = analysisResult.Description.Captions[0].Text + ". Would you like to know anything else?";
+                ret = analysisResult.Description.Captions[0].Text + "." + messageEnding;
             }
             else if (userData.GetProperty<int>("Attachment") == 22)
             {
                 Uri imageUri = userData.GetProperty<Uri>("ImageUrl");
                 AnalysisResult analysisResult = await VisionServiceClient.DescribeAsync(imageUri.AbsoluteUri, 1);
-                ret = analysisResult.Description.Captions[0].Text + ". Would you like to know anything else?";
+                ret = analysisResult.Description.Captions[0].Text + "." + messageEnding;
             }
             return ret;
         }
@@ -429,10 +545,184 @@ namespace ImageDescriberV3
             return ret;
         }
 
+        // gets percentages of specified emotions
+        public static async Task<string> Emotion(Activity message, Collection<string> emotions)
+        {
+            EmotionServiceClient emotionServiceClient = new EmotionServiceClient(KeyEmo);
+            string ret = "Please first attach an image or enter an image URL.";
+            foreach (string emotion in emotions)
+            {
+                if (null == ValidEmo(emotion)) return (emotion + " is not a valid option. Valid emotions are anger, contempt, disgust, fear, happiness, neutral, sadness, and surprise. Please try again.");
+            }
+            if (userData.GetProperty<int>("Attachment") == 11)
+            {
+                Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")));
+                StringBuilder sb = new StringBuilder();
+                foreach (string emotion in emotions) sb.Append(GetEmotion(emotionResult, ValidEmo(emotion)));
+                return sb.Append(messageEnding).ToString();
+            }
+            else if (userData.GetProperty<int>("Attachment") == 22)
+            {
+                Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(userData.GetProperty<Uri>("ImageUrl").ToString());
+                StringBuilder sb = new StringBuilder();
+                foreach (string emotion in emotions) sb.Append(GetEmotion(emotionResult, ValidEmo(emotion)));
+                return sb.Append(messageEnding).ToString();
+            }
+            return ret + messageEnding;
+        }
+
+        // returns number of faces using Emotion API call
+        public static async Task<string> Face(Activity message)
+        {
+            EmotionServiceClient emotionServiceClient = new EmotionServiceClient(KeyEmo);
+            string ret = "Please first attach an image or enter an image URL.";
+            if (userData.GetProperty<int>("Attachment") == 11)
+            {
+                Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")));
+                ret = "There are " + emotionResult.Length + " faces." + messageEnding;
+            }
+            else if (userData.GetProperty<int>("Attachment") == 22)
+            {
+                Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(userData.GetProperty<Uri>("ImageUrl").ToString());
+                ret = "There are " + emotionResult.Length + " faces." + messageEnding;
+            }
+            return ret;
+        }
+
+        // returns age of people using CV API call
+        public static async Task<string> Age(Activity message)
+        {
+            VisionServiceClient VisionServiceClient = new VisionServiceClient(KeyDes);
+            string ret = "Please first attach an image or enter an image URL.";
+            if (userData.GetProperty<int>("Attachment") == 11)
+            {
+                VisualFeature[] visualFeatures = new VisualFeature[] { VisualFeature.Faces };
+                AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")), visualFeatures);
+                ret = GetAge(analysisResult);
+            }
+            else if (userData.GetProperty<int>("Attachment") == 22)
+            {
+                Uri imageUri = userData.GetProperty<Uri>("ImageUrl");
+                VisualFeature[] visualFeatures = new VisualFeature[] { VisualFeature.Faces };
+                AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(imageUri.AbsoluteUri, visualFeatures);
+                ret = GetAge(analysisResult);
+            }
+            return ret;
+        }
+
+        // returns celebrities in image using CV API call
+        public static async Task<string> Celebrities(Activity message)
+        {
+            VisionServiceClient VisionServiceClient = new VisionServiceClient(KeyDes);
+            string ret = "Please first attach an image or enter an image URL.";
+            if (userData.GetProperty<int>("Attachment") == 11)
+            {
+                AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")), null, new string[] { "celebrities" });
+                ret = GetCeleb(analysisResult);
+            }
+            else if (userData.GetProperty<int>("Attachment") == 22)
+            {
+                Uri imageUri = userData.GetProperty<Uri>("ImageUrl");
+                AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(imageUri.AbsoluteUri, null, new string[] { "celebrities" });
+                ret = GetCeleb(analysisResult);
+            }
+            return ret;
+        }
+
+        // returns gender using CV API
+        public static async Task<string> Gender(Activity message)
+        {
+            VisionServiceClient VisionServiceClient = new VisionServiceClient(KeyDes);
+            string ret = "Please first attach an image or enter an image URL.";
+            if (userData.GetProperty<int>("Attachment") == 11)
+            {
+                VisualFeature[] visualFeatures = new VisualFeature[] { VisualFeature.Faces };
+                AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")), visualFeatures);
+                ret = GetGender(analysisResult);
+            }
+            else if (userData.GetProperty<int>("Attachment") == 22)
+            {
+                Uri imageUri = userData.GetProperty<Uri>("ImageUrl");
+                VisualFeature[] visualFeatures = new VisualFeature[] { VisualFeature.Faces };
+                AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(imageUri.AbsoluteUri, visualFeatures);
+                ret = GetGender(analysisResult);
+            }
+            return ret;
+        }
+
+        // returns OCR using CV API
+        public static async Task<string> Text(Activity message)
+        {
+            VisionServiceClient VisionServiceClient = new VisionServiceClient(KeyDes);
+            string ret = "Please first attach an image or enter an image URL.";
+            if (userData.GetProperty<int>("Attachment") == 11)
+            {
+                OcrResults analysisResult = await VisionServiceClient.RecognizeTextAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")));
+                ret = GetText(analysisResult);
+            }
+            else if (userData.GetProperty<int>("Attachment") == 22)
+            {
+                Uri imageUri = userData.GetProperty<Uri>("ImageUrl");
+                OcrResults analysisResult = await VisionServiceClient.RecognizeTextAsync(imageUri.AbsoluteUri);
+                ret = GetText(analysisResult);
+            }
+            return ret;
+        }
+
+        // returns translation of text within a message to a specified language using Microsoft Translator API call
+        public static async Task<string> Translator(Activity message, string to)
+        {
+            string text = await Text(message);
+            string ret = text;
+            if (ret.Contains("No text detected") || ret.Contains("Please first attach")) return ret;
+            else
+            {
+                text = text.Replace("The text says", " ").Replace("." + messageEnding, " ");
+                text = text.Trim();
+                AccessToken admToken;
+                string headerValue;
+                TranslateAuthentication admAuth = new TranslateAuthentication(IdTrans, SecTrans);
+                admToken = admAuth.Token;
+                headerValue = "Bearer " + admToken.access_token;
+                string langTo = Translate.CheckLanguage(headerValue, to);
+
+                if (langTo == null) ret = "Not a valid language name. Try again.";
+                else
+                {
+                    StringBuilder sb = new StringBuilder().Append("The translation is " + Translate.TranslateMethod(headerValue, text, langTo));
+                    if (ret[ret.Length - 1] != '.') sb.Append('.');
+                    sb.Append("" + messageEnding);
+                    ret = sb.ToString();
+                }
+            }
+            return ret;
+        }
+
+        // method that returns activity that displays similar images in a carousel
+        public static async Task<Activity> Similar(Activity message)
+        {
+            VisionServiceClient VisionServiceClient = new VisionServiceClient(KeyDes);
+            if (userData.GetProperty<int>("Attachment") == 11)
+            {
+                AnalysisResult analysisResult = await VisionServiceClient.DescribeAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")), 1);
+                if (message.ChannelId.Equals("facebook")) return await FacebookCarousel(message, analysisResult.Description.Captions[0].Text);
+                else return await CreateCarousel(message, analysisResult.Description.Captions[0].Text);
+            }
+            else if (userData.GetProperty<int>("Attachment") == 22)
+            {
+                Uri imageUri = userData.GetProperty<Uri>("ImageUrl");
+                AnalysisResult analysisResult = await VisionServiceClient.DescribeAsync(imageUri.AbsoluteUri, 1);
+                if (message.ChannelId.Equals("facebook")) return await FacebookCarousel(message, analysisResult.Description.Captions[0].Text);
+                else return await CreateCarousel(message, analysisResult.Description.Captions[0].Text);
+            }
+            return message.CreateReply("Please first attach an image and enter an image URL.");
+        }
+
+        //////////// API HELPERS ////////////
         // helper method that calculates primary emotion
         public static string GetEmotion(Emotion[] emotionResult)
         {
-            string ret = "There is no emotion detected. Would you like to know anything else?";
+            string ret = "There is no emotion detected." + messageEnding;
             float[] sums = new float[8];
             string[] emotions = { "anger", "contempt", "disgust", "fear", "happiness", "neutral", "sadness", "surpise" };
             if (emotionResult != null && emotionResult.Length > 0)
@@ -448,26 +738,7 @@ namespace ImageDescriberV3
                     sums[6] += emotion.Scores.Sadness;
                     sums[7] += emotion.Scores.Surprise;
                 }
-                ret = "The primary emotion is " + emotions[Array.IndexOf(sums, sums.Max())] + ". Would you like to know anything else?";
-            }
-            return ret;
-        }
-
-        // returns the percentage of a certain emotion using Emotion API call
-        public static async Task<string> Emotion(Activity message, string which)
-        {
-            EmotionServiceClient emotionServiceClient = new EmotionServiceClient(KeyEmo);
-            string ret = "Please first attach an image or enter an image URL.";
-            if (null == ValidEmo(which)) return "Not a valid emotion. Valid emotions are anger, contempt, disgust, fear, happiness, neutral, sadness, and surprise. Please try again.";
-            if (userData.GetProperty<int>("Attachment") == 11)
-            {
-                Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")));
-                ret = GetEmotion(emotionResult, ValidEmo(which));
-            }
-            else if (userData.GetProperty<int>("Attachment") == 22)
-            {
-                Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(userData.GetProperty<Uri>("ImageUrl").ToString());
-                ret = GetEmotion(emotionResult, ValidEmo(which));
+                ret = "The primary emotion is " + emotions[Array.IndexOf(sums, sums.Max())] + "." + messageEnding;
             }
             return ret;
         }
@@ -493,7 +764,7 @@ namespace ImageDescriberV3
         public static string GetEmotion(Emotion[] emotionResult, string which)
         {
             if (which == null) return null;
-            string ret = "There is no emotion detected. Would you like to know anything else?";
+            string ret = " There is no emotion detected.";
             float val = 0.0F;
             if (emotionResult != null && emotionResult.Length > 0)
             {
@@ -527,46 +798,7 @@ namespace ImageDescriberV3
                             break;
                     }
                 }
-                ret = "The level of " + which + " is " + (val / (emotionResult.Length) * 100) + "%. Would you like to know anything else?";
-            }
-            return ret;
-        }
-
-        // returns number of faces using Emotion API call
-        public static async Task<string> Face(Activity message)
-        {
-            EmotionServiceClient emotionServiceClient = new EmotionServiceClient(KeyEmo);
-            string ret = "Please first attach an image or enter an image URL.";
-            if (userData.GetProperty<int>("Attachment") == 11)
-            {
-                Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")));
-                ret = "There are " + emotionResult.Length + " faces. Would you like to know anything else?";
-            }
-            else if (userData.GetProperty<int>("Attachment") == 22)
-            {
-                Emotion[] emotionResult = await emotionServiceClient.RecognizeAsync(userData.GetProperty<Uri>("ImageUrl").ToString());
-                ret = "There are " + emotionResult.Length + " faces. Would you like to know anything else?";
-            }
-            return ret;
-        }
-
-        // returns age of people using CV API call
-        public static async Task<string> Age(Activity message)
-        {
-            VisionServiceClient VisionServiceClient = new VisionServiceClient(KeyDes);
-            string ret = "Please first attach an image or enter an image URL.";
-            if (userData.GetProperty<int>("Attachment") == 11)
-            {
-                VisualFeature[] visualFeatures = new VisualFeature[] { VisualFeature.Faces };
-                AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")), visualFeatures);
-                ret = GetAge(analysisResult);
-            }
-            else if (userData.GetProperty<int>("Attachment") == 22)
-            {
-                Uri imageUri = userData.GetProperty<Uri>("ImageUrl");
-                VisualFeature[] visualFeatures = new VisualFeature[] { VisualFeature.Faces };
-                AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(imageUri.AbsoluteUri, visualFeatures);
-                ret = GetAge(analysisResult);
+                ret = " The level of " + which + " is " + (val / (emotionResult.Length) * 100) + "%.";
             }
             return ret;
         }
@@ -574,10 +806,10 @@ namespace ImageDescriberV3
         // helper method that calculates ages
         public static string GetAge(AnalysisResult analysisResult)
         {
-            string ret = "No person detected. Would you like to know anything else?";
+            string ret = "No person detected." + messageEnding;
             if (analysisResult != null && analysisResult.Faces.Length == 1)
             {
-                ret = "The person's age is " + analysisResult.Faces[0].Age + " years old. Would you like to know anything else?";
+                ret = "The person's age is " + analysisResult.Faces[0].Age + " years old." + messageEnding;
             }
             else if (analysisResult != null && analysisResult.Faces.Length > 1)
             {
@@ -607,29 +839,10 @@ namespace ImageDescriberV3
             return ret;
         }
 
-        // returns celebrities in image using CV API call
-        public static async Task<string> Celebrities(Activity message)
-        {
-            VisionServiceClient VisionServiceClient = new VisionServiceClient(KeyDes);
-            string ret = "Please first attach an image or enter an image URL.";
-            if (userData.GetProperty<int>("Attachment") == 11)
-            {
-                AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")), null, new string[] { "celebrities" });
-                ret = GetCeleb(analysisResult);
-            }
-            else if (userData.GetProperty<int>("Attachment") == 22)
-            {
-                Uri imageUri = userData.GetProperty<Uri>("ImageUrl");
-                AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(imageUri.AbsoluteUri, null, new string[] { "celebrities" });
-                ret = GetCeleb(analysisResult);
-            }
-            return ret;
-        }
-
         // helper method that calculates which celebrities are present
         public static string GetCeleb(AnalysisResult analysisResult)  // need to sort by lefts
         {
-            string ret = "No celebrity detected. Would you like to know anything else?";
+            string ret = "No celebrity detected." + messageEnding;
             if (analysisResult != null && null != analysisResult.Categories && analysisResult.Categories.Length > 0 && analysisResult.Categories[0].Name.Contains("people") && analysisResult.Categories[0].Detail.ToString().Length > 25) // based on number of characters
             {
                 string total = analysisResult.Categories[0].Detail.ToString();
@@ -641,7 +854,7 @@ namespace ImageDescriberV3
                     int len = total.IndexOf(",", start, StringComparison.CurrentCulture) - start - 1;
                     names.Add(total.Substring(start, len));
                 }
-                if (names.Count == 1) ret = "This person is [" + names[0] + "](http://en.wikipedia.org/wiki/" + ReplaceSpace(names[0]) + "). Would you like to know anything else?";
+                if (names.Count == 1) ret = "This person is [" + names[0] + "](http://en.wikipedia.org/wiki/" + ReplaceSpace(names[0]) + ")." + messageEnding;
                 else
                 {
                     StringBuilder sb = new StringBuilder();
@@ -655,7 +868,7 @@ namespace ImageDescriberV3
                         else
                             sb.Append("[" + names[i] + "](http://en.wikipedia.org/wiki/" + ReplaceSpace(names[i]) + "), ");
                     }
-                    sb.Append(" Would you like to know anything else?");
+                    sb.Append("" + messageEnding);
                     ret = sb.ToString();
                 }
 
@@ -676,34 +889,13 @@ namespace ImageDescriberV3
             return sb.ToString();
         }
 
-        // returns gender using CV API
-        public static async Task<string> Gender(Activity message)
-        {
-            VisionServiceClient VisionServiceClient = new VisionServiceClient(KeyDes);
-            string ret = "Please first attach an image or enter an image URL.";
-            if (userData.GetProperty<int>("Attachment") == 11)
-            {
-                VisualFeature[] visualFeatures = new VisualFeature[] { VisualFeature.Faces };
-                AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")), visualFeatures);
-                ret = GetGender(analysisResult);
-            }
-            else if (userData.GetProperty<int>("Attachment") == 22)
-            {
-                Uri imageUri = userData.GetProperty<Uri>("ImageUrl");
-                VisualFeature[] visualFeatures = new VisualFeature[] { VisualFeature.Faces };
-                AnalysisResult analysisResult = await VisionServiceClient.AnalyzeImageAsync(imageUri.AbsoluteUri, visualFeatures);
-                ret = GetGender(analysisResult);
-            }
-            return ret;
-        }
-
         // helper method that calculates gender
         public static string GetGender(AnalysisResult analysisResult)
         {
-            string ret = "No person detected. Would you like to know anything else?";
+            string ret = "No person detected." + messageEnding;
             if (analysisResult != null && analysisResult.Faces.Length == 1)
             {
-                ret = "The person's gender is " + analysisResult.Faces[0].Gender + ". Would you like to know anything else?";
+                ret = "The person's gender is " + analysisResult.Faces[0].Gender + "." + messageEnding;
             }
             else if (analysisResult != null && analysisResult.Faces.Length > 1)
             {
@@ -732,29 +924,10 @@ namespace ImageDescriberV3
             return ret;
         }
 
-        // returns OCR using CV API
-        public static async Task<string> Text(Activity message)
-        {
-            VisionServiceClient VisionServiceClient = new VisionServiceClient(KeyDes);
-            string ret = "Please first attach an image or enter an image URL.";
-            if (userData.GetProperty<int>("Attachment") == 11)
-            {
-                OcrResults analysisResult = await VisionServiceClient.RecognizeTextAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")));
-                ret = GetText(analysisResult);
-            }
-            else if (userData.GetProperty<int>("Attachment") == 22)
-            {
-                Uri imageUri = userData.GetProperty<Uri>("ImageUrl");
-                OcrResults analysisResult = await VisionServiceClient.RecognizeTextAsync(imageUri.AbsoluteUri);
-                ret = GetText(analysisResult);
-            }
-            return ret;
-        }
-
         // helper method that calculates the text
         public static string GetText(OcrResults analysisResult)
         {
-            string ret = "No text detected. Would you like to know anything else?";
+            string ret = "No text detected." + messageEnding;
             if (analysisResult != null && analysisResult.Regions != null && analysisResult.Regions.Length > 0)
             {
                 StringBuilder sb = new StringBuilder().Append("The text says ");
@@ -766,12 +939,123 @@ namespace ImageDescriberV3
                     }
                 }
                 if (ret[ret.Length - 1] != '.') sb.Append('.');
-                sb.Append(" Would you like to know anything else?");
+                sb.Append("" + messageEnding);
                 ret = sb.ToString();
             }
             return ret;
         }
 
+        // helper method that returns Json of similar photos using Bing Image Search API call
+        public static async Task<JObject> SimilarPictures(string query)
+        {
+            var client = new HttpClient();
+            var queryString = HttpUtility.ParseQueryString(string.Empty);
+
+            // Request headers
+            client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", KeyBing);
+
+            // Request parameters
+            queryString["q"] = query;
+            queryString["count"] = "5";
+            queryString["offset"] = "0";
+            queryString["mkt"] = "en-us";
+            queryString["safeSearch"] = "Moderate";
+            var uri = "https://api.cognitive.microsoft.com/bing/v5.0/images/search?" + queryString;
+
+            var response = await client.GetAsync(uri);
+            string rep = await response.Content.ReadAsStringAsync();
+            return JObject.Parse(rep);
+        }
+
+        //////////// GENERAL ACTIVITY HELPERS ////////////
+        // general method to set userData and send reply message
+        public static async Task SetDataSendMessage(Activity message, Collection<Activity> replies, ConnectorClient connector)
+        {
+            userData.SetProperty<string>("PreviousQ", message.Text);
+            foreach (Activity reply in replies) await connector.Conversations.ReplyToActivityAsync(reply);
+            await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
+            foreach (Activity reply in replies) await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9))); // log outgoing message
+            await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
+        }
+
+        // converts attachment url to a stream
+        public static async Task<Stream> AttachmentStream(Activity message, Uri url)
+        {
+            if (message.ChannelId.Equals("skype")) return new MemoryStream(await SkypeMessage(message, url));
+            else return new MemoryStream(await new WebClient().DownloadDataTaskAsync(url));
+        }
+
+        // returns an activity with a button to confirm accuracy of caption
+        public static Activity ConfirmButton(Activity message)
+        {
+            if (message == null) return null;
+            confirm = true;
+            if (message.ChannelId.Equals("facebook")) return FacebookButton(message);
+            return CreateButton(message);
+        }
+
+        // helper method to create accuracy confirming button
+        public static Activity CreateButton(Activity message) // works for skype (POSTBACK buttons not yet supported), emulator 
+        {
+            if (message == null) return null;
+            Activity replyToConversation = message.CreateReply("Is this correct?");
+            replyToConversation.Recipient = message.From;
+            replyToConversation.Type = "message";
+            replyToConversation.Attachments = new List<Attachment>();
+            List<CardAction> cardButtons = new List<CardAction>();
+
+            CardAction plButton = new CardAction()
+            {
+                Value = "postbackyes", // correct caption
+                Type = "postBack",
+                Title = "Yes"
+            };
+
+            CardAction p2Button = new CardAction()
+            {
+                Value = "postbackno", // incorrect caption
+                Type = "postBack",
+                Title = "No"
+            };
+
+            cardButtons.Add(plButton);
+            cardButtons.Add(p2Button);
+
+            HeroCard plCard = new HeroCard()
+            {
+                Buttons = cardButtons
+            };
+
+            Attachment plAttachment = plCard.ToAttachment();
+            replyToConversation.Attachments.Add(plAttachment);
+            return replyToConversation;
+        }
+
+        // helper method that creates similar image carousel
+        public static async Task<Activity> CreateCarousel(Activity message, string query) // for skype, emulator
+        {
+            JObject json = await SimilarPictures(query);
+
+            Activity replyToConversation = message.CreateReply("Here are some more pictures:");
+            replyToConversation.Recipient = message.From;
+            replyToConversation.Type = "message";
+            replyToConversation.Attachments = new List<Attachment>();
+            replyToConversation.AttachmentLayout = "carousel";
+
+            for (int i = 0; i < 5; i++)
+            {
+                List<CardImage> cardImages = new List<CardImage>();
+                cardImages.Add(new CardImage((json["value"][i]["contentUrl"]).ToString()));
+                HeroCard card = new HeroCard()
+                {
+                    Images = cardImages
+                };
+                replyToConversation.Attachments.Add(card.ToAttachment());
+            }
+            return replyToConversation;
+        }
+
+        //////////// AZURE STORAGE ////////////
         // logs message to azure blob
         public static async Task SaveMessage(Activity message, string dateIn)
         {
@@ -828,82 +1112,39 @@ namespace ImageDescriberV3
             return JsonConvert.SerializeObject(output, Formatting.Indented);
         }
 
-        // returns translation of text within a message to a specified language using Microsoft Translator API call
-        public static async Task<string> Translator(Activity message, string to)
+        //////////// SKYPE SPECIFIC HELPERS ////////////
+        // processes skype attachment url
+        public static async Task<byte[]> SkypeMessage(Activity activity, Uri url)
         {
-            string text = await Text(message);
-            string ret = text;
-            if (ret.Contains("No text detected") || ret.Contains("Please first attach")) return ret;
-            else
+            using (var connectorClient = new ConnectorClient(new Uri(activity.ServiceUrl)))
             {
-                text = text.Replace("The text says", " ").Replace(". Would you like to know anything else?", " ");
-                text = text.Trim();
-                AdmAccessToken admToken;
-                string headerValue;
-                AdmAuthentication admAuth = new AdmAuthentication(IdTrans, SecTrans);
-                admToken = admAuth.GetAccessToken();
-                headerValue = "Bearer " + admToken.access_token;
-                string langTo = Translate.CheckLanguage(headerValue, to);
-
-                if (langTo == null) ret = "Not a valid language name. Try again.";
-                else
+                var token = await (connectorClient.Credentials as MicrosoftAppCredentials).GetTokenAsync();
+                using (var httpClient = new HttpClient())
                 {
-                    StringBuilder sb = new StringBuilder().Append("The translation is " + Translate.TranslateMethod(headerValue, text, langTo));
-                    if (ret[ret.Length - 1] != '.') sb.Append('.');
-                    sb.Append(" Would you like to know anything else?");
-                    ret = sb.ToString();
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/octet-stream"));
+
+                    byte[] ret = await httpClient.GetByteArrayAsync(url);
+                    return ret;
                 }
             }
-            return ret;
         }
 
-        // returns an activity with a button to confirm accuracy of caption
-        public static Activity ConfirmButton(Activity message)
-        {
-            if (message == null) return null;
-            confirm = true;
-            if (message.ChannelId.Equals("facebook")) return FacebookButton(message);
-            return CreateButton(message);
-        }
-
+<<<<<<< HEAD
+        // converts message text to URL for skype
+        public static Uri SkypeUrl(string text) // gets image url from skype message
+=======
         // helper method to create accuracy confirming button
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Microsoft.Bot.Connector.Activity.CreateReply(System.String,System.String)")]
         public static Activity CreateButton(Activity message) // works for skype (POSTBACK buttons not yet supported), emulator 
+>>>>>>> refs/remotes/MSRCCS/master
         {
-            if (message == null) return null;
-            Activity replyToConversation = message.CreateReply("Is this correct?");
-            replyToConversation.Recipient = message.From;
-            replyToConversation.Type = "message";
-            replyToConversation.Attachments = new List<Attachment>();
-            List<CardAction> cardButtons = new List<CardAction>();
-
-            CardAction plButton = new CardAction()
-            {
-                Value = "postbackyes", // correct caption
-                Type = "postBack",
-                Title = "Yes"
-            };
-
-            CardAction p2Button = new CardAction()
-            {
-                Value = "postbackno", // incorrect caption
-                Type = "postBack",
-                Title = "No"
-            };
-
-            cardButtons.Add(plButton);
-            cardButtons.Add(p2Button);
-
-            HeroCard plCard = new HeroCard()
-            {
-                Buttons = cardButtons
-            };
-
-            Attachment plAttachment = plCard.ToAttachment();
-            replyToConversation.Attachments.Add(plAttachment);
-            return replyToConversation;
+            if (text == null) return null;
+            string full = text.Substring(text.IndexOf('>'));
+            return new Uri(full.Substring(1, full.Length - 5));
         }
 
+        //////////// FACEBOOK HELPERS ////////////
         // helper method to create accuracy confirming button
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "ImageDescriberV3.Payload.set_Text(System.String)")]
         public static Activity FacebookButton(Activity input) // works for facebook
@@ -923,72 +1164,6 @@ namespace ImageDescriberV3
             return reply;
         }
 
-        // method that returns activity that displays similar images in a carousel
-        public static async Task<Activity> Similar(Activity message)
-        {
-            VisionServiceClient VisionServiceClient = new VisionServiceClient(KeyDes);
-            if (userData.GetProperty<int>("Attachment") == 11)
-            {
-                AnalysisResult analysisResult = await VisionServiceClient.DescribeAsync(await AttachmentStream(message, userData.GetProperty<Uri>("ImageUrl")), 1);
-                if (message.ChannelId.Equals("facebook")) return await FacebookCarousel(message, analysisResult.Description.Captions[0].Text);
-                else return await CreateCarousel(message, analysisResult.Description.Captions[0].Text);
-            }
-            else if (userData.GetProperty<int>("Attachment") == 22)
-            {
-                Uri imageUri = userData.GetProperty<Uri>("ImageUrl");
-                AnalysisResult analysisResult = await VisionServiceClient.DescribeAsync(imageUri.AbsoluteUri, 1);
-                if (message.ChannelId.Equals("facebook")) return await FacebookCarousel(message, analysisResult.Description.Captions[0].Text);
-                else return await CreateCarousel(message, analysisResult.Description.Captions[0].Text);
-            }
-            return message.CreateReply("Please first attach an image and enter an image URL.");
-        }
-
-        // helper method that returns Json of similar photos using Bing Image Search API call
-        public static async Task<JObject> SimilarPictures(string query)
-        {
-            var client = new HttpClient();
-            var queryString = HttpUtility.ParseQueryString(string.Empty);
-
-            // Request headers
-            client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", KeyBing);
-
-            // Request parameters
-            queryString["q"] = query;
-            queryString["count"] = "5";
-            queryString["offset"] = "0";
-            queryString["mkt"] = "en-us";
-            queryString["safeSearch"] = "Moderate";
-            var uri = "https://api.cognitive.microsoft.com/bing/v5.0/images/search?" + queryString;
-
-            var response = await client.GetAsync(uri);
-            string rep = await response.Content.ReadAsStringAsync();
-            return JObject.Parse(rep);
-        }
-
-        // helper method that creates similar image carousel
-        public static async Task<Activity> CreateCarousel(Activity message, string query) // for skype, emulator
-        {
-            JObject json = await SimilarPictures(query);
-
-            Activity replyToConversation = message.CreateReply("Here are some more pictures:");
-            replyToConversation.Recipient = message.From;
-            replyToConversation.Type = "message";
-            replyToConversation.Attachments = new List<Attachment>();
-            replyToConversation.AttachmentLayout = "carousel";
-
-            for (int i = 0; i < 5; i++)
-            {
-                List<CardImage> cardImages = new List<CardImage>();
-                cardImages.Add(new CardImage((json["value"][i]["contentUrl"]).ToString()));
-                HeroCard card = new HeroCard()
-                {
-                    Images = cardImages
-                };
-                replyToConversation.Attachments.Add(card.ToAttachment());
-            }
-            return replyToConversation;
-        }
-
         // helper method that creates similar image carousel
         public static async Task<Activity> FacebookCarousel(Activity input, string query) // for facebook
         {
@@ -1000,6 +1175,7 @@ namespace ImageDescriberV3
             message.Attachment.Payload = new Payload();
             message.Attachment.Payload.TemplateType = "generic";
             JObject json = await SimilarPictures(query);
+            message.Attachment.Payload.Elements = new Collection<Element>();
             for (int i = 0; i < 5; i++) message.Attachment.Payload.Elements.Add(new Element((json["value"][i]["name"]).ToString(), (new Uri((json["value"][i]["contentUrl"]).ToString()))));
             reply.ChannelData = message;
             return reply;

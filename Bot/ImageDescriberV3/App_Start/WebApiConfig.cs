@@ -16,6 +16,7 @@ namespace ImageDescriberV3
                 throw new ArgumentNullException("config", "HttpConfiguration is null");
             }
             // Json settings
+            if (config == null) throw new ArgumentNullException("config", "HttpConfiguration is null");
             config.Formatters.JsonFormatter.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
             config.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             config.Formatters.JsonFormatter.SerializerSettings.Formatting = Formatting.Indented;

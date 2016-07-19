@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -32,13 +33,23 @@ namespace ImageDescriberV3
             }
             return null;
         }
-    }
+    } 
 
     public class ImageLuis
     {
         [JsonProperty(PropertyName = "query")]
         public string Query { get; set; }
 
+<<<<<<< HEAD
+        [JsonProperty(PropertyName = "intents")]
+        internal Collection<LIntent> Intents;
+
+        [JsonProperty(PropertyName = "entities")]
+        internal Collection<LEntity> Entities;
+    }
+
+    public class LIntent
+=======
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
         // Follow Luis Convention
         [JsonProperty(PropertyName = "intents")]
@@ -51,18 +62,31 @@ namespace ImageDescriberV3
     }
 
     public class IIntent
+>>>>>>> refs/remotes/MSRCCS/master
     {
-        public string intent { get; set; }
-        public float score { get; set; }
+        [JsonProperty(PropertyName = "intent")]
+        public string Intent { get; set; }
+
+        [JsonProperty(PropertyName = "score")]
+        public float Score { get; set; }
     }
 
-    public class lEntity
+    public class LEntity
     {
-        public string entity { get; set; }
-        public string type { get; set; }
-        public int startIndex { get; set; }
-        public int endIndex { get; set; }
-        public float score { get; set; }
+        [JsonProperty(PropertyName = "entity")]
+        public string Entity { get; set; }
+
+        [JsonProperty(PropertyName = "type")]
+        public string EntityType { get; set; }
+
+        [JsonProperty(PropertyName = "startIndex")]
+        public int StartIndex { get; set; }
+
+        [JsonProperty(PropertyName = "endIndex")]
+        public int EndIndex { get; set; }
+
+        [JsonProperty(PropertyName = "score")]
+        public float Score { get; set; }
     }
 
 }
