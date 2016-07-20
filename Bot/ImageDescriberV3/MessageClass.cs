@@ -20,7 +20,7 @@ namespace ImageDescriberV3
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         // Usage of Reflection to assign properties requires them to be able to be set
         [JsonProperty(PropertyName = "attachments")]
-        public IList<Attachment> Attachments { get; }
+        public IList<Attachment> Attachments { get; set; }
 
         [JsonProperty(PropertyName = "channelData")]
         public object ChannelData { get; set; }
@@ -33,11 +33,7 @@ namespace ImageDescriberV3
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         [JsonProperty(PropertyName = "entities")]
-<<<<<<< HEAD
         internal IList<Entity> Entities { get; set; }
-=======
-        public IList<Entity> Entities { get;  }
->>>>>>> refs/remotes/MSRCCS/master
 
         [JsonProperty(PropertyName = "from")]
         public ChannelAccount From { get; set; }
@@ -53,15 +49,15 @@ namespace ImageDescriberV3
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         [JsonProperty(PropertyName = "membersAdded")]
-        public IList<ChannelAccount> MembersAdded { get;  }
+        public IList<ChannelAccount> MembersAdded { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         [JsonProperty(PropertyName = "membersRemoved")]
-        public IList<ChannelAccount> MembersRemoved { get;  }
+        public IList<ChannelAccount> MembersRemoved { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         [JsonExtensionData(ReadData = true, WriteData = true)]
-        public JObject Properties { get;  }
+        public JObject Properties { get; set; }
 
         [JsonProperty(PropertyName = "recipient")]
         public ChannelAccount Recipient { get; set; }
@@ -70,10 +66,7 @@ namespace ImageDescriberV3
         public string ReplyToId { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings")]
-<<<<<<< HEAD
         // Identifier is of type string in Activity class
-=======
->>>>>>> refs/remotes/MSRCCS/master
         [JsonProperty(PropertyName = "serviceUrl")]
         public string ServiceUrl { get; set; }
 

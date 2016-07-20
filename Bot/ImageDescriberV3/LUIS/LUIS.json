@@ -2132,6 +2132,265 @@
       "text": "show me other pictures like this one",
       "intent": "Similar",
       "entities": []
+    },
+    {
+      "text": "is he happy or sad",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        },
+        {
+          "entity": "WhichEmotion",
+          "startPos": 4,
+          "endPos": 4
+        }
+      ]
+    },
+    {
+      "text": "is he sad or happy",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        },
+        {
+          "entity": "WhichEmotion",
+          "startPos": 4,
+          "endPos": 4
+        }
+      ]
+    },
+    {
+      "text": "is she sad or angry",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        },
+        {
+          "entity": "WhichEmotion",
+          "startPos": 4,
+          "endPos": 4
+        }
+      ]
+    },
+    {
+      "text": "what is the level of anger and sadness",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        },
+        {
+          "entity": "WhichEmotion",
+          "startPos": 7,
+          "endPos": 7
+        }
+      ]
+    },
+    {
+      "text": "are they angry or surprised",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        },
+        {
+          "entity": "WhichEmotion",
+          "startPos": 4,
+          "endPos": 4
+        }
+      ]
+    },
+    {
+      "text": "is she happy or sad",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        },
+        {
+          "entity": "WhichEmotion",
+          "startPos": 4,
+          "endPos": 4
+        }
+      ]
+    },
+    {
+      "text": "are they happy or sad",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        },
+        {
+          "entity": "WhichEmotion",
+          "startPos": 4,
+          "endPos": 4
+        }
+      ]
+    },
+    {
+      "text": "is he asdja or asduas",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        },
+        {
+          "entity": "WhichEmotion",
+          "startPos": 4,
+          "endPos": 4
+        }
+      ]
+    },
+    {
+      "text": "are they serui or asudh",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 2,
+          "endPos": 2
+        },
+        {
+          "entity": "WhichEmotion",
+          "startPos": 4,
+          "endPos": 4
+        }
+      ]
+    },
+    {
+      "text": "what is the level of asdhi and audkhk",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        },
+        {
+          "entity": "WhichEmotion",
+          "startPos": 7,
+          "endPos": 7
+        }
+      ]
+    },
+    {
+      "text": "what are the levels of gdph and adhf",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        },
+        {
+          "entity": "WhichEmotion",
+          "startPos": 7,
+          "endPos": 7
+        }
+      ]
+    },
+    {
+      "text": "what are the levels of contempt and happiness",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        },
+        {
+          "entity": "WhichEmotion",
+          "startPos": 7,
+          "endPos": 7
+        }
+      ]
+    },
+    {
+      "text": "what are the levels of surprise and contempt",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        },
+        {
+          "entity": "WhichEmotion",
+          "startPos": 7,
+          "endPos": 7
+        }
+      ]
+    },
+    {
+      "text": "what are the levels of sadh and gfop",
+      "intent": "Emotion",
+      "entities": [
+        {
+          "entity": "WhichEmotion",
+          "startPos": 5,
+          "endPos": 5
+        },
+        {
+          "entity": "WhichEmotion",
+          "startPos": 7,
+          "endPos": 7
+        }
+      ]
+    },
+    {
+      "text": "what is this capable of doing",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what are the capabilities of this",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what all things is this able to do",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "what is everything this can do",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "help me",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "how do i use this",
+      "intent": "ActionsAsk",
+      "entities": []
+    },
+    {
+      "text": "how can i use this",
+      "intent": "ActionsAsk",
+      "entities": []
     }
   ]
 }

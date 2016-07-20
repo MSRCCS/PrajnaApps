@@ -50,10 +50,12 @@ namespace ImageDescriberV3
         private static SemaphoreSlim semaphore = new SemaphoreSlim(1); // only one task pushing to azure at a time
         private static StateClient stateClient;
         private static BotData userData = null;
+        private static Activity reply;
 
         private static bool misinterpret = false; // expecting labeling errors
         private static bool incorrect = false; // expecting annotation errors
         private static bool confirm = false; // expecting button response
+        private static float luisConfidence = 0.75f; // minimum confidence to categorize multiple intents
 
         private static string messageEnding = " Would you like to know anything else?";
 
@@ -65,114 +67,21 @@ namespace ImageDescriberV3
 
                 stateClient = message.GetStateClient();
                 userData = await stateClient.BotState.GetUserDataAsync(message.ChannelId, message.From.Id); // acquire all current userData
-                userData.SetProperty<bool>("Message", true); // arbitrary variable - required for userData to function properly
 
-                Activity reply = new Activity();
+                reply = new Activity();
 
-                if (await CheckAttachments(message, reply, connector)) return Request.CreateResponse(HttpStatusCode.OK); // checks if an image or image url has been sent
-                if (await CheckHelpCommand(message, reply, connector)) return Request.CreateResponse(HttpStatusCode.OK); // checks if help was requested
-                if (await CheckLabelFeedback(message, reply, connector)) return Request.CreateResponse(HttpStatusCode.OK); // checks if reporting LUIS label error
-                if (await CheckAnnotateFeedback(message, reply, connector)) return Request.CreateResponse(HttpStatusCode.OK); // checks if identifying annotation error (or button response)
+                if (await CheckFirstMessage(message, connector)) return Request.CreateResponse(HttpStatusCode.OK); // checks if it is user's first message
+                if (await CheckAttachments(message, connector)) return Request.CreateResponse(HttpStatusCode.OK); // checks if an image or image url has been sent
+                if (await CheckHelpCommand(message, connector)) return Request.CreateResponse(HttpStatusCode.OK); // checks if help was requested
+                if (await CheckLabelFeedback(message, connector)) return Request.CreateResponse(HttpStatusCode.OK); // checks if reporting LUIS label error
+                if (await CheckAnnotateFeedback(message, connector)) return Request.CreateResponse(HttpStatusCode.OK); // checks if identifying annotation error (or button response)
 
                 ImageLuis luis = await LuisClient.ParseUserInput(message.Text);
-<<<<<<< HEAD
 
                 for (int i = 0; i < luis.Intents.Count(); i++)
                 {
-                    if (i == 0 || (i > 0 && luis.Intents[i].Score > 0.75)) await ChooseIntent(message, connector, luis, luis.Intents[i].Intent); // rarely detects multiple intents due to nature of LUIS
+                    if (i == 0 || (i > 0 && luis.Intents[i].Score > luisConfidence)) await ChooseIntent(message, connector, luis, luis.Intents[i].Intent); // rarely detects multiple intents due to nature of LUIS
                     else break;
-=======
-                foreach ( IIntent intent in luis.Intent ) // identifying the correct intent from LUIS
-                {
-                    switch (intent.intent)
-                    {
-                        case "None":
-                            reply = message.CreateReply("I don't understand what you mean. Please enter in another request. For a full list of commands, enter \"help\".");
-                            await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
-                            return Request.CreateResponse(HttpStatusCode.OK);
-                        case "Describe":
-                            reply = message.CreateReply(await Describe(message));
-                            userData.SetProperty<string>("PreviousQ", message.Text);
-                            Activity confirm = ConfirmButton(message);
-                            await SetDataSendMessage(message, new Collection<Activity>() { reply, confirm }, connector);
-                            return Request.CreateResponse(HttpStatusCode.OK);
-                        case "Emotion":
-                            // Please change the code to deal with multiple emotions. 
-                            if (luis.Entities.Count() > 0) reply = message.CreateReply(await Emotion(message, luis.Entities[0].entity));
-                            else reply = message.CreateReply(await Emotion(message));
-                            await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
-                            return Request.CreateResponse(HttpStatusCode.OK);
-                        case "Face":
-                            reply = message.CreateReply(await Face(message));
-                            await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
-                            return Request.CreateResponse(HttpStatusCode.OK);
-                        case "ActionsAsk":
-                            reply = message.CreateReply("This bot provides information about images. After attaching an image or sending an image URL, you can ask the bot about the image's contents, emotions, people, text, and for similar images, using natural language commands. For a full list of functions, enter \"help\".");
-                            Activity reply2 = message.CreateReply("If the bot misinterprets any of your requests, enter \"wrong\". To help us improve the bot, please correct it if it gives you an inaccurate response to your question.");
-                            Activity reply3 = message.CreateReply("To get started, enter an image and try asking \"What is this a picture of\".");
-                            await SetDataSendMessage(message, new Collection<Activity>() { reply, reply2, reply3 }, connector);
-                            return Request.CreateResponse(HttpStatusCode.OK);
-                        case "Age":
-                            reply = message.CreateReply(await Age(message));
-                            await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
-                            return Request.CreateResponse(HttpStatusCode.OK);
-                        case "Celebrity":
-                            reply = message.CreateReply(await Celebrities(message));
-                            await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
-                            return Request.CreateResponse(HttpStatusCode.OK);
-                        case "Gender":
-                            reply = message.CreateReply(await Gender(message));
-                            await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
-                            return Request.CreateResponse(HttpStatusCode.OK);
-                        case "Text":
-                            reply = message.CreateReply(await Text(message));
-                            await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
-                            return Request.CreateResponse(HttpStatusCode.OK);
-                        case "Translate":
-                            // We will translate into first language 
-                            if (luis.Entities.Count() == 1)
-                                reply = message.CreateReply(await Translator(message, luis.Entities[0].entity));
-                            else if ( luis.Entities.Count() == 0 ) 
-                                reply = message.CreateReply("You need to specify a language to translate to. Please try again.");
-                            else 
-                                reply = message.CreateReply("You can't specify more than one language to translate to. Please try again.");
-
-                            await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
-                            return Request.CreateResponse(HttpStatusCode.OK);
-
-                        case "Similar":
-                            reply = await Similar(message);
-                            await SetDataSendMessage(message, new Collection<Activity>() { reply } , connector);
-                            return Request.CreateResponse(HttpStatusCode.OK);
-                        case "Annotate":
-                            if (userData.GetProperty<string>("PreviousQ") != null) // responding without a previous question
-                            {
-                                if (luis.Entities.Count() == 1) // not identifying the correct annotation
-                                {
-                                    reply = message.CreateReply("Thanks for the feedback - we will use it to better train our models. Would you like to know anything else?");
-                                    StringBuilder sb = new StringBuilder();
-                                    foreach (lEntity entity in luis.Entities) sb.Append(entity.entity + " ");
-                                    userData.SetProperty<string>("Annotation", sb.ToString());
-                                }
-                                else if (luis.Entities.Count() == 0)
-                                {
-                                    reply = message.CreateReply("Please identify what the correct annotation is.");
-                                    incorrect = true;
-                                }
-                                else
-                                {
-                                    reply = message.CreateReply("You specify more than one annotations, that confuses me. ");
-                                    incorrect = true;
-                                }
-                            }
-                            else reply = message.CreateReply("Please first ask the bot about the image.");
-                            await connector.Conversations.ReplyToActivityAsync(reply);
-                            await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
-                            await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9)));
-                            await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
-                            return Request.CreateResponse(HttpStatusCode.OK);
-                    }
->>>>>>> refs/remotes/MSRCCS/master
                 }
                 return Request.CreateResponse(HttpStatusCode.OK);
             }
@@ -214,8 +123,27 @@ namespace ImageDescriberV3
         }
 
         //////////// INITIAL MESSAGE CHECKS ////////////
+        // initial method to check if sending their first message to bot
+        public static async Task<bool> CheckFirstMessage(Activity message, ConnectorClient connector)
+        {
+            if (userData.GetProperty<bool>("MessageFirst"))
+            {
+                userData.SetProperty<bool>("MessageFirst", true); // one property setting is necessary for userData to work properly
+                return false;
+            }
+            else
+            {
+                userData.SetProperty<bool>("MessageFirst", true);
+                Activity greeting = message.CreateReply("Hello!");
+                await connector.Conversations.ReplyToActivityAsync(greeting);
+                await Task.Run(async () => await SaveMessage(greeting, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
+                await ActionsAskIntent(message, connector);
+                return true;
+            }
+        }
+
         // initial method to check if sending attachment or URL
-        public static async Task<bool> CheckAttachments(Activity message, Activity reply, ConnectorClient connector)
+        public static async Task<bool> CheckAttachments(Activity message, ConnectorClient connector)
         {
             if (message.Attachments != null && message.Attachments.Count() >= 1 && message.Attachments[0].ContentType.ToString().Contains("image")) // sending image + error catching for facebook link thumbnail
             {
@@ -257,11 +185,11 @@ namespace ImageDescriberV3
         }
 
         // initial method to see if help is requested
-        public static async Task<bool> CheckHelpCommand(Activity message, Activity reply, ConnectorClient connector)
+        public static async Task<bool> CheckHelpCommand(Activity message, ConnectorClient connector)
         {
             if (message.Text.ToLower().Contains("help") || message.Text.ToLower().Contains("functionality") || message.Text.ToLower().Contains("commands"))
             {
-                reply = message.CreateReply("Full capabilities: image description, primary emotion, levels of emotions, number of faces, age of people, genders, celebrity recognition, image text detection, image text translation, similar images. To use the bot in a different language, enter \"use\" followed by your language.");
+                reply = message.CreateReply("Full capabilities: image description, primary emotion, levels of particular emotions, number of faces, age of people, genders, celebrity recognition, image text detection, image text translation, similar images. To use the bot in a different language, enter \"use\" followed by your language.");
                 await connector.Conversations.ReplyToActivityAsync(reply);
                 await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
                 await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9)));
@@ -272,7 +200,7 @@ namespace ImageDescriberV3
         }
 
         // initial method to see is LUIS label feedback is being given
-        public static async Task<bool> CheckLabelFeedback(Activity message, Activity reply, ConnectorClient connector)
+        public static async Task<bool> CheckLabelFeedback(Activity message, ConnectorClient connector)
         {
             if (message.Text.ToLower().Contains("wrong")) // wants to report incorrect labeling
             {
@@ -292,13 +220,15 @@ namespace ImageDescriberV3
                 {
                     if (message.Text.ToLower().Contains(opt.ToLower()))
                     {
-                        reply = message.CreateReply("Thanks for the feedback. We will categorize the request as " + opt.ToLower() + " next time. Here's your intended request: ");
+                        if (!opt.Equals("None")) reply = message.CreateReply("Thanks for the feedback. We will categorize the request as " + opt.ToLower() + " next time. Here's your intended request: ");
+                        else reply = message.CreateReply("Thanks for the feedback. We will categorize the request as " + opt.ToLower() + " next time.");
+
                         misinterpret = false;
                         await connector.Conversations.ReplyToActivityAsync(reply);
                         await Task.Run(async () => await SaveMessage(message, message.Timestamp.ToString().Substring(0, 9))); // log incoming message
                         await Task.Run(async () => await SaveMessage(reply, message.Timestamp.ToString().Substring(0, 9)));
 
-                        await ChooseIntent(message, connector, await LuisClient.ParseUserInput(userData.GetProperty<string>("PreviousQ")), opt);
+                        if (!opt.Equals("None")) await ChooseIntent(message, connector, await LuisClient.ParseUserInput(userData.GetProperty<string>("PreviousQ")), opt);
                         return true;
                     }
                 }
@@ -313,7 +243,7 @@ namespace ImageDescriberV3
         }
 
         // initial method to see if annotation result feedback is being given
-        public static async Task<bool> CheckAnnotateFeedback(Activity message, Activity reply, ConnectorClient connector)
+        public static async Task<bool> CheckAnnotateFeedback(Activity message, ConnectorClient connector)
         {
             if (incorrect) // identifying only correct annotation (after Annotate intent)
             {
@@ -360,37 +290,37 @@ namespace ImageDescriberV3
             switch (intent)
             {
                 case "None":
-                    await NoneIntent(message, connector, luis);
+                    await NoneIntent(message, connector);
                     break;
                 case "Describe":
-                    await DescribeIntent(message, connector, luis);
+                    await DescribeIntent(message, connector);
                     break;
                 case "Emotion":
                     await EmotionIntent(message, connector, luis);
                     break;
                 case "Face":
-                    await FaceIntent(message, connector, luis);
+                    await FaceIntent(message, connector);
                     break;
                 case "ActionsAsk":
-                    await ActionsAskIntent(message, connector, luis);
+                    await ActionsAskIntent(message, connector);
                     break;
                 case "Age":
-                    await AgeIntent(message, connector, luis);
+                    await AgeIntent(message, connector);
                     break;
                 case "Celebrity":
-                    await CelebrityIntent(message, connector, luis);
+                    await CelebrityIntent(message, connector);
                     break;
                 case "Gender":
-                    await GenderIntent(message, connector, luis);
+                    await GenderIntent(message, connector);
                     break;
                 case "Text":
-                    await TextIntent(message, connector, luis);
+                    await TextIntent(message, connector);
                     break;
                 case "Translate":
                     await TranslateIntent(message, connector, luis);
                     break;
                 case "Similar":
-                    await SimilarIntent(message, connector, luis);
+                    await SimilarIntent(message, connector);
                     break;
                 case "Annotate":
                     await AnnotateIntent(message, connector, luis);
@@ -398,22 +328,27 @@ namespace ImageDescriberV3
             }
         }
 
-        public static async Task NoneIntent(Activity message, ConnectorClient connector, ImageLuis luis)
+        public static async Task NoneIntent(Activity message, ConnectorClient connector)
         {
-            Activity reply = message.CreateReply("I don't understand what you mean. Please enter in another request. For a full list of commands, enter \"help\".");
+            reply = message.CreateReply("I don't understand what you mean. Please enter in another request. For a full list of commands, enter \"help\".");
             await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector);
         }
 
-        public static async Task DescribeIntent(Activity message, ConnectorClient connector, ImageLuis luis)
+        public static async Task DescribeIntent(Activity message, ConnectorClient connector)
         {
-            Activity reply = message.CreateReply(await Describe(message));
-            Activity confirm = ConfirmButton(message);
-            await SetDataSendMessage(message, new Collection<Activity>() { reply, confirm }, connector);
+            string describe = await Describe(message);
+            reply = message.CreateReply(describe);
+            if (message.ChannelId.Equals("skype")) await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector); // postback buttons do not yet work for skype
+            else if (describe.Contains("Please first")) await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector); // no response given
+            else 
+            {
+                Activity confirm = ConfirmButton(message);
+                await SetDataSendMessage(message, new Collection<Activity>() { reply, confirm }, connector);
+            }
         }
 
         public static async Task EmotionIntent(Activity message, ConnectorClient connector, ImageLuis luis)
         {
-            Activity reply = new Activity();
             if (luis.Entities.Count() > 0)
             {
                 Collection<string> emotions = new Collection<string>();
@@ -424,61 +359,59 @@ namespace ImageDescriberV3
             await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector);
         }
 
-        public static async Task FaceIntent(Activity message, ConnectorClient connector, ImageLuis luis)
+        public static async Task FaceIntent(Activity message, ConnectorClient connector)
         {
-            Activity reply = message.CreateReply(await Face(message));
+            reply = message.CreateReply(await Face(message));
             await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector);
         }
 
-        public static async Task ActionsAskIntent(Activity message, ConnectorClient connector, ImageLuis luis)
+        public static async Task ActionsAskIntent(Activity message, ConnectorClient connector)
         {
-            Activity reply = message.CreateReply("This bot provides information about images. After attaching an image or sending an image URL, you can ask the bot about the image's contents, emotions, people, text, and for similar images, using natural language commands. For a full list of functions, enter \"help\".");
+            reply = message.CreateReply("This bot provides information about images. After attaching an image or sending an image URL, you can ask the bot about the image's contents, emotions, people, text, and for similar images, using natural language commands. For a full list of functions, enter \"help\".");
             Activity reply2 = message.CreateReply("If the bot misinterprets any of your requests, enter \"wrong\". To help us improve the bot, please correct it if it gives you an inaccurate response to your question.");
             Activity reply3 = message.CreateReply("To get started, enter an image and try asking \"What is this a picture of\".");
             await SetDataSendMessage(message, new Collection<Activity>() { reply, reply2, reply3 }, connector);
         }
 
-        public static async Task AgeIntent(Activity message, ConnectorClient connector, ImageLuis luis)
+        public static async Task AgeIntent(Activity message, ConnectorClient connector)
         {
-            Activity reply = message.CreateReply(await Age(message));
+            reply = message.CreateReply(await Age(message));
             await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector);
         }
-        public static async Task CelebrityIntent(Activity message, ConnectorClient connector, ImageLuis luis)
+        public static async Task CelebrityIntent(Activity message, ConnectorClient connector)
         {
-            Activity reply = message.CreateReply(await Celebrities(message));
-            await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector);
-        }
-
-        public static async Task GenderIntent(Activity message, ConnectorClient connector, ImageLuis luis)
-        {
-            Activity reply = message.CreateReply(await Gender(message));
+            reply = message.CreateReply(await Celebrities(message));
             await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector);
         }
 
-        public static async Task TextIntent(Activity message, ConnectorClient connector, ImageLuis luis)
+        public static async Task GenderIntent(Activity message, ConnectorClient connector)
         {
-            Activity reply = message.CreateReply(await Text(message));
+            reply = message.CreateReply(await Gender(message));
+            await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector);
+        }
+
+        public static async Task TextIntent(Activity message, ConnectorClient connector)
+        {
+            reply = message.CreateReply(await Text(message));
             await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector);
         }
         public static async Task TranslateIntent(Activity message, ConnectorClient connector, ImageLuis luis)
         {
             // We will translate into first language   
-            Activity reply = new Activity();
             if (luis.Entities.Count() == 1) reply = message.CreateReply(await Translator(message, luis.Entities[0].Entity));
             else if (luis.Entities.Count() == 0) reply = message.CreateReply("You need to specify a language to translate to. Please try again.");
             else reply = message.CreateReply("You can't specify more than one language to translate to. Please try again.");
             await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector);
         }
 
-        public static async Task SimilarIntent(Activity message, ConnectorClient connector, ImageLuis luis)
+        public static async Task SimilarIntent(Activity message, ConnectorClient connector)
         {
-            Activity reply = await Similar(message);
+            reply = await Similar(message);
             await SetDataSendMessage(message, new Collection<Activity>() { reply }, connector);
         }
 
         public static async Task AnnotateIntent(Activity message, ConnectorClient connector, ImageLuis luis)
         {
-            Activity reply = new Activity();
             if (userData.GetProperty<string>("PreviousQ") != null) // responding without a previous question
             {
                 if (luis.Entities.Count() == 1) // identifying the correct annotation
@@ -552,7 +485,7 @@ namespace ImageDescriberV3
             string ret = "Please first attach an image or enter an image URL.";
             foreach (string emotion in emotions)
             {
-                if (null == ValidEmo(emotion)) return (emotion + " is not a valid option. Valid emotions are anger, contempt, disgust, fear, happiness, neutral, sadness, and surprise. Please try again.");
+                if (ValidEmo(emotion) == null) return (emotion + " is not a valid option. Valid emotions are anger, contempt, disgust, fear, happiness, neutral, sadness, and surprise. Please try again.");
             }
             if (userData.GetProperty<int>("Attachment") == 11)
             {
@@ -991,7 +924,7 @@ namespace ImageDescriberV3
             if (message == null) return null;
             confirm = true;
             if (message.ChannelId.Equals("facebook")) return FacebookButton(message);
-            return CreateButton(message);
+            else return CreateButton(message);
         }
 
         // helper method to create accuracy confirming button
@@ -1130,14 +1063,8 @@ namespace ImageDescriberV3
             }
         }
 
-<<<<<<< HEAD
         // converts message text to URL for skype
         public static Uri SkypeUrl(string text) // gets image url from skype message
-=======
-        // helper method to create accuracy confirming button
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Microsoft.Bot.Connector.Activity.CreateReply(System.String,System.String)")]
-        public static Activity CreateButton(Activity message) // works for skype (POSTBACK buttons not yet supported), emulator 
->>>>>>> refs/remotes/MSRCCS/master
         {
             if (text == null) return null;
             string full = text.Substring(text.IndexOf('>'));
@@ -1146,7 +1073,6 @@ namespace ImageDescriberV3
 
         //////////// FACEBOOK HELPERS ////////////
         // helper method to create accuracy confirming button
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "ImageDescriberV3.Payload.set_Text(System.String)")]
         public static Activity FacebookButton(Activity input) // works for facebook
         {
             if (input == null) return null;
@@ -1158,6 +1084,7 @@ namespace ImageDescriberV3
             message.Attachment.Payload = new Payload();
             message.Attachment.Payload.TemplateType = "button";
             message.Attachment.Payload.Text = "Is this correct?";
+            message.Attachment.Payload.Buttons = new Collection<Button>();
             message.Attachment.Payload.Buttons.Add(new Button("postback", "postbackyes", "Yes")); // correct caption
             message.Attachment.Payload.Buttons.Add(new Button("postback", "postbackno", "No")); // incorrect caption
             reply.ChannelData = message;

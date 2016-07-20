@@ -81,15 +81,9 @@ namespace ImageDescriberV3
 
     public class AccessToken
     {
-<<<<<<< HEAD
         // Translator API sample code follows this format. 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
-=======
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "access")]
-        // follow sample code https://msdn.microsoft.com/en-us/library/hh454950.aspx
->>>>>>> refs/remotes/MSRCCS/master
         public string access_token { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
@@ -112,7 +106,6 @@ namespace ImageDescriberV3
 
         public TranslateAuthentication(string clientId, string clientSecret)
         {
-            //If clientid or client secret has special characters, encode before sending request
             this.request = string.Format(CultureInfo.InvariantCulture, "grant_type=client_credentials&client_id={0}&client_secret={1}&scope=http://api.microsofttranslator.com", WebUtility.UrlEncode(clientId), WebUtility.UrlEncode(clientSecret));
             this.Token = HttpPost(AccessUri, this.request);
         }

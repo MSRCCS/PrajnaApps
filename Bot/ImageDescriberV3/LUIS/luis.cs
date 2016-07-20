@@ -40,7 +40,6 @@ namespace ImageDescriberV3
         [JsonProperty(PropertyName = "query")]
         public string Query { get; set; }
 
-<<<<<<< HEAD
         [JsonProperty(PropertyName = "intents")]
         internal Collection<LIntent> Intents;
 
@@ -49,20 +48,6 @@ namespace ImageDescriberV3
     }
 
     public class LIntent
-=======
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
-        // Follow Luis Convention
-        [JsonProperty(PropertyName = "intents")]
-        public IIntent[] Intent { get; }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
-        // Follow Luis Convention
-        [JsonProperty(PropertyName = "entities")]
-        public lEntity[] Entities { get; set; }
-    }
-
-    public class IIntent
->>>>>>> refs/remotes/MSRCCS/master
     {
         [JsonProperty(PropertyName = "intent")]
         public string Intent { get; set; }
