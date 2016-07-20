@@ -10,7 +10,7 @@ using System.Globalization;
 namespace ImageDescriberV3
 {
     // class for Microsoft Translator API methods
-    class Translate
+    static class Translate
     {
 
         public static string TranslateMethod(string authToken, string textIn, string langTo)
@@ -79,43 +79,45 @@ namespace ImageDescriberV3
         }
     }
 
-    public class AdmAccessToken
+    public class AccessToken
     {
+<<<<<<< HEAD
+        // Translator API sample code follows this format. 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
+=======
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "access")]
         // follow sample code https://msdn.microsoft.com/en-us/library/hh454950.aspx
+>>>>>>> refs/remotes/MSRCCS/master
         public string access_token { get; set; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public string token_type { get; set; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public string expires_in { get; set; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly")]
         public string scope { get; set; }
     }
-    public class AdmAuthentication
+
+    public class TranslateAuthentication
     {
-        public static readonly string DatamarketAccessUri = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13";
-        private string clientId;
-        private string clientSecret;
+        public static readonly string AccessUri = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13";
         private string request;
-        private AdmAccessToken token;
-        //Access token expires every 10 minutes. Renew it every 9 minutes only.
+        public AccessToken Token { get; }
 
-        public AdmAuthentication(string clientId, string clientSecret)
+        public TranslateAuthentication(string clientId, string clientSecret)
         {
-            this.clientId = clientId;
-            this.clientSecret = clientSecret;
             //If clientid or client secret has special characters, encode before sending request
-            this.request = string.Format("grant_type=client_credentials&client_id={0}&client_secret={1}&scope=http://api.microsofttranslator.com", WebUtility.UrlEncode(clientId), WebUtility.UrlEncode(clientSecret));
-            this.token = HttpPost(DatamarketAccessUri, this.request);
-            //renew the token every specified minutes
-        }
-        public AdmAccessToken GetAccessToken()
-        {
-            return this.token;
+            this.request = string.Format(CultureInfo.InvariantCulture, "grant_type=client_credentials&client_id={0}&client_secret={1}&scope=http://api.microsofttranslator.com", WebUtility.UrlEncode(clientId), WebUtility.UrlEncode(clientSecret));
+            this.Token = HttpPost(AccessUri, this.request);
         }
 
-        private AdmAccessToken HttpPost(string DatamarketAccessUri, string requestDetails)
+        private static AccessToken HttpPost(string DatamarketAccessUri, string requestDetails)
         {
             //Prepare OAuth request 
             WebRequest webRequest = WebRequest.Create(DatamarketAccessUri);
@@ -129,9 +131,9 @@ namespace ImageDescriberV3
             }
             using (WebResponse webResponse = webRequest.GetResponse())
             {
-                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(AdmAccessToken));
+                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(AccessToken));
                 //Get deserialized object from JSON stream
-                return (AdmAccessToken)serializer.ReadObject(webResponse.GetResponseStream());
+                return (AccessToken)serializer.ReadObject(webResponse.GetResponseStream());
             }
         }
 
