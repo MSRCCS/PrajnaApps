@@ -28,8 +28,11 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
     var uploadButton = UIButton()
     var switchButton = UIButton()
     var menuButton = UIButton()
+    var saveButton = UIButton()
     let doubleTap = UITapGestureRecognizer()
     var swipe = UISwipeGestureRecognizer()
+    var cover = UIView()
+    var currentImage = UIImage()
     
     var boxView:UIView!;
     var previewView: UIView!;
@@ -70,6 +73,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
     //State Variables - Which API to call & details about it
     var camState = 0
     var camDetails = ":-)"
+    let detailLabel = UILabel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -83,8 +87,9 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
         self.picker.delegate = self
         
         self.setupAVCapture()
+        
+        self.tabBarController?.tabBar.hidden = true
     }
-    
     
     override func viewWillAppear(animated: Bool) {
         if !done {
@@ -123,13 +128,14 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
     
     func viewFinder(sender: UISwipeGestureRecognizer) {
         self.stopCamera()
-        performSegueWithIdentifier("viewFinder", sender: nil)
+        self.tabBarController?.selectedIndex = 0
+        print("!!")
     }
     
     //adds attributes to the buttons and adds some of them to the view
     func addButtons() {
         //sets up the toggle button
-        toggleButton.frame = CGRectMake(0, 20, 45, 25)
+        toggleButton.frame = CGRectMake(0, 20, 50, 40)
         toggleButton.addTarget(self, action: #selector(ImageCaptureViewController.toggle(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         let flipImage = UIImage(named:"FlipCameraButton.png")?.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate)
         toggleButton.tintColor = UIColor.whiteColor()
@@ -139,61 +145,68 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
         
         //sets up the capture button
         captureButton.frame = CGRectMake(self.view.frame.width / 2 - 45, self.view.frame.height - 110, 90, 90)
-        let captureImage = UIImage(named: "CaptureButtonPNG.png")!
+        let captureImage = UIImage(named: "CaptureButtonPNG.png")?.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate)
+        captureButton.tintColor = UIColor.whiteColor()
         captureButton.setImage(captureImage, forState: .Normal)
         captureButton.addTarget(self, action: #selector(ImageCaptureViewController.takePicture(_:)), forControlEvents: .TouchUpInside)
         self.view.addSubview(captureButton)
         
         //sets up the dismiss button
         dismissButton.setTitle("Dismiss", forState: .Normal)
-        dismissButton.backgroundColor = UIColor.blackColor()
+        dismissButton.backgroundColor = UIColor.whiteColor()
+        dismissButton.setTitleColor(UIColor.blackColor(), forState: .Normal)
         dismissButton.addTarget(self, action: #selector(ImageCaptureViewController.dismissCapturedImage(_:)), forControlEvents: .TouchUpInside)
         
         //sets up the caption label
-        captionLabel.backgroundColor = UIColor.darkGrayColor()
+        captionLabel.backgroundColor = UIColor.blackColor()
         captionLabel.textColor = UIColor.whiteColor()
         captionLabel.textAlignment = NSTextAlignment.Center
         
         //sets up the close button
-        closeButton.frame = CGRectMake(0.0, self.view.frame.size.height - 44, self.view.frame.size.width, 44)
+        closeButton.frame = CGRectMake(self.view.frame.size.width / 2 - 50, self.view.frame.size.height - 44, 100, 44)
+        closeButton.layer.cornerRadius = 0.25 * closeButton.bounds.size.width
         closeButton.addTarget(self, action: #selector(ImageCaptureViewController.dismissUploadImageVC(_:)), forControlEvents: UIControlEvents.TouchUpInside)
-        closeButton.backgroundColor = UIColor.blackColor()
+        closeButton.backgroundColor = UIColor.whiteColor()
+        closeButton.setTitleColor(UIColor.blackColor(), forState: .Normal)
         closeButton.setTitle("Dismiss", forState: .Normal)
         
         //sets up the uploadButton
         uploadButton.frame = CGRect(x: self.view.frame.size.width - 60, y: self.view.frame.size.height - 60, width: 44, height: 44)
         let uploadImage = UIImage(named: "uploadButton.png")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate)
         uploadButton.setImage(uploadImage, forState: .Normal)
-        uploadButton.tintColor = UIColor.darkGrayColor()
+        uploadButton.tintColor = UIColor.whiteColor()
         uploadButton.addTarget(self, action: #selector(ImageCaptureViewController.uploadPicture(_:)), forControlEvents: .TouchUpInside)
         self.view.addSubview(uploadButton)
         
         //sets up the switch button
-        switchButton.frame = CGRect(x: 0, y: self.view.frame.size.height - 60, width: 80, height: 60)
-        switchButton.setTitle("LIVE", forState: .Normal)
+        switchButton.frame = CGRect(x: 16, y: self.view.frame.size.height - 54, width: 44, height: 33)
+        let switchImage = UIImage(named: "glyphicons-facetime-video.png")?.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate)
+        switchButton.tintColor = UIColor.whiteColor()
+        switchButton.setImage(switchImage, forState: .Normal)
         switchButton.addTarget(self, action: #selector(ImageCaptureViewController.viewFinder(_:)), forControlEvents: .TouchUpInside)
-        //switchButton.backgroundColor = UIColor.whiteColor()
-        switchButton.setTitleColor(UIColor.grayColor(), forState: .Normal)
         self.view.addSubview(switchButton)
         
         //sets up the Menu Button
-        menuButton.frame = CGRect(x: self.view.frame.size.width - 60, y: 20, width: 44, height: 44)
-        //let menuImage = UIImage(named: "menuButtonSlim2.png")!.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate)
-        //menuButton.setImage(menuImage, forState: .Normal)
+        menuButton.frame = CGRect(x: self.view.frame.size.width - 45, y: 20, width: 40, height: 40)
 
-        if(camState == 1) {
-            let index: String.Index = camDetails.startIndex.advancedBy(2) // Swift 2
-            var ss2:String = camDetails.substringToIndex(index) // "Stack"
-            ss2 = ss2.uppercaseString
-            menuButton.setTitle(ss2, forState: .Normal)
-        } else {
-            menuButton.setTitle(camDetails, forState: .Normal)
-        }
-        menuButton.titleLabel?.textColor = UIColor.blackColor()
-        menuButton.titleLabel?.adjustsFontSizeToFitWidth = true
-        menuButton.tintColor = UIColor.blackColor()
+        menuButton.setImage(UIImage(named: "MenuButton.png"), forState: .Normal)
         menuButton.addTarget(self, action: #selector(ImageCaptureViewController.showMenu(_:)), forControlEvents: .TouchUpInside)
         self.view.addSubview(menuButton)
+        
+        detailLabel.frame = CGRect(x: self.view.frame.size.width - 150, y: 20, width: 100, height: 40)
+        detailLabel.numberOfLines = 2
+        detailLabel.textColor = UIColor.whiteColor()
+        detailLabel.text = "Facial Recognition"
+        detailLabel.textAlignment = .Right
+        detailLabel.font = UIFont(name: (detailLabel.font?.fontName)!, size: 12.0)
+        self.view.addSubview(detailLabel)
+        
+        cover.frame = CGRect(x: 0, y: self.view.frame.size.height - 44, width: self.view.frame.size.width, height: 44)
+        cover.backgroundColor = UIColor.blackColor()
+        
+        self.saveButton.backgroundColor = UIColor.whiteColor()
+        self.saveButton.setTitleColor(UIColor.blackColor(), forState: .Normal)
+        self.saveButton.setTitle("Save", forState: .Normal)
     }
     
     //adds the translation detail view controller to the screen
@@ -276,6 +289,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
                                                 //checks each FaceDetectionBox to see if is close to the celebrity face. If the origin point is within fifteen of the celebrity face the 'nametag' is replaced with the celebrity's name
                                                 if(withinFifteen(Int(face.outline.frame.minX), two: newX) && withinFifteen(Int(face.outline.frame.minY), two: newY)) {
                                                     face.caption.text = (celeb["name"] as! String)
+                                                    print(face.caption.text)
                                                 }
                                             }
                                         }
@@ -359,6 +373,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
                         self.view.addSubview(detailButton)
                         self.detailButtons.append(detailButton)
                         self.translationDetails.append(packet)
+                        self.captionLabel.text = "Done Translating"
                     }
                 }
             }
@@ -373,13 +388,10 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
         self.camDetails = details
         self.camState = state
         
-        if(camState == 1) {
-            let index: String.Index = camDetails.startIndex.advancedBy(2) // Swift 2
-            var ss2:String = camDetails.substringToIndex(index) // "Stack"
-            ss2 = ss2.uppercaseString
-            menuButton.setTitle(ss2, forState: .Normal)
+        if(camState == 0) {
+            detailLabel.text = "Facial Recognition"
         } else {
-            menuButton.setTitle(camDetails, forState: .Normal)
+            detailLabel.text = "Translating Into " + getLanguageFromCode(camDetails)
         }
     }
     
@@ -401,10 +413,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
         #endif
     
         let controller = storyboard.instantiateViewControllerWithIdentifier("menu") as! MenuViewController
-        
-        controller.camState = self.camState
-        controller.camDetails = self.camDetails
-        controller.preferredContentSize = CGSizeMake(250, 300)
+        controller.preferredContentSize = CGSizeMake(180, 300)
         
         controller.modalPresentationStyle = UIModalPresentationStyle.Popover
         
@@ -417,8 +426,8 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
         
         popoverPresentationController!.permittedArrowDirections = .Any
         popoverPresentationController!.delegate = self
-        
         self.presentViewController(controller, animated: true, completion: nil)
+        controller.setDetails(camState, camDetails: camDetails)
     }
     
  /////////////////// TAKE PICTURE ////////////////////
@@ -465,11 +474,8 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
                     } else {
                         self.celebrityPresent = false
                     }
-                    
                     self.displayAnswers(rs)
                 }
-                
-                
                 
                 let width = image!.size.width
                 
@@ -481,13 +487,32 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
                 
                 let dismissButtonHeight = ((self.view.frame.size.height - resizedHeight) / 2)
                 
-                self.dismissButton.frame = CGRect(x: 0,y: self.view.frame.size.height - dismissButtonHeight, width: self.view.frame.size.width, height: dismissButtonHeight)
-                self.view.addSubview(self.dismissButton)
+                
+                self.cover.frame = CGRect(x: 0.0, y: self.view.frame.size.height - dismissButtonHeight, width: self.view.frame.size.width, height: dismissButtonHeight)
+                self.view.addSubview(self.cover)
                 
                 self.captionLabel.frame = CGRect(x: 0, y: self.view.frame.size.height - (2 * dismissButtonHeight), width: self.view.frame.size.width, height: dismissButtonHeight + 4)
                 self.view.addSubview(self.captionLabel)
+                
+                self.dismissButton.frame = CGRect(x: self.view.frame.size.width / 4 - 50,y: self.view.frame.size.height - dismissButtonHeight, width: 100, height: dismissButtonHeight)
+                self.dismissButton.layer.cornerRadius = 0.25 * self.dismissButton.bounds.size.width
+                self.view.addSubview(self.dismissButton)
+                
+                self.saveButton.frame = CGRect(x: 3 * (self.view.frame.size.width / 4) - 50,y: self.view.frame.size.height - dismissButtonHeight, width: 100, height: dismissButtonHeight)
+                self.saveButton.layer.cornerRadius = 0.25 * self.saveButton.bounds.size.width
+                self.saveButton.addTarget(self, action: #selector(self.save(_:)), forControlEvents: .TouchUpInside)
+                self.view.addSubview(self.saveButton)
+                
+                self.currentImage = image!
             }
         }
+    }
+    
+    func save(sender: UIButton) {
+        UIImageWriteToSavedPhotosAlbum(currentImage, nil, nil, nil)
+        saveButton.setTitle("✅", forState: .Normal)
+        saveButton.backgroundColor = UIColor.darkGrayColor()
+        saveButton.removeTarget(self, action: #selector(self.save(_:)), forControlEvents: .TouchUpInside)
     }
     
     //removes the image and detection views from the superview
@@ -495,6 +520,10 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
         imageView.removeFromSuperview()
         dismissButton.removeFromSuperview()
         captionLabel.removeFromSuperview()
+        cover.removeFromSuperview()
+        saveButton.removeFromSuperview()
+        saveButton.setTitle("Save", forState: .Normal)
+        saveButton.backgroundColor = UIColor.whiteColor()
         
         //removes all the face detection boxes from the view
         if(!(faces.isEmpty)) {
@@ -537,12 +566,17 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
         if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
             
             picker.dismissViewControllerAnimated(true, completion: nil)
-            
+
             analyzeUploadedImageView = AnalyzeUploadedImageViewController(height: self.view.frame.size.height, width: self.view.frame.size.width, image: image)
-            analyzeUploadedImageView.language = self.camDetails
+            analyzeUploadedImageView.setDetails(camState, camDetails: camDetails)
             self.view.addSubview(analyzeUploadedImageView)
+            
+            self.view.addSubview(cover)
             self.view.addSubview(closeButton)
+            
             swipe.removeTarget(self, action: #selector(ImageCaptureViewController.viewFinder(_:)))
+            doubleTap.removeTarget(self, action: #selector(ImageCaptureViewController.toggle(_:)))
+            session.stopRunning()
         }
     }
     
@@ -553,9 +587,16 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
     }
     
     func dismissUploadImageVC(sender: AnyObject) {
+        session.startRunning()
         analyzeUploadedImageView.removeFromSuperview()
+        for btn in analyzeUploadedImageView.detailButtons {
+            btn.removeFromSuperview()
+        }
+        analyzeUploadedImageView.detailButtons.removeAll()
         closeButton.removeFromSuperview()
+        cover.removeFromSuperview()
         swipe.addTarget(self, action: #selector(ImageCaptureViewController.viewFinder(_:)))
+        doubleTap.addTarget(self, action: #selector(ImageCaptureViewController.toggle(_:)))
     }
     
 /////////////////// HELPER METHODS ///////////////////
@@ -679,8 +720,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
         super.touchesBegan(touches, withEvent: event)
         
         let touchedPoint = touch.locationInView(cameraPreview)
-        
-        
+
         let newPoint = CGPoint(x: 480 * (touchedPoint.x / self.view.frame.size.width), y: 640 * (touchedPoint.y / self.view.frame.size.height))
         
         self.focusAtPoint(newPoint)

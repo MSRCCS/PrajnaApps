@@ -12,6 +12,9 @@
 #include "tensorflow/core/public/session.h"
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 
+/*
+This is the implementation for the Tensorflow Wrapper
+*/
 
 @implementation NSObject (Wrapper)
 

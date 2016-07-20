@@ -23,12 +23,16 @@ class FaceDetectionBox: UILabel {
     init(x: Int, y: Int, height: Int, width: Int, caption: String) {
         super.init(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
         outline.frame = CGRect(x: x, y: y, width: width, height: height)
-        outline.layer.borderColor = UIColor.yellowColor().CGColor
+        outline.layer.borderColor = UIColor.whiteColor().CGColor
         outline.layer.borderWidth = 3.0
         self.addSubview(outline)
         
-        self.caption.frame = CGRect(x: x, y: y + height, width: width, height: 24)
-        self.caption.backgroundColor = UIColor.yellowColor()
+        if(width < 70) {
+            self.caption.frame = CGRect(x: x, y: y + height, width: 70, height: 24)
+        } else {
+            self.caption.frame = CGRect(x: x, y: y + height, width: width, height: 24)
+        }
+        self.caption.backgroundColor = UIColor.whiteColor()
         self.caption.textColor = UIColor.blackColor()
         self.caption.text = caption
         self.caption.font = self.caption.font.fontWithSize(12)
@@ -43,12 +47,17 @@ class FaceDetectionBox: UILabel {
         let width = frame.width
         
         outline.frame = CGRect(x: x, y: y, width: width, height: height)
-        outline.layer.borderColor = UIColor.yellowColor().CGColor
+        outline.layer.borderColor = UIColor.whiteColor().CGColor
         outline.layer.borderWidth = 3.0
         self.addSubview(outline)
         
-        self.caption.frame = CGRect(x: x, y: y + height, width: width, height: 24)
-        self.caption.backgroundColor = UIColor.yellowColor()
+        if(width < 70) {
+            self.caption.frame = CGRect(x: x, y: y + height, width: 70, height: 24)
+        } else {
+            self.caption.frame = CGRect(x: x, y: y + height, width: width, height: 24)
+        }
+        
+        self.caption.backgroundColor = UIColor.whiteColor()
         self.caption.textColor = UIColor.blackColor()
         self.caption.text = caption
         self.caption.font = self.caption.font.fontWithSize(12)
@@ -65,12 +74,16 @@ class FaceDetectionBox: UILabel {
         self.inFrame = inFrame
         
         outline.frame = CGRect(x: x, y: y, width: width, height: height)
-        outline.layer.borderColor = UIColor.yellowColor().CGColor
+        outline.layer.borderColor = UIColor.whiteColor().CGColor
         outline.layer.borderWidth = 3.0
         self.addSubview(outline)
         
-        self.caption.frame = CGRect(x: x, y: y + height, width: width, height: 24)
-        self.caption.backgroundColor = UIColor.yellowColor()
+        if(width < 70) {
+            self.caption.frame = CGRect(x: x, y: y + height, width: 70, height: 24)
+        } else {
+            self.caption.frame = CGRect(x: x, y: y + height, width: width, height: 24)
+        }
+        self.caption.backgroundColor = UIColor.whiteColor()
         self.caption.textColor = UIColor.blackColor()
         self.caption.font = self.caption.font.fontWithSize(12)
         self.addSubview(self.caption)

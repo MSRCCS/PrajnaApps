@@ -15,7 +15,32 @@
                     <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="Icon-App-40x40.png" translatesAutoresizingMaskIntoConstraints="NO" id="RbY-6X-9ag">
+                                <rect key="frame" x="260" y="168" width="80" height="80"/>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="MSRCCS" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="F1W-5d-WHK">
+                                <rect key="frame" x="247" y="256" width="107" height="36"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="ViewFinder with Tensorflow" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Oh9-p0-l1L">
+                                <rect key="frame" x="195" y="300" width="211" height="35"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="F1W-5d-WHK" firstAttribute="top" secondItem="RbY-6X-9ag" secondAttribute="bottom" constant="8" id="589-Ra-8SG"/>
+                            <constraint firstItem="F1W-5d-WHK" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="JrK-hi-2Y5"/>
+                            <constraint firstItem="RbY-6X-9ag" firstAttribute="top" secondItem="Llm-lL-Icb" secondAttribute="bottom" constant="148" id="QtX-mB-czr"/>
+                            <constraint firstItem="RbY-6X-9ag" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="jnZ-8P-70I"/>
+                            <constraint firstItem="Oh9-p0-l1L" firstAttribute="top" secondItem="F1W-5d-WHK" secondAttribute="bottom" constant="8" id="zs9-T2-4XP"/>
+                            <constraint firstItem="Oh9-p0-l1L" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="zuT-D0-jqj"/>
+                        </constraints>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -23,4 +48,7 @@
             <point key="canvasLocation" x="53" y="375"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="Icon-App-40x40.png" width="40" height="40"/>
+    </resources>
 </document>
