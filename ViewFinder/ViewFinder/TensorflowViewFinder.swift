@@ -82,6 +82,7 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
     //State Variables - Which API to call & details about it
     var camState = 2
     var camDetails = "tf"
+    var detailLabel = UILabel()
     var menuButton = UIButton()
     
     //Tensorflow
@@ -92,6 +93,9 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
     let debugButton = UIButton()
     let dismissDebugImageButton = UIButton()
     var currentImage: CGImage!;
+    let instructionButton = UIButton()
+    
+    var timeOutTimer = NSTimer()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -109,17 +113,37 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
         setUpMotionDetector()
         
         setUpTensorflow()
+        
+        timeOutTimer = NSTimer.scheduledTimerWithTimeInterval(0.5, target: self, selector: #selector(self.testIfRunning(_:)), userInfo: nil, repeats: true)
+        
+        self.tabBarController?.tabBar.hidden = true
     }
     
-    
+    func testIfRunning(sender: NSTimer) {
+        if(session.running) {
+        } else {
+            session.stopRunning()
+            session.startRunning()
+        }
+    }
+
     override func viewWillAppear(animated: Bool) {
         if !done {
             session.startRunning();
         }
+        
+        
     }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+        if(firstTime) {
+            showInstructions(instructionButton)
+        }
     }
     
     override func shouldAutorotate() -> Bool {
@@ -430,6 +454,26 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
         self.presentViewController(controller, animated: true, completion: nil)
     }
     
+    func showInstructions(sender: AnyObject) {
+
+        let storyboard = UIStoryboard(name: "Tensorflow", bundle: nil)
+        
+        let instructionVC = storyboard.instantiateViewControllerWithIdentifier("Instructions") as! InstructionsViewController
+        instructionVC.preferredContentSize = CGSize(width: 300, height: 300)
+        
+        instructionVC.modalPresentationStyle = UIModalPresentationStyle.Popover
+
+        let popoverPresentationController = instructionVC.popoverPresentationController
+        
+        popoverPresentationController!.sourceView = self.view
+        popoverPresentationController!.sourceRect = sender.frame
+        
+        popoverPresentationController!.permittedArrowDirections = .Any
+        popoverPresentationController!.delegate = self
+        
+        self.presentViewController(instructionVC, animated: true, completion: nil)
+    }
+    
     ////////////////// JSON PARSING /////////////////////////////
     
     //this is called after the analyze image api is used
@@ -481,8 +525,7 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
                                                 
                                                 dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0), { () -> Void in
                                                     self.faces[i].setTitle(caption)
-                                                    print("ID: \(id). Caption: " + caption)
-                                                    
+                                                    print("ID: \(id). Caption: " + caption) 
                                                 })
                                             }
                                         }
@@ -545,6 +588,9 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
                     self.view.addSubview(self.closeButton)
                     self.translateActivity.stopAnimating()
                 }
+            } else {
+                self.translateActivity.stopAnimating()
+                self.restartTranslation()
             }
         }
     }
@@ -564,19 +610,18 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
     
     //adds attributes to the buttons and adds some of them to the view
     func addButtons() {
-        toggleButton.frame = CGRectMake(0, 20, 45, 25)
+        toggleButton.frame = CGRectMake(0, 20, 50, 40)
         toggleButton.addTarget(self, action: #selector(TensorflowViewController.toggle(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         let flipImage = UIImage(named:"FlipCameraButton.png")?.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate)
         toggleButton.tintColor = UIColor.whiteColor()
         toggleButton.setImage(flipImage, forState: .Normal)
-        //toggleButton.backgroundColor = UIColor.blackColor()
         self.view.addSubview(toggleButton)
         
-        switchButton.frame = CGRect(x: self.view.frame.size.width - 80, y: self.view.frame.size.height - 60, width: 80, height: 60)
-        switchButton.setTitle("PHOTO", forState: .Normal)
+        switchButton.frame = CGRect(x: self.view.frame.size.width - 50, y: self.view.frame.size.height - 40, width: 40, height: 30)
+        let camImage = UIImage(named: "CameraButton.png")?.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate)
+        switchButton.tintColor = UIColor.whiteColor()
         switchButton.addTarget(self, action: #selector(TensorflowViewController.takeStill(_:)), forControlEvents: .TouchUpInside)
-        //switchButton.backgroundColor = UIColor.whiteColor()
-        switchButton.setTitleColor(UIColor.grayColor(), forState: .Normal)
+        switchButton.setImage(camImage, forState: .Normal)
         self.view.addSubview(switchButton)
         
         self.detailButton.frame = CGRect(x: self.view.frame.size.width - 40.0, y: 70.0, width: 34.0, height: 34.0)
@@ -588,18 +633,8 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
         self.closeButton.addTarget(self, action: #selector(TensorflowViewController.restartTranslation), forControlEvents: .TouchUpInside)
         
         //sets up the Menu Button
-        menuButton.frame = CGRect(x: self.view.frame.size.width - 60, y: 20, width: 44, height: 44)
-        if(camState == 1 || camState == 2) {
-            let index: String.Index = camDetails.startIndex.advancedBy(2)
-            var ss2:String = camDetails.substringToIndex(index)
-            ss2 = ss2.uppercaseString
-            menuButton.setTitle(ss2, forState: .Normal)
-        } else {
-            menuButton.setTitle(camDetails, forState: .Normal)
-        }
-        menuButton.titleLabel?.textColor = UIColor.blackColor()
-        menuButton.titleLabel?.adjustsFontSizeToFitWidth = true
-        menuButton.tintColor = UIColor.blackColor()
+        menuButton.frame = CGRect(x: self.view.frame.size.width - 45, y: 20, width: 40, height: 40)
+        menuButton.setImage(UIImage(named: "MenuButton.png"), forState: .Normal)
         menuButton.addTarget(self, action: #selector(TensorflowViewController.showMenu(_:)), forControlEvents: .TouchUpInside)
         self.view.addSubview(menuButton)
         
@@ -614,18 +649,30 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
         debugButton.setTitleColor(UIColor.blackColor(), forState: .Normal)
         debugButton.setTitle("DEBUG", forState: .Normal)
         debugButton.addTarget(self, action: #selector(self.debugImage(_:)), forControlEvents: .TouchUpInside)
-        if(camState == 2) {
-            //#if DEBUG
-                self.view.addSubview(debugButton)
-            //#endif
-        }
-        
+
         debugImageView.frame = CGRect(x: 0, y: self.view.frame.size.height - 268, width: 224, height: 224)
         
         dismissDebugImageButton.frame = CGRect(x: 0, y: self.view.frame.size.height - 44, width: 80, height: 44)
         dismissDebugImageButton.backgroundColor = UIColor.redColor()
         dismissDebugImageButton.setTitle("DISMISS", forState: .Normal)
         dismissDebugImageButton.addTarget(self, action: #selector(TensorflowViewController.doneDebugging(_:)), forControlEvents: .TouchUpInside)
+        
+        instructionButton.frame = CGRect(x: (self.view.frame.width / 2) - 20, y: 20, width: 40, height: 40)
+        let instructionImage = UIImage(named: "InstructionsButton.png")?.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate)
+        instructionButton.tintColor = UIColor.whiteColor()
+
+    
+        instructionButton.setImage(instructionImage, forState: .Normal)
+        instructionButton.addTarget(self, action: #selector(self.showInstructions(_:)), forControlEvents: .TouchUpInside)
+        self.view.addSubview(instructionButton)
+        
+        detailLabel.frame = CGRect(x: self.view.frame.size.width - 150, y: 20, width: 100, height: 40)
+        detailLabel.numberOfLines = 2
+        detailLabel.textColor = UIColor.whiteColor()
+        detailLabel.text = "Tensorflow"
+        detailLabel.textAlignment = .Right
+        detailLabel.font = UIFont(name: (detailLabel.font?.fontName)!, size: 12.0)
+        self.view.addSubview(detailLabel)
     }
     
     ///////////////////// FACE DETECTOR /////////////////////////
@@ -681,37 +728,28 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
             steady = false
             numSteady = 0
             numLabels = 0
-            //#if DEBUG
                 debugButton.removeFromSuperview()
-            //#endif
         }
         
         self.camDetails = details
         self.camState = state
-        
-        if(camState == 1 || camState == 2) {
-            let index: String.Index = camDetails.startIndex.advancedBy(2) // Swift 2
-            var ss2:String = camDetails.substringToIndex(index) // "Stack"
-            ss2 = ss2.uppercaseString
-            menuButton.setTitle(ss2, forState: .Normal)
+
+        if(camState == 0) {
+            detailLabel.text = "Facial Recognition"
+        } else if(camState == 1) {
+            detailLabel.text = "Translating Into " + getLanguageFromCode(camDetails)
         } else {
-            menuButton.setTitle(camDetails, forState: .Normal)
-        }
-        
-        if(camState == 2) {
-            self.view.addSubview(debugButton)
+            detailLabel.text = "Tensorflow"
         }
     }
     
     //displays the language changing menu
     func showMenu(sender: AnyObject) {
-
+        
         let storyboard = UIStoryboard(name: "Tensorflow", bundle: nil)
         let controller = storyboard.instantiateViewControllerWithIdentifier("tfmenu") as! TensorflowMenu
-
-        controller.camState = self.camState
-        controller.camDetails = self.camDetails
-        controller.preferredContentSize = CGSizeMake(250, 300)
+        
+        controller.preferredContentSize = CGSizeMake(180, 450)
         controller.modalPresentationStyle = UIModalPresentationStyle.Popover
 
         controller.delegate = self
@@ -721,7 +759,9 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
         popoverPresentationController!.sourceRect = menuButton.frame
         popoverPresentationController!.permittedArrowDirections = .Any
         popoverPresentationController!.delegate = self
-        self.presentViewController(controller, animated: true, completion: nil)
+        self.presentViewController(controller, animated: true, completion: {
+            controller.setDetails(self.camState, camDetails: self.camDetails)
+        })
     }
     
     ///////////////////// CAMERA METHODS ////////////////////////
@@ -888,14 +928,8 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
                 var fields = ""
                 
                 if(self.camState == 0) {
-                    // self.analyzeImage(image!) //calls analyze image API
                     self.captionLabel.text = "Generating Caption..."
-                    
-                    if(self.camDetails == ":-)") {
-                        fields = "?visualFeatures=Faces,Description,Categories"
-                    } else if(self.camDetails == "B-)") {
-                        fields = "?visualFeatures=Faces,Description,Categories&details=Celebrities"
-                    }
+                    fields = "?visualFeatures=Faces,Description,Categories&details=Celebrities"
                 } else if(self.camState == 1) {
                     self.captionLabel.text = "Getting Translation..."
                 }
@@ -934,9 +968,13 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
     //calls the segue to move to the ImageCaptureViewController
     func takeStill(sender: AnyObject) {
         self.stopCamera()
-        performSegueWithIdentifier("takeStill", sender: nil)
+        timeOutTimer.invalidate()
+        //performSegueWithIdentifier("takeStill", sender: nil)
+        if let tbc = self.tabBarController {
+            tbc.selectedIndex = 1
+        }
     }
-    
+
     //Touch to focus
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
         let touch = touches.first!

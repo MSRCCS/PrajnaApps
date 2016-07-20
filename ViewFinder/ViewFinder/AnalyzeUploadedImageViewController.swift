@@ -34,6 +34,9 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
     
     var language = String()
     
+    var camState = Int()
+    var camDetails = String()
+    
     var newHeight = CGFloat()
     var newWidth = CGFloat()
     
@@ -45,32 +48,50 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
         self.image = image
         
         setUpScreen()
-        
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setDetails(camState: Int, camDetails: String) {
+        self.camState = camState
+        self.camDetails = camDetails
+
         let header = ["Ocp-Apim-Subscription-Key": "dca2b686d07a4e18ba81f5731053dbab", "Content-Type": "application/octet-stream"]
         let body = UIImageJPEGRepresentation(image, 0.9)!
         
         let analyzeAPI = API(state: 0, header: header, body: body, fields: "?visualFeatures=Faces,Description,Categories&details=Celebrities")
         let ocrAPI = API(state: 1, header: header, body: body, fields: "")
-        
-        analyzeAPI.callAPI() { (rs: String) in
-            self.displayAnswers(rs)
-        }
-        
-        ocrAPI.callAPI() { (rs: String) in
-            self.translate(rs)
-        }
-    }
-    
-    
 
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        if(camState == 0) {
+            analyzeAPI.callAPI() { (rs: String) in
+                if(!rs.containsString("Input image is too large")) {
+                    print(rs)
+                    self.displayAnswers(rs)
+                } else {
+                    print(rs)
+                    self.captionLabel.backgroundColor = UIColor.redColor()
+                    self.captionLabel.text = "Oops! Image too large!"
+                }
+            }
+        } else if(camState == 1) {
+            ocrAPI.callAPI() { (rs: String) in
+                if(!rs.containsString("Input image is too large") && !rs.containsString("requestId")) {
+                    self.translate(rs)
+                } else {
+                    self.captionLabel.backgroundColor = UIColor.redColor()
+                    self.captionLabel.text = "Oops! Input image is too large"
+                }
+            }
+        }
     }
     
  ////////////////////// POPOVERS //////////////////////////////
     
-    func showTranslationDetails(sender: UIButton) {
+    func showTranslationDetails(sender: AnyObject) {
+        
+        print("!!")
         
         #if TENSORFLOW
             let storyboard = UIStoryboard(name: "Tensorflow", bundle: nil)
@@ -99,7 +120,23 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
         controller.from = details["from"]!
         controller.translated = details["translated"]!
         controller.original = details["original"]!
+        
+        let currentController = self.getCurrentViewController()
+        currentController?.presentViewController(controller, animated: true, completion: nil)
+    }
     
+    //gets the current view controller
+    func getCurrentViewController() -> UIViewController? {
+        
+        if let rootController = UIApplication.sharedApplication().keyWindow?.rootViewController {
+            var currentController: UIViewController! = rootController
+            while( currentController.presentedViewController != nil ) {
+                currentController = currentController.presentedViewController
+            }
+            return currentController
+        }
+        return nil
+        
     }
     
     func adaptivePresentationStyleForPresentationController(
@@ -131,10 +168,17 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
         imageView.image = image
         self.addSubview(imageView)
         
-        self.captionLabel.frame = CGRectMake(0.0, height - 88, width, 44)
-        self.captionLabel.text = "Generating Caption..."
+        self.captionLabel.frame = CGRectMake(0.0, imageView.frame.maxY + 12, width, 44)
+        
+        if(camState == 0) {
+            self.captionLabel.text = "Generating Caption..."
+        } else if(camState == 1) {
+            self.captionLabel.text = "Translating..."
+        }
         self.captionLabel.textAlignment = NSTextAlignment.Center
-        self.captionLabel.backgroundColor = UIColor.darkGrayColor()
+        self.captionLabel.backgroundColor = UIColor.blackColor()
+        self.captionLabel.numberOfLines = 2
+        self.captionLabel.textColor = UIColor.whiteColor()
         self.addSubview(self.captionLabel)
     }
 
@@ -178,7 +222,7 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
             }
         }
         if(toTranslate != "") {
-            let to = self.language
+            let to = self.camDetails
             
             let encText = toTranslate.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())
             
@@ -194,30 +238,42 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
                 for i in 0 ..< self.lines.count {
                     self.lines[i].outline.text = translated[i]
                     
-                    let packet: Dictionary<String, String> = ["from": from, "original": originalText[i], "to": self.language, "translated": translated[i]]
+                    let packet: Dictionary<String, String> = ["from": from, "original": originalText[i], "to": self.camDetails, "translated": translated[i]]
                     
                     //Adds Detail Button
                     let detailButton = UIButton()
                     let x = self.lines[i].outline.frame.minX
                     let y = self.lines[i].outline.frame.minY
                     let width = self.lines[i].outline.frame.width
-                    detailButton.frame = CGRect(x: x + width, y: y, width: 24.0, height: 24.0)
+                    let height = self.lines[i].outline.frame.height
+                    if(height > 40) {
+                        detailButton.frame = CGRect(x: x + width, y: y, width: 40.0, height: 40.0)
+                    } else {
+                        detailButton.frame = CGRect(x: x + width, y: y, width: height, height: height)
+                    }
                     detailButton.setImage(UIImage(named: "detailButton.png"), forState: .Normal)
                     detailButton.tag = self.translationDetails.count
-                    detailButton.addTarget(self, action: #selector(ImageCaptureViewController.showTranslationDetails(_:)), forControlEvents: .TouchUpInside)
-                    //self.addSubview(detailButton)     //uncomment when figure out how to display a popover from a uiview
+                    detailButton.userInteractionEnabled = true
+                    
+                    detailButton.addTarget(self, action: #selector(AnalyzeUploadedImageViewController.showTranslationDetails(_:)), forControlEvents: .TouchUpInside)
+                    
+                    let rootController = self.getCurrentViewController()
+                    rootController!.view.addSubview(detailButton)
                     self.detailButtons.append(detailButton)
                     self.translationDetails.append(packet)
+                    self.captionLabel.text = "Done Translating"
                 }
             }
         }
-
     }
     
     //parses the analyze image api json for faces, celebrities, and captions
     func displayAnswers(rs: String) {
         let dict = (convertStringToDictionary(rs)!)
         
+        if(rs.containsString("celeb")) {
+            celebrityPresent = true
+        }
         if let facesInImage = dict["faces"] as? [NSDictionary] {
             if(facesInImage.isEmpty) {
                 print("No Faces")
@@ -259,6 +315,8 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
                                             //checks each FaceDetectionBox to see if is close to the celebrity face. If the origin point is within fifteen of the celebrity face the 'nametag' is replaced with the celebrity's name
                                             if(withinFifteen(Int(face.outline.frame.minX), two: newX) && withinFifteen(Int(face.outline.frame.minY), two: newY)) {
                                                 face.caption.text = (celeb["name"] as! String)
+                                            } else {
+                                                print("!")
                                             }
                                         }
                                     }
@@ -276,9 +334,6 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
         
         captionLabel.text = (x as! String)
     }
-    
- ////////////////////// API CALLS /////////////////////////////
-
     
  ////////////////////// HELPER METHODS ////////////////////////
     
