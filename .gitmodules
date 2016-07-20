@@ -1,0 +1,3 @@
+[submodule "ViewFinder/tensorflow"]
+	path = ViewFinder/tensorflow
+	url = https://github.com/tensorflow/tensorflow
