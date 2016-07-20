@@ -32,17 +32,10 @@ namespace ImageDescriberV3
         public string Text { get; set; }
 
         [JsonProperty(PropertyName = "buttons")]
-<<<<<<< HEAD
         internal Collection<Button> Buttons;
 
         [JsonProperty(PropertyName = "elements")]
         internal Collection<Element> Elements;
-=======
-        public Collection<Button> Buttons { get; } = new Collection<Button>();
-
-        [JsonProperty(PropertyName = "elements")]
-        public Collection<Element> Elements { get; } = new Collection<Element>(); 
->>>>>>> refs/remotes/MSRCCS/master
     }
     public class Element
     {
@@ -63,11 +56,6 @@ namespace ImageDescriberV3
 
         [JsonProperty(PropertyName = "subtitle")]
         public string Subtitle { get; set; }
-<<<<<<< HEAD
-=======
-        [JsonProperty(PropertyName = "buttons")]
-        public Collection<Button> Buttons { get; } = new Collection<Button>(); 
->>>>>>> refs/remotes/MSRCCS/master
     }
     public class Button
     {
@@ -80,10 +68,7 @@ namespace ImageDescriberV3
 
         [JsonProperty(PropertyName = "type")]
         public string TypeOfButton { get; set; }
-<<<<<<< HEAD
 
-=======
->>>>>>> refs/remotes/MSRCCS/master
         [JsonProperty(PropertyName = "url")]
         public Uri Url { get; set; }
 

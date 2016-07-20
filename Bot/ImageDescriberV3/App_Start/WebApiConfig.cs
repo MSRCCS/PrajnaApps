@@ -11,10 +11,6 @@ namespace ImageDescriberV3
     {
         public static void Register(HttpConfiguration config)
         {
-            if ( config == null )
-            {
-                throw new ArgumentNullException("config", "HttpConfiguration is null");
-            }
             // Json settings
             if (config == null) throw new ArgumentNullException("config", "HttpConfiguration is null");
             config.Formatters.JsonFormatter.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
