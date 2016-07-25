@@ -58,7 +58,7 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
         self.camState = camState
         self.camDetails = camDetails
 
-        let header = ["Ocp-Apim-Subscription-Key": "dca2b686d07a4e18ba81f5731053dbab", "Content-Type": "application/octet-stream"]
+        let header = ["Ocp-Apim-Subscription-Key": "8cace64f78f34355b7e2ab22e3b06bed", "Content-Type": "application/octet-stream"]
         let body = UIImageJPEGRepresentation(image, 0.9)!
         
         let analyzeAPI = API(state: 0, header: header, body: body, fields: "?visualFeatures=Faces,Description,Categories&details=Celebrities")
@@ -264,6 +264,8 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
                     self.captionLabel.text = "Done Translating"
                 }
             }
+        } else {
+            captionLabel.text = "Couldn't find any text in the picture"
         }
     }
     
@@ -332,7 +334,11 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
         
         let x = (dict["description"] as! NSDictionary)["captions"]![0]["text"]
         
+        print(x)
+        
         captionLabel.text = (x as! String)
+        
+        print(captionLabel.text)
     }
     
  ////////////////////// HELPER METHODS ////////////////////////

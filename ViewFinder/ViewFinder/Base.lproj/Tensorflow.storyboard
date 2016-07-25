@@ -9,14 +9,14 @@
         <!--Translation Table View Controller-->
         <scene sceneID="JcG-fI-XfI">
             <objects>
-                <tableViewController storyboardIdentifier="ttvc" id="3Aq-vT-LmK" customClass="TranslationTableViewController" customModule="ViewFinderTensorflow" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="ttvc" id="3Aq-vT-LmK" customClass="TranslationTableViewController" customModule="MyDigitalLife" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="138" sectionHeaderHeight="28" sectionFooterHeight="28" id="Hbl-ns-Dan">
                         <rect key="frame" x="0.0" y="0.0" width="300" height="225"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <color key="separatorColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="translationCell" rowHeight="138" id="KMd-Wq-O7C" customClass="TranslationTableCell" customModule="ViewFinderTensorflow" customModuleProvider="target">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="translationCell" rowHeight="138" id="KMd-Wq-O7C" customClass="TranslationTableCell" customModule="MyDigitalLife" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="28" width="300" height="138"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KMd-Wq-O7C" id="YPr-Cf-Rxc">
@@ -96,17 +96,17 @@
         <!--Instructions-->
         <scene sceneID="nNB-BP-blj">
             <objects>
-                <viewController storyboardIdentifier="Instructions" title="Instructions" id="s8e-xu-WZ4" customClass="InstructionsViewController" customModule="ViewFinderTensorflow" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="Instructions" title="Instructions" id="s8e-xu-WZ4" customClass="InstructionsViewController" customModule="MyDigitalLife" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="ZhO-mr-nR1"/>
                         <viewControllerLayoutGuide type="bottom" id="Tc2-xY-gtM"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="zAC-s4-Xij">
-                        <rect key="frame" x="0.0" y="0.0" width="300" height="300"/>
+                        <rect key="frame" x="0.0" y="0.0" width="300" height="360"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="EKj-Ud-xgd">
-                                <rect key="frame" x="20" y="127" width="260" height="165"/>
+                                <rect key="frame" x="20" y="127" width="260" height="225"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <string key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</string>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -140,7 +140,7 @@
                         </constraints>
                     </view>
                     <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
-                    <size key="freeformSize" width="300" height="300"/>
+                    <size key="freeformSize" width="300" height="360"/>
                     <connections>
                         <outlet property="picker" destination="YI3-Ig-2C1" id="2od-Id-s5h"/>
                         <outlet property="textView" destination="EKj-Ud-xgd" id="pDn-5s-P4d"/>
@@ -153,7 +153,7 @@
         <!--Item-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="TensorflowViewController" customModule="ViewFinderTensorflow" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="TensorflowViewController" customModule="MyDigitalLife" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
@@ -179,7 +179,7 @@
         <!--Item-->
         <scene sceneID="Rfe-tk-8tn">
             <objects>
-                <viewController id="WpJ-Za-7Ht" customClass="ImageCaptureViewController" customModule="ViewFinderTensorflow" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="WpJ-Za-7Ht" customClass="ImageCaptureViewController" customModule="MyDigitalLife" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="MVu-qO-2O7"/>
                         <viewControllerLayoutGuide type="bottom" id="Ojs-Nh-aJJ"/>
@@ -205,7 +205,7 @@
         <!--menu-->
         <scene sceneID="reg-fe-fiA">
             <objects>
-                <viewController storyboardIdentifier="menu" title="menu" id="zPz-rS-wkw" customClass="MenuViewController" customModule="ViewFinderTensorflow" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="menu" title="menu" id="zPz-rS-wkw" customClass="MenuViewController" customModule="MyDigitalLife" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="L57-ng-vhN"/>
                         <viewControllerLayoutGuide type="bottom" id="hO5-Za-Gd8"/>
@@ -270,31 +270,15 @@
         <!--tfmenu-->
         <scene sceneID="gGT-Fg-1dB">
             <objects>
-                <viewController storyboardIdentifier="tfmenu" title="tfmenu" id="ase-dR-gC1" customClass="TensorflowMenu" customModule="ViewFinderTensorflow" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="tfmenu" title="tfmenu" id="ase-dR-gC1" customClass="TensorflowMenu" customModule="MyDigitalLife" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="1qp-i7-tpz"/>
                         <viewControllerLayoutGuide type="bottom" id="ogu-hG-WZN"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="j67-6Z-Y2a">
-                        <rect key="frame" x="0.0" y="0.0" width="180" height="450"/>
+                        <rect key="frame" x="0.0" y="0.0" width="180" height="300"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="yJN-Ei-QdW">
-                                <rect key="frame" x="20" y="156" width="140" height="140"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="140" id="G3u-RK-uhP"/>
-                                    <constraint firstAttribute="width" constant="140" id="nnt-4a-EQC"/>
-                                </constraints>
-                                <state key="normal" image="TranslateUnselected.png"/>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Hha-KL-jgh">
-                                <rect key="frame" x="20" y="304" width="140" height="140"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="140" id="4Hi-sl-Tmh"/>
-                                    <constraint firstAttribute="height" constant="140" id="D4b-wn-R1I"/>
-                                </constraints>
-                                <state key="normal" image="TensorflowUnselected.png"/>
-                            </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ci0-o3-OnW">
                                 <rect key="frame" x="20" y="8" width="140" height="140"/>
                                 <constraints>
@@ -303,20 +287,24 @@
                                 </constraints>
                                 <state key="normal" image="FaceUnselected.png"/>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Hha-KL-jgh">
+                                <rect key="frame" x="20" y="156" width="140" height="140"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="140" id="4Hi-sl-Tmh"/>
+                                    <constraint firstAttribute="height" constant="140" id="D4b-wn-R1I"/>
+                                </constraints>
+                                <state key="normal" image="TensorflowUnselected.png"/>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="Hha-KL-jgh" firstAttribute="top" secondItem="ci0-o3-OnW" secondAttribute="bottom" constant="8" id="DAk-qq-9Fs"/>
                             <constraint firstItem="Hha-KL-jgh" firstAttribute="leading" secondItem="j67-6Z-Y2a" secondAttribute="leadingMargin" id="ED5-Qo-3Y1"/>
                             <constraint firstItem="ci0-o3-OnW" firstAttribute="leading" secondItem="j67-6Z-Y2a" secondAttribute="leadingMargin" id="Nb2-JH-ogX"/>
-                            <constraint firstItem="yJN-Ei-QdW" firstAttribute="centerX" secondItem="j67-6Z-Y2a" secondAttribute="centerX" id="Onq-wD-BeH"/>
                             <constraint firstItem="ci0-o3-OnW" firstAttribute="centerX" secondItem="j67-6Z-Y2a" secondAttribute="centerX" id="ThG-nq-hUq"/>
                             <constraint firstItem="ogu-hG-WZN" firstAttribute="top" secondItem="Hha-KL-jgh" secondAttribute="bottom" constant="6" id="Wwn-to-B9b"/>
-                            <constraint firstItem="yJN-Ei-QdW" firstAttribute="top" secondItem="ci0-o3-OnW" secondAttribute="bottom" constant="8" id="Y5w-C0-jmU"/>
-                            <constraint firstItem="Hha-KL-jgh" firstAttribute="top" secondItem="yJN-Ei-QdW" secondAttribute="bottom" constant="8" id="aFk-v9-HIg"/>
                             <constraint firstItem="ci0-o3-OnW" firstAttribute="top" secondItem="j67-6Z-Y2a" secondAttribute="topMargin" constant="8" id="f7I-cj-hyB"/>
-                            <constraint firstItem="yJN-Ei-QdW" firstAttribute="trailing" secondItem="j67-6Z-Y2a" secondAttribute="trailingMargin" id="g9E-8J-Dxa"/>
                             <constraint firstItem="Hha-KL-jgh" firstAttribute="centerX" secondItem="j67-6Z-Y2a" secondAttribute="centerX" id="iVp-EP-Ss5"/>
-                            <constraint firstItem="yJN-Ei-QdW" firstAttribute="leading" secondItem="j67-6Z-Y2a" secondAttribute="leadingMargin" id="jXu-WC-ycB"/>
                             <constraint firstItem="ci0-o3-OnW" firstAttribute="trailing" secondItem="j67-6Z-Y2a" secondAttribute="trailingMargin" id="lRS-Zm-Wt9"/>
                             <constraint firstItem="Hha-KL-jgh" firstAttribute="trailing" secondItem="j67-6Z-Y2a" secondAttribute="trailingMargin" id="y7C-um-MEu"/>
                         </constraints>
@@ -324,29 +312,27 @@
                             <mask key="constraints">
                                 <exclude reference="Nb2-JH-ogX"/>
                                 <exclude reference="lRS-Zm-Wt9"/>
-                                <exclude reference="g9E-8J-Dxa"/>
-                                <exclude reference="jXu-WC-ycB"/>
                                 <exclude reference="ED5-Qo-3Y1"/>
                                 <exclude reference="y7C-um-MEu"/>
+                                <exclude reference="Wwn-to-B9b"/>
                             </mask>
                         </variation>
                     </view>
                     <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
-                    <size key="freeformSize" width="180" height="450"/>
+                    <size key="freeformSize" width="180" height="300"/>
                     <connections>
                         <outlet property="faceButton" destination="ci0-o3-OnW" id="ZxP-H9-uFx"/>
                         <outlet property="tensorflowButton" destination="Hha-KL-jgh" id="9Fs-8l-eF9"/>
-                        <outlet property="translateButton" destination="yJN-Ei-QdW" id="gWU-iT-QSc"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="s15-71-UKK" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-6" y="-266"/>
+            <point key="canvasLocation" x="-107" y="-301"/>
         </scene>
         <!--Translation Detail View Controller-->
         <scene sceneID="vZo-gP-k1C">
             <objects>
-                <viewController storyboardIdentifier="tdc" id="AH2-JL-4wM" customClass="TranslationDetailViewController" customModule="ViewFinderTensorflow" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="tdc" id="AH2-JL-4wM" customClass="TranslationDetailViewController" customModule="MyDigitalLife" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="cOB-vo-35U"/>
                         <viewControllerLayoutGuide type="bottom" id="ydk-yI-9qX"/>
@@ -443,7 +429,7 @@
         <image name="TranslateUnselected.png" width="140" height="140"/>
     </resources>
     <inferredMetricsTieBreakers>
+        <segue reference="aRH-bZ-uRN"/>
         <segue reference="O9v-Wg-JAk"/>
-        <segue reference="vJr-Yt-xXi"/>
     </inferredMetricsTieBreakers>
 </document>

@@ -4,19 +4,29 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>ViewFinder copy.xcscheme</key>
+		<key>MyDigitalLife.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>1</integer>
+			<integer>2</integer>
 		</dict>
 		<key>ViewFinder.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
+		<key>ViewFinderTensorflow.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>2C21F0011D427A4A002F90C7</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>2C72D95A1D2EFD8D00C3D707</key>
 		<dict>
 			<key>primary</key>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10117" systemVersion="15B42" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="mPr-AY-HN7">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+    </dependencies>
+    <scenes>
+        <!--Home View Controller-->
+        <scene sceneID="6wM-PG-P9E">
+            <objects>
+                <viewController id="bmR-Fo-QdN" customClass="MDLHomeViewController" customModule="MyDigitalLife" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="CZN-HH-JFq"/>
+                        <viewControllerLayoutGuide type="bottom" id="D0E-ff-DDS"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="6Um-oI-nZE">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eDZ-IG-PFR">
+                                <rect key="frame" x="366" y="514" width="41" height="30"/>
+                                <state key="normal" title="Photo"/>
+                                <connections>
+                                    <segue destination="vCE-6f-s8e" kind="show" id="XnL-U0-1wI"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3xJ-LW-jWM">
+                                <rect key="frame" x="276" y="514" width="48" height="30"/>
+                                <state key="normal" title="Search"/>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lmd-TZ-BaY">
+                                <rect key="frame" x="185" y="514" width="50" height="30"/>
+                                <state key="normal" title="Upload"/>
+                                <connections>
+                                    <segue destination="VbR-n3-RaD" kind="show" id="bDp-W1-LjW"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="inP-SA-kHD">
+                                <rect key="frame" x="264" y="476" width="73" height="30"/>
+                                <state key="normal" title="My Gallery"/>
+                                <connections>
+                                    <segue destination="k3b-nh-M0k" kind="show" id="OjM-x7-NF6"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="inP-SA-kHD" firstAttribute="centerX" secondItem="6Um-oI-nZE" secondAttribute="centerX" id="BUp-3z-zHb"/>
+                            <constraint firstItem="D0E-ff-DDS" firstAttribute="top" secondItem="eDZ-IG-PFR" secondAttribute="bottom" constant="56" id="F0A-Y6-3V4"/>
+                            <constraint firstItem="D0E-ff-DDS" firstAttribute="top" secondItem="lmd-TZ-BaY" secondAttribute="bottom" constant="56" id="UcI-Fr-Wa1"/>
+                            <constraint firstItem="D0E-ff-DDS" firstAttribute="top" secondItem="3xJ-LW-jWM" secondAttribute="bottom" constant="56" id="eh5-15-Yob"/>
+                            <constraint firstItem="eDZ-IG-PFR" firstAttribute="leading" secondItem="3xJ-LW-jWM" secondAttribute="trailing" constant="42" id="nId-Pt-tpC"/>
+                            <constraint firstItem="3xJ-LW-jWM" firstAttribute="top" secondItem="inP-SA-kHD" secondAttribute="bottom" constant="8" id="qPM-h6-gFP"/>
+                            <constraint firstItem="3xJ-LW-jWM" firstAttribute="centerX" secondItem="6Um-oI-nZE" secondAttribute="centerX" id="ryO-xs-pn0"/>
+                            <constraint firstItem="3xJ-LW-jWM" firstAttribute="leading" secondItem="lmd-TZ-BaY" secondAttribute="trailing" constant="42" id="uga-5d-Aof"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="1cw-Xe-kKQ"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="mHt-9Q-Upr" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1115" y="-419"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="o1j-f5-3Cm">
+            <objects>
+                <viewController id="k3b-nh-M0k" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="u6R-PB-qyc"/>
+                        <viewControllerLayoutGuide type="bottom" id="JKR-Jk-PCr"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="gTU-k8-a57">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="pLg-X2-482" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1942" y="-419"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="pnS-wv-Iqi">
+            <objects>
+                <viewController id="VbR-n3-RaD" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="raL-9f-9iM"/>
+                        <viewControllerLayoutGuide type="bottom" id="TOe-U4-QwV"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="Nnk-U8-Phj">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Eu7-Li-u1c" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="710" y="398"/>
+        </scene>
+        <!--Camera View Controller-->
+        <scene sceneID="ize-Il-tYT">
+            <objects>
+                <viewController id="vCE-6f-s8e" customClass="MDLCameraViewController" customModule="MyDigitalLife" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="JRJ-uo-Wky"/>
+                        <viewControllerLayoutGuide type="bottom" id="W1y-JA-re7"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="n1X-IK-ygY">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="5s6-5t-FIx" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1402" y="398"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="NW2-k1-9t3">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="mPr-AY-HN7" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="Q0c-Es-AsL">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="bmR-Fo-QdN" kind="relationship" relationship="rootViewController" id="tfS-tD-InR"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="sXJ-He-5JM" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="303" y="-419"/>
+        </scene>
+    </scenes>
+</document>

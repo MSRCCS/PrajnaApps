@@ -7,25 +7,29 @@
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
-	<string>ViewFinderTensorflow</string>
+	<string>MyDigitalLife</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>ViewFinder</string>
+	<string>MyDigitalLife</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.2</string>
+	<string>1.0.1</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>MyDigitalLife would like to use your current location</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>MyDigitalLife would like to use your current location when you use the app.</string>
 	<key>UILaunchStoryboardName</key>
-	<string>LaunchScreen</string>
+	<string>MDLLaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
-	<string>Tensorflow</string>
+	<string>MyDigitalLife</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>

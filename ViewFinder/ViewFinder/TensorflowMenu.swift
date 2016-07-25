@@ -20,7 +20,7 @@ protocol TensorflowMenuDelegate {
 class TensorflowMenu: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     @IBOutlet weak var faceButton:UIButton!
-    @IBOutlet weak var translateButton: UIButton!
+//    @IBOutlet weak var translateButton: UIButton!
     @IBOutlet weak var tensorflowButton: UIButton!
     
     let table = UITableView()
@@ -47,8 +47,8 @@ class TensorflowMenu: UIViewController, UITableViewDataSource, UITableViewDelega
         faceButton.tag = 0
         faceButton.addTarget(self, action: #selector(self.buttonPressed(_:)), forControlEvents: .TouchUpInside)
         
-        translateButton.tag = 1
-        translateButton.addTarget(self, action: #selector(self.buttonPressed(_:)), forControlEvents: .TouchUpInside)
+//        translateButton.tag = 1
+//        translateButton.addTarget(self, action: #selector(self.buttonPressed(_:)), forControlEvents: .TouchUpInside)
         
         tensorflowButton.tag = 2
         tensorflowButton.addTarget(self, action: #selector(self.buttonPressed(_:)), forControlEvents: .TouchUpInside)
@@ -123,7 +123,7 @@ class TensorflowMenu: UIViewController, UITableViewDataSource, UITableViewDelega
         if(camState == 0) {
             faceButton.setImage(UIImage(named: "FaceSelected.png"), forState: .Normal)
         } else if(camState == 1) {
-            translateButton.setImage(UIImage(named: "TranslateSelected.png"), forState: .Normal)
+//            translateButton.setImage(UIImage(named: "TranslateSelected.png"), forState: .Normal)
         } else {
             tensorflowButton.setImage(UIImage(named: "TensorflowSelected.png"), forState: .Normal)
         }

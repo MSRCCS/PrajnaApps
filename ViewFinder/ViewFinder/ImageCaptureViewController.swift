@@ -376,6 +376,8 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
                         self.captionLabel.text = "Done Translating"
                     }
                 }
+            } else {
+                captionLabel.text = "Couldn't find any text in the picture"
             }
         }
     }
@@ -466,7 +468,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
 
                 }
                 
-                let api = API(state: self.camState, header: ["Ocp-Apim-Subscription-Key": "dca2b686d07a4e18ba81f5731053dbab", "Content-Type": "application/octet-stream"], body: UIImageJPEGRepresentation(image!, 0.9)!, fields: fields)
+                let api = API(state: self.camState, header: ["Ocp-Apim-Subscription-Key": "8cace64f78f34355b7e2ab22e3b06bed", "Content-Type": "application/octet-stream"], body: UIImageJPEGRepresentation(image!, 0.9)!, fields: fields)
                 
                 api.callAPI() { (rs: String) in
                     if(rs.containsString("celebrities")) {
