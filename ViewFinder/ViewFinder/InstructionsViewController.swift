@@ -14,9 +14,9 @@ class InstructionsViewController: UIViewController, UIPickerViewDelegate, UIPick
     @IBOutlet weak var textView: UITextView!
     @IBOutlet weak var picker: UIPickerView!
     
-    let sections:[String] = ["Introduction", "Three Modes", "Using the Menu", "Using Tensorflow", "Facial Recognition", "Translation", "Live Translation Issues", "Uploading an Image", "Troubleshooting"]
+    let sections:[String] = ["Introduction", "Three Modes", "Using the Menu", "Object Detection", "Facial Recognition", "Translation", "Uploading an Image", "Troubleshooting"]
     
-    let sectionDetails:[String] = [introductionIns, threeModesIns, usingTheMenuIns, usingTensorflowIns, facialRecognitionIns, translationIns, liveTranslationIns, uploadImageIns, troubleshootingIns]
+    let sectionDetails:[String] = [introductionIns, threeModesIns, usingTheMenuIns, usingTensorflowIns, facialRecognitionIns, translationIns, uploadImageIns, troubleshootingIns]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,8 +25,8 @@ class InstructionsViewController: UIViewController, UIPickerViewDelegate, UIPick
         picker.dataSource = self
         
         textView.text = introductionIns
-        textView.textAlignment = NSTextAlignment.Center
-        textView.font = UIFont(name: (textView.font?.fontName)!, size: 14.0)
+        textView.textAlignment = NSTextAlignment.Left
+        textView.font = UIFont(name: (textView.font?.fontName)!, size: 18.0)
     }
     
     override func didReceiveMemoryWarning() {

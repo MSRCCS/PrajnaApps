@@ -143,6 +143,7 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
         super.viewDidAppear(animated)
         if(firstTime) {
             showInstructions(instructionButton)
+            firstTime = false
         }
     }
     
@@ -459,7 +460,7 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
         let storyboard = UIStoryboard(name: "Tensorflow", bundle: nil)
         
         let instructionVC = storyboard.instantiateViewControllerWithIdentifier("Instructions") as! InstructionsViewController
-        instructionVC.preferredContentSize = CGSize(width: 300, height: 300)
+        instructionVC.preferredContentSize = CGSize(width: 300, height: 360)
         
         instructionVC.modalPresentationStyle = UIModalPresentationStyle.Popover
 
@@ -669,7 +670,7 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
         detailLabel.frame = CGRect(x: self.view.frame.size.width - 150, y: 20, width: 100, height: 40)
         detailLabel.numberOfLines = 2
         detailLabel.textColor = UIColor.whiteColor()
-        detailLabel.text = "Tensorflow"
+        detailLabel.text = "Object Detection"
         detailLabel.textAlignment = .Right
         detailLabel.font = UIFont(name: (detailLabel.font?.fontName)!, size: 12.0)
         self.view.addSubview(detailLabel)
@@ -739,7 +740,7 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
         } else if(camState == 1) {
             detailLabel.text = "Translating Into " + getLanguageFromCode(camDetails)
         } else {
-            detailLabel.text = "Tensorflow"
+            detailLabel.text = "Object Detection"
         }
     }
     
@@ -749,7 +750,7 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
         let storyboard = UIStoryboard(name: "Tensorflow", bundle: nil)
         let controller = storyboard.instantiateViewControllerWithIdentifier("tfmenu") as! TensorflowMenu
         
-        controller.preferredContentSize = CGSizeMake(180, 450)
+        controller.preferredContentSize = CGSizeMake(180, 300)
         controller.modalPresentationStyle = UIModalPresentationStyle.Popover
 
         controller.delegate = self
@@ -934,7 +935,7 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
                     self.captionLabel.text = "Getting Translation..."
                 }
                 
-                let api = API(state: self.camState, header: ["Ocp-Apim-Subscription-Key": "dca2b686d07a4e18ba81f5731053dbab", "Content-Type": "application/octet-stream"], body: UIImageJPEGRepresentation(image!, 0.9)!, fields: fields)
+                let api = API(state: self.camState, header: ["Ocp-Apim-Subscription-Key": "8cace64f78f34355b7e2ab22e3b06bed", "Content-Type": "application/octet-stream"], body: UIImageJPEGRepresentation(image!, 0.9)!, fields: fields)
                 
                 api.callAPI() { (rs: String) in
                     if(rs.containsString("celebrities")) {
