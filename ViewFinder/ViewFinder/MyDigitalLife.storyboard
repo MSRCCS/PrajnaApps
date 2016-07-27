@@ -3,6 +3,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
         <!--Home View Controller-->
@@ -79,10 +80,10 @@
             </objects>
             <point key="canvasLocation" x="1942" y="-419"/>
         </scene>
-        <!--View Controller-->
+        <!--Upload View Controller-->
         <scene sceneID="pnS-wv-Iqi">
             <objects>
-                <viewController id="VbR-n3-RaD" sceneMemberID="viewController">
+                <viewController id="VbR-n3-RaD" customClass="MDLUploadViewController" customModule="MyDigitalLife" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="raL-9f-9iM"/>
                         <viewControllerLayoutGuide type="bottom" id="TOe-U4-QwV"/>
@@ -90,8 +91,70 @@
                     <view key="view" contentMode="scaleToFill" id="Nnk-U8-Phj">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="hwG-L0-eRV">
+                                <rect key="frame" x="0.0" y="64" width="600" height="536"/>
+                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="fKQ-Sq-F2G">
+                                    <size key="itemSize" width="275" height="262"/>
+                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                </collectionViewFlowLayout>
+                                <cells>
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="uploadCell" id="Ihr-n0-1P7" customClass="UploadCollectionViewCell" customModule="MyDigitalLife" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="64" width="275" height="262"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                                            <rect key="frame" x="0.0" y="0.0" width="275" height="262"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="SOH-MO-UPe">
+                                                    <rect key="frame" x="0.0" y="0.0" width="275" height="262"/>
+                                                </imageView>
+                                            </subviews>
+                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                        </view>
+                                        <constraints>
+                                            <constraint firstAttribute="bottomMargin" secondItem="SOH-MO-UPe" secondAttribute="bottom" constant="-8" id="2LS-aF-X0r"/>
+                                            <constraint firstItem="SOH-MO-UPe" firstAttribute="bottom" secondItem="Ihr-n0-1P7" secondAttribute="bottomMargin" id="9jl-y1-Fnc"/>
+                                            <constraint firstAttribute="trailingMargin" secondItem="SOH-MO-UPe" secondAttribute="trailing" constant="3" id="GfC-0H-x4C"/>
+                                            <constraint firstItem="SOH-MO-UPe" firstAttribute="top" secondItem="Ihr-n0-1P7" secondAttribute="topMargin" id="LrB-dH-848"/>
+                                            <constraint firstItem="SOH-MO-UPe" firstAttribute="leading" secondItem="Ihr-n0-1P7" secondAttribute="leadingMargin" constant="3" id="Ryu-mV-Nlg"/>
+                                            <constraint firstItem="SOH-MO-UPe" firstAttribute="top" secondItem="Ihr-n0-1P7" secondAttribute="topMargin" constant="-8" id="VMs-yU-Rrq"/>
+                                            <constraint firstItem="SOH-MO-UPe" firstAttribute="leading" secondItem="Ihr-n0-1P7" secondAttribute="leadingMargin" constant="-8" id="cIc-EW-PKl"/>
+                                            <constraint firstAttribute="trailingMargin" secondItem="SOH-MO-UPe" secondAttribute="trailing" constant="-8" id="m6v-Mr-u4O"/>
+                                        </constraints>
+                                        <variation key="default">
+                                            <mask key="constraints">
+                                                <exclude reference="9jl-y1-Fnc"/>
+                                                <exclude reference="GfC-0H-x4C"/>
+                                                <exclude reference="LrB-dH-848"/>
+                                                <exclude reference="Ryu-mV-Nlg"/>
+                                            </mask>
+                                        </variation>
+                                        <connections>
+                                            <outlet property="imageView" destination="SOH-MO-UPe" id="TSB-jh-beP"/>
+                                        </connections>
+                                    </collectionViewCell>
+                                </cells>
+                            </collectionView>
+                        </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstAttribute="trailingMargin" secondItem="hwG-L0-eRV" secondAttribute="trailing" constant="-20" id="PQU-V8-yrg"/>
+                            <constraint firstItem="TOe-U4-QwV" firstAttribute="top" secondItem="hwG-L0-eRV" secondAttribute="bottom" id="cfn-cY-DRP"/>
+                            <constraint firstItem="hwG-L0-eRV" firstAttribute="top" secondItem="raL-9f-9iM" secondAttribute="bottom" id="hk0-SC-p7X"/>
+                            <constraint firstItem="hwG-L0-eRV" firstAttribute="leading" secondItem="Nnk-U8-Phj" secondAttribute="leadingMargin" constant="-20" id="wo2-zg-CTp"/>
+                        </constraints>
                     </view>
+                    <toolbarItems>
+                        <barButtonItem title="Item" id="c07-7I-aLs"/>
+                        <barButtonItem title="Item" id="JVP-c7-kHP"/>
+                    </toolbarItems>
+                    <nil key="simulatedBottomBarMetrics"/>
+                    <connections>
+                        <outlet property="cv" destination="hwG-L0-eRV" id="auQ-pW-PpG"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Eu7-Li-u1c" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

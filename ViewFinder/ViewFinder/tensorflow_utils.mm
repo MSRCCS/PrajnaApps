@@ -116,15 +116,15 @@ NSString* FilePathForResourceName(NSString* name, NSString* extension) {
   return file_path;
 }
 
-tensorflow::Status LoadModel(NSString* file_name, NSString* file_type,
+NSString* LoadModel(NSString* file_name, NSString* file_type,
                              std::unique_ptr<tensorflow::Session>* session) {
   tensorflow::SessionOptions options;
   
   tensorflow::Session* session_pointer = nullptr;
   tensorflow::Status session_status = tensorflow::NewSession(options, &session_pointer);
   if (!session_status.ok()) {
-    LOG(ERROR) << "Could not create Tensorflow Session: " << session_status;
-    return session_status;
+
+      return @"Could not create Tensorflow Session";
   }
   session->reset(session_pointer);
   LOG(INFO) << "Session created.";
@@ -134,37 +134,33 @@ tensorflow::Status LoadModel(NSString* file_name, NSString* file_type,
   
   NSString* model_path = FilePathForResourceName(file_name, file_type);
   if (!model_path) {
-    LOG(ERROR) << "Failed to find model proto at" << [file_name UTF8String]
-               << [file_type UTF8String];
-    return tensorflow::errors::NotFound([file_name UTF8String],
-                                        [file_type UTF8String]);
+
+      return @"Failed to find model proto";
   }
   const bool read_proto_succeeded = PortableReadFileToProto(
     [model_path UTF8String], &tensorflow_graph);
   if (!read_proto_succeeded) {
-    LOG(ERROR) << "Failed to load model proto from" << [model_path UTF8String];
-    return tensorflow::errors::NotFound([model_path UTF8String]);
+
+      return @"Could not load model proto";
   }
   
   LOG(INFO) << "Creating session.";
   tensorflow::Status create_status = (*session)->Create(tensorflow_graph);
   if (!create_status.ok()) {
-    LOG(ERROR) << "Could not create Tensorflow Graph: " << create_status;
-    return create_status;
+      
+      return @"Could not create Tensorflow Graph";
   }
   
-  return tensorflow::Status::OK();
+    return @"OK";
 }
 
-tensorflow::Status LoadLabels(NSString* file_name, NSString* file_type,
+NSString* LoadLabels(NSString* file_name, NSString* file_type,
                                 std::vector<std::string>* label_strings) {
   // Read the label list
   NSString* labels_path = FilePathForResourceName(file_name, file_type);
   if (!labels_path) {
-    LOG(ERROR) << "Failed to find model proto at" << [file_name UTF8String]
-    << [file_type UTF8String];
-    return tensorflow::errors::NotFound([file_name UTF8String],
-                                        [file_type UTF8String]);
+
+      return @"Failed to find model";
   }
   std::ifstream t;
   t.open([labels_path UTF8String]);
@@ -174,5 +170,5 @@ tensorflow::Status LoadLabels(NSString* file_name, NSString* file_type,
     label_strings->push_back(line);
   }
   t.close();
-  return tensorflow::Status::OK();
+    return @"OK";
 }

@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "737A3BA92F14C1CCE39788E88A6CCE83E0A62DF6",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "DEF827AEE61008D72BA753A95234A28088662AAB" : 0,
+    "737A3BA92F14C1CCE39788E88A6CCE83E0A62DF6" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "1EAE738F-E783-4BBA-A447-3AA09347C019",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "DEF827AEE61008D72BA753A95234A28088662AAB" : "PrajnaApps\/ViewFinder\/tensorflow\/",
+    "737A3BA92F14C1CCE39788E88A6CCE83E0A62DF6" : "PrajnaApps\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "ViewFinder",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "ViewFinder\/ViewFinder.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/jdkohn\/PrajnaApps.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "737A3BA92F14C1CCE39788E88A6CCE83E0A62DF6"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/tensorflow\/tensorflow",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "DEF827AEE61008D72BA753A95234A28088662AAB"
+    }
+  ]
+}
