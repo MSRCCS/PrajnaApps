@@ -31,33 +31,20 @@ std::vector<std::string> labels;
     return toPrint;
 }
 
-- (BOOL) LoadModel:(NSString *)file_name second:(NSString *)file_type
+- (NSString*) LoadModel:(NSString *)file_name second:(NSString *)file_type
 {
-    tensorflow::Status load_status = LoadModel(file_name, file_type, &tf_session);
-    return load_status.ok();
+    return LoadModel(file_name, file_type, &tf_session);
 }
 
-- (BOOL) LoadLabel: (NSString*) file_name second: (NSString*) file_type
+- (NSString*) LoadLabel: (NSString*) file_name second: (NSString*) file_type
 {
-    tensorflow::Status labels_status = LoadLabels(file_name, file_type, &labels);
-    return labels_status.ok();
+    return LoadLabels(file_name, file_type, &labels);
 }
 
 - (NSMutableDictionary*) runCNNOnFrame: (CVPixelBufferRef) pixelBuffer
 {
     
     if(pixelBuffer != NULL) {
-        
-        OSType sourcePixelFormat = CVPixelBufferGetPixelFormatType(pixelBuffer);
-        int doReverseChannels;
-        if (kCVPixelFormatType_32ARGB == sourcePixelFormat) {
-            doReverseChannels = 1;
-        } else if (kCVPixelFormatType_32BGRA == sourcePixelFormat) {
-            doReverseChannels = 0;
-        } else {
-            assert(false);  // Unknown source format
-        }
-
         
         const int sourceRowBytes = (int)CVPixelBufferGetBytesPerRow(pixelBuffer);
         const int image_width = (int)CVPixelBufferGetWidth(pixelBuffer);

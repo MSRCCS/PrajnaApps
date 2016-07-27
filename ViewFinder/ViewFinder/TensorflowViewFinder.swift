@@ -165,21 +165,31 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
         var loadedModel = false
         var loadedlabels = false
         
-        if(self.LoadModel("tensorflow_inception_graph", second: "pb")) {
-            print("Loaded Model")
+        let alertController = UIAlertController(title: "Uh Oh!", message:
+            "--", preferredStyle: UIAlertControllerStyle.Alert)
+        alertController.addAction(UIAlertAction(title: "Dismiss", style: UIAlertActionStyle.Default,handler: nil))
+        
+        
+        
+        let loadModel = self.LoadModel("tensorflow_inception_graph", second: "pb")
+        if(loadModel == "OK") {
             loadedModel = true
         } else {
-            print("Failed to load Model")
-        }
+            //send alert with fail
+            alertController.message = loadModel
+            self.presentViewController(alertController, animated: true, completion: nil)
+        }        
         
-        if(self.LoadLabel("imagenet_comp_graph_label_strings", second: "txt")) {
-            print("Loaded Labels")
+        let loadLabel = self.LoadLabel("imagenet_comp_graph_label_strings", second: "txt")
+        if(loadLabel == "OK") {
             loadedlabels = true
         } else {
-            print("Failed to load Labels")
+            alertController.message = loadLabel
+            self.presentViewController(alertController, animated: true, completion: nil)
         }
         
         if(loadedModel && loadedlabels) {
+            print("Loaded")
             self.loaded = true
         }
         

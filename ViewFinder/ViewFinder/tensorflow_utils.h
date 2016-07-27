@@ -21,9 +21,9 @@
 #include "tensorflow/core/public/session.h"
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 
-tensorflow::Status LoadModel(NSString* file_name, NSString* file_type,
+NSString* LoadModel(NSString* file_name, NSString* file_type,
                              std::unique_ptr<tensorflow::Session>* session);
-tensorflow::Status LoadLabels(NSString* file_name, NSString* file_type,
+NSString* LoadLabels(NSString* file_name, NSString* file_type,
                               std::vector<std::string>* label_strings);
 void GetTopN(const Eigen::TensorMap<Eigen::Tensor<float, 1, Eigen::RowMajor>,
              Eigen::Aligned>& prediction, const int num_results,

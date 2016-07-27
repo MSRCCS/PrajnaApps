@@ -17,9 +17,9 @@
 
 - (NSString*) logText: (NSString*) toPrint;
 
-- (BOOL) LoadModel: (NSString*) file_name second: (NSString*) file_type;
+- (NSString*) LoadModel: (NSString*) file_name second: (NSString*) file_type;
 
-- (BOOL) LoadLabel: (NSString*) file_name second: (NSString*) file_type;
+- (NSString*) LoadLabel: (NSString*) file_name second: (NSString*) file_type;
 
 - (NSMutableDictionary*) runCNNOnFrame: (CVPixelBufferRef) pixelBuffer;
 

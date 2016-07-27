@@ -165,7 +165,6 @@ class MDLCameraViewController: UIViewController, CLLocationManagerDelegate {
         self.view.addSubview(longLabel)
     }
 
-    
     /////////////////// TAKE PICTURE ////////////////////
     
     /*
@@ -183,9 +182,7 @@ class MDLCameraViewController: UIViewController, CLLocationManagerDelegate {
                 
                 let image = UIImage(data: imageData)
 
-                //send to server
-                
-            
+                self.uploadOneImage(image!)
                 
                 self.locationManager.startUpdatingLocation()
                 self.latLabel.text! = "\(self.locationManager.location!.coordinate.latitude)"
@@ -197,7 +194,7 @@ class MDLCameraViewController: UIViewController, CLLocationManagerDelegate {
     
     func uploadOneImage(image: UIImage) {
         do {
-            let account = try AZSCloudStorageAccount(fromConnectionString:"DefaultEndpointsProtocol=https;AccountName=TODO;AccountKey=TODO") //I stored the property in my header file
+            let account = try AZSCloudStorageAccount(fromConnectionString:"DefaultEndpointsProtocol=https;AccountName=prajnabot;AccountKey=T5dp2kZO0vMJzlFo54a+ZgELkVinI4HZe5Hl9e6XLIO2Rj7i680cFl7ztHN8uIbiL95Z03DlY+hGUE+Uds2ziw==") //I stored the property in my header file
             
             let blobClient: AZSCloudBlobClient = account.getBlobClient()
             
@@ -215,7 +212,7 @@ class MDLCameraViewController: UIViewController, CLLocationManagerDelegate {
                     let imageName = CFUUIDCreateString(nil, CFUUIDCreate(nil))
                     let blob: AZSCloudBlockBlob = blobContainer.blockBlobReferenceFromName(imageName as String) //If you want a random name, I used let imageName = CFUUIDCreateString(nil, CFUUIDCreate(nil))
                     
-                    let imageData = UIImagePNGRepresentation(image)
+                    let imageData = UIImageJPEGRepresentation(image, 0.9)
                     
                     blob.uploadFromData(imageData!, completionHandler: {(NSError) -> Void in
                         

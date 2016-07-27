@@ -27,7 +27,5 @@ class MDLHomeViewController: UIViewController {
     override func didReceiveMemoryWarning() {
         //
     }
-    
-    
-    
+
 }
