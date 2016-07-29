@@ -27,7 +27,7 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>MyDigitalLife would like to use your current location when you use the app.</string>
 	<key>UILaunchStoryboardName</key>
-	<string>MDLLaunchScreen</string>
+	<string>MyDigitalLife</string>
 	<key>UIMainStoryboardFile</key>
 	<string>MyDigitalLife</string>
 	<key>UIRequiredDeviceCapabilities</key>

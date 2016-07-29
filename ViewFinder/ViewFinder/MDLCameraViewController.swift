@@ -22,7 +22,7 @@ import CoreLocation
 
 
 
-class MDLCameraViewController: UIViewController, CLLocationManagerDelegate {
+class MDLCameraViewController: UIViewController, CLLocationManagerDelegate, AVCaptureMetadataOutputObjectsDelegate {
     
     var toggleButton = UIButton()
     var captureButton = UIButton()
@@ -46,7 +46,8 @@ class MDLCameraViewController: UIViewController, CLLocationManagerDelegate {
     var captureDevice : AVCaptureDevice!
     var frontDevice : AVCaptureDevice!
     var backDevice : AVCaptureDevice!
-    let session=AVCaptureSession();
+    let session=AVCaptureSession()
+    let metadataOutput=AVCaptureMetadataOutput()
     let stillImageOutput = AVCaptureStillImageOutput()
     let imageView = UIImageView()
     let cameraPreview = UIView()
@@ -61,6 +62,17 @@ class MDLCameraViewController: UIViewController, CLLocationManagerDelegate {
     let latLabel = UILabel()
     let longLabel = UILabel()
     
+    //Face Detector
+    var detector: CIDetector?
+    var options: [String : AnyObject]?
+    var context: CIContext?
+
+    //Text Detector
+    var textDetector: CIDetector?
+    var textDetectorOptions: [String : AnyObject]?
+    var textContext: CIContext?
+    var translating = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -73,9 +85,12 @@ class MDLCameraViewController: UIViewController, CLLocationManagerDelegate {
         configureTapActions()
         
         self.setupAVCapture()
-        
+        setUpTensorflow()
         addLocationManager()
         
+        setUpFaceDetector()
+        setUpTextDetector()
+
         self.navigationController?.setNavigationBarHidden(true, animated: false)
     }
     
@@ -105,8 +120,63 @@ class MDLCameraViewController: UIViewController, CLLocationManagerDelegate {
         }
     }
     
+    // NEEDS WORK
+    func setUpTensorflow() {
+        let alertController = UIAlertController(title: "Uh Oh!", message:
+            "--", preferredStyle: UIAlertControllerStyle.Alert)
+        alertController.addAction(UIAlertAction(title: "Dismiss", style: UIAlertActionStyle.Default,handler: nil))
+        
+        
+        
+        let loadModel = self.LoadModel("tensorflow_inception_graph", second: "pb")
+        if(loadModel != "OK") {
+            //send alert with fail
+            alertController.message = loadModel
+            self.presentViewController(alertController, animated: true, completion: nil)
+        }
+        
+        let loadLabel = self.LoadLabel("imagenet_comp_graph_label_strings", second: "txt")
+        if(loadLabel != "OK") {
+            alertController.message = loadLabel
+            self.presentViewController(alertController, animated: true, completion: nil)
+        }
+    }
+
+    
     /////////////////// CONFIGURE ACTIONS //////////////////
     
+    
+    //sets up the detector to track faces
+    func setUpFaceDetector() {
+        context = CIContext()
+        options = [String : AnyObject]()
+        options![CIDetectorAccuracy] = CIDetectorAccuracyLow
+        
+        detector = CIDetector(ofType: CIDetectorTypeFace, context: context, options: options)
+    }
+    
+    /* returns an array of features
+     If the array is empty then there are no faces in the screen
+     If it is not empty then there are as many faces as the return array.count */
+    func getFacialFeatures(image: CIImage) -> Bool {
+        let imageOptions = [CIDetectorImageOrientation : 6]
+        if(detector!.featuresInImage(image, options: imageOptions).count > 0) {
+            return true
+        }
+        return false
+    }
+    
+    func setUpTextDetector() {
+        textDetector = CIDetector(ofType: CIDetectorTypeText, context: nil, options: [CIDetectorAccuracy: CIDetectorAccuracyLow])
+    }
+    
+    func getTextFeatures(image: CIImage) -> Bool {
+        let imageOptions = [CIDetectorImageOrientation : 6]
+        if(textDetector!.featuresInImage(image, options: imageOptions).count > 0) {
+            return true
+        }
+        return false
+    }
     
     //adds the double tap and swipe to the view
     func configureTapActions() {
@@ -178,16 +248,20 @@ class MDLCameraViewController: UIViewController, CLLocationManagerDelegate {
             // Secure image
             stillImageOutput.captureStillImageAsynchronouslyFromConnection(videoConnection) {
                 (imageDataSampleBuffer, error) -> Void in
+                
                 let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(imageDataSampleBuffer)
                 
                 let image = UIImage(data: imageData)
 
-                self.uploadOneImage(image!)
+                UIImageWriteToSavedPhotosAlbum(image!, nil, nil, nil)
+                //self.uploadFromData(imageData)
+                
                 
                 self.locationManager.startUpdatingLocation()
                 self.latLabel.text! = "\(self.locationManager.location!.coordinate.latitude)"
                 self.longLabel.text! = "\(self.locationManager.location!.coordinate.longitude)"
                 self.locationManager.stopUpdatingLocation()
+                self.uploadOneImage(image!)
             }
         }
     }
@@ -212,11 +286,69 @@ class MDLCameraViewController: UIViewController, CLLocationManagerDelegate {
                     let imageName = CFUUIDCreateString(nil, CFUUIDCreate(nil))
                     let blob: AZSCloudBlockBlob = blobContainer.blockBlobReferenceFromName(imageName as String) //If you want a random name, I used let imageName = CFUUIDCreateString(nil, CFUUIDCreate(nil))
                     
-                    let imageData = UIImageJPEGRepresentation(image, 0.9)
+                    blob.properties.contentType = "JPEG"
+                    var imageData = UIImageJPEGRepresentation(image, 1.0)
+                    
+                    let alert = UIAlertController(title: "Hang On", message: "We are uploading your image", preferredStyle: .Alert)
+                    self.presentViewController(alert, animated: true, completion: nil)
                     
                     blob.uploadFromData(imageData!, completionHandler: {(NSError) -> Void in
                         
-                        NSLog("Ok, uploaded!")
+                        alert.dismissViewControllerAnimated(true, completion: nil)
+                        
+                    })
+                    
+                    //GET TENSORFLOW SOMEHOW
+                    
+                    let jsonObject: [String: AnyObject] = [
+                        "latitude": String(self.locationManager.location!.coordinate.latitude),
+                        "longitude": String(self.locationManager.location!.coordinate.longitude),
+                        "faces": self.getFacialFeatures(CIImage(CGImage: image.CGImage!)),
+                        "text": self.getTextFeatures(CIImage(CGImage: image.CGImage!)),
+                        "imagename": imageName]                    
+                    do {
+                        let obj = try NSJSONSerialization.dataWithJSONObject(jsonObject, options: NSJSONWritingOptions.PrettyPrinted)
+                        let jsonStream = NSInputStream(data: obj)
+                        let jsonBlob: AZSCloudAppendBlob = blobContainer.appendBlobReferenceFromName((imageName as String) + "-m")
+                        jsonBlob.properties.contentType = "STRING"
+                        jsonBlob.uploadFromStream(jsonStream, createNew: true, completionHandler: { Void in
+                            
+                        })
+                    }
+                    catch {
+                        print("UH OH")
+                    }
+                }
+            }
+        } catch {
+            print("Could not get account from connection string")
+        }
+    }
+
+    
+    func uploadFromData(data: NSData) {
+        do {
+            let account = try AZSCloudStorageAccount(fromConnectionString:"DefaultEndpointsProtocol=https;AccountName=prajnabot;AccountKey=T5dp2kZO0vMJzlFo54a+ZgELkVinI4HZe5Hl9e6XLIO2Rj7i680cFl7ztHN8uIbiL95Z03DlY+hGUE+Uds2ziw==") //I stored the property in my header file
+            
+            let blobClient: AZSCloudBlobClient = account.getBlobClient()
+            
+            let blobContainer: AZSCloudBlobContainer = blobClient.containerReferenceFromName("test-image-blob")
+            
+            blobContainer.createContainerIfNotExistsWithAccessType(AZSContainerPublicAccessType.Container, requestOptions: nil, operationContext: nil) { (NSError, Bool) -> Void in
+                
+                if ((NSError) != nil){
+                    
+                    NSLog("Error in creating container.")
+                    
+                }
+                    
+                else {
+                    let imageName = CFUUIDCreateString(nil, CFUUIDCreate(nil))
+                    let blob: AZSCloudBlockBlob = blobContainer.blockBlobReferenceFromName(imageName as String) //If you want a random name, I used let imageName = CFUUIDCreateString(nil, CFUUIDCreate(nil))
+
+                    let stream = NSInputStream(data: data)
+                    
+                    blob.uploadFromStream(stream, completionHandler: { Void in
                         
                     })
                 }
@@ -368,7 +500,13 @@ extension MDLCameraViewController:  AVCaptureVideoDataOutputSampleBufferDelegate
         if session.canAddOutput(stillImageOutput) {
             session.addOutput(stillImageOutput)
         }
+
         
+        metadataOutput.setMetadataObjectsDelegate(self, queue: dispatch_get_main_queue())
+        if(session.canAddOutput(metadataOutput)) {
+            session.addOutput(metadataOutput)
+        }
+        self.videoDataOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey:Int(kCVPixelFormatType_32BGRA)]
         session.startRunning();
         addButtons()
     }
@@ -401,5 +539,49 @@ extension MDLCameraViewController:  AVCaptureVideoDataOutputSampleBufferDelegate
         let pixelBuffer:CVPixelBufferRef = CMSampleBufferGetImageBuffer(sampleBuffer)!;
         let ciImage:CIImage = CIImage(CVPixelBuffer: pixelBuffer)
         return ciImage;
+    }
+}
+
+extension UIImage {
+    public func imageRotatedByDegrees(degrees: CGFloat, flip: Bool) -> UIImage {
+        let radiansToDegrees: (CGFloat) -> CGFloat = {
+            return $0 * (180.0 / CGFloat(M_PI))
+        }
+        let degreesToRadians: (CGFloat) -> CGFloat = {
+            return $0 / 180.0 * CGFloat(M_PI)
+        }
+        
+        // calculate the size of the rotated view's containing box for our drawing space
+        let rotatedViewBox = UIView(frame: CGRect(origin: CGPointZero, size: size))
+        let t = CGAffineTransformMakeRotation(degreesToRadians(degrees));
+        rotatedViewBox.transform = t
+        let rotatedSize = rotatedViewBox.frame.size
+        
+        // Create the bitmap context
+        UIGraphicsBeginImageContext(rotatedSize)
+        let bitmap = UIGraphicsGetCurrentContext()
+        
+        // Move the origin to the middle of the image so we will rotate and scale around the center.
+        CGContextTranslateCTM(bitmap, rotatedSize.width / 2.0, rotatedSize.height / 2.0);
+        
+        //   // Rotate the image context
+        CGContextRotateCTM(bitmap, degreesToRadians(degrees));
+        
+        // Now, draw the rotated/scaled image into the context
+        var yFlip: CGFloat
+        
+        if(flip){
+            yFlip = CGFloat(-1.0)
+        } else {
+            yFlip = CGFloat(1.0)
+        }
+        
+        CGContextScaleCTM(bitmap, yFlip, -1.0)
+        CGContextDrawImage(bitmap, CGRectMake(-size.width / 2, -size.height / 2, size.width, size.height), CGImage)
+        
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return newImage
     }
 }

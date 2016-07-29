@@ -43,7 +43,7 @@ std::vector<std::string> labels;
 
 - (NSMutableDictionary*) runCNNOnFrame: (CVPixelBufferRef) pixelBuffer
 {
-    
+    NSLog(@"%s", "!");
     if(pixelBuffer != NULL) {
         
         const int sourceRowBytes = (int)CVPixelBufferGetBytesPerRow(pixelBuffer);
@@ -81,11 +81,12 @@ std::vector<std::string> labels;
         tensorflow::uint8 *in = sourceStartAddr;
 
         float *out = image_tensor_mapped.data();
-        
         for (int y = 0; y < wanted_height; ++y) {
+            NSLog(@"%i", y);
             float *out_row = out + (y * wanted_width * wanted_channels);
 
             for (int x = 0; x < wanted_width; ++x) {
+                NSLog(@"%i", x);
             const int in_x = (y * image_width) / wanted_width;
                 const int in_y = (x * image_height) / wanted_height;
                 tensorflow::uint8 *in_pixel = in + (in_y * image_width * image_channels) + (in_x * image_channels);
@@ -93,10 +94,12 @@ std::vector<std::string> labels;
 
                 for (int c = 0; c < wanted_channels; ++c) {
                     out_pixel[c] = (in_pixel[c] - input_mean) / input_std;
+                    NSLog(@"%i", c);
                 }
             }
         }
 
+        NSLog(@"%s", "!!!!");
         //gets predictions
         if (tf_session.get()) {
             std::string input_layer = "input";
@@ -134,5 +137,4 @@ std::vector<std::string> labels;
     NSLog(@"%s", "Pixel Buffer Was NULL");
     return nil;
 }
-
 @end

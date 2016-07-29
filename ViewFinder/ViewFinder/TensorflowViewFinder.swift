@@ -444,7 +444,6 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
     }
     
     func showTranslations(sender: AnyObject) {
-        
         let storyboard = UIStoryboard(name: "Tensorflow", bundle: nil)
         let controller = storyboard.instantiateViewControllerWithIdentifier("ttvc") as! TranslationTableViewController
         
