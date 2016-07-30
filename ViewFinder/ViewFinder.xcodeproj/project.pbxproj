@@ -23,6 +23,7 @@
 		2C21F0381D428328002F90C7 /* MDLLaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2C21F0371D428328002F90C7 /* MDLLaunchScreen.storyboard */; };
 		2C21F0391D428328002F90C7 /* MDLLaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2C21F0371D428328002F90C7 /* MDLLaunchScreen.storyboard */; };
 		2C3FAF911D4285BB0058B8DF /* MDLCameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C3FAF901D4285BB0058B8DF /* MDLCameraViewController.swift */; };
+		2C4AC9211D4C15E1003A468B /* MDLSplashScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C4AC9201D4C15E1003A468B /* MDLSplashScreen.swift */; };
 		2C50CBB71D4684F8009BB7EE /* MDLUploadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C50CBB61D4684F8009BB7EE /* MDLUploadViewController.swift */; };
 		2C50CBB81D468AFC009BB7EE /* TensorflowSelected.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CF64E501D40052000374AAF /* TensorflowSelected.png */; };
 		2C5F0A081D341908006AE9D0 /* ObjectCaptionLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C5F0A071D341908006AE9D0 /* ObjectCaptionLabel.swift */; };
@@ -70,8 +71,10 @@
 		2CA806B71D3ECCB100D005D8 /* MenuButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CA806B51D3ECCB100D005D8 /* MenuButton.png */; };
 		2CAB03DD1D416F6D0020BE81 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CAB03DC1D416F6D0020BE81 /* Icon.png */; };
 		2CAB03DE1D416F6D0020BE81 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CAB03DC1D416F6D0020BE81 /* Icon.png */; };
+		2CBC43891D4AC365008E41A7 /* MDLMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CBC43881D4AC365008E41A7 /* MDLMapViewController.swift */; };
 		2CDB225C1D3EDC5E0062EAAA /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CDB225B1D3EDC5E0062EAAA /* Global.swift */; };
 		2CDB225D1D3EDC5E0062EAAA /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CDB225B1D3EDC5E0062EAAA /* Global.swift */; };
+		2CDEB38B1D4AE460005AAD38 /* MDLImagePopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CDEB38A1D4AE460005AAD38 /* MDLImagePopover.swift */; };
 		2CE344DB1D48322E00A27BEF /* MDLGalleryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE344DA1D48322E00A27BEF /* MDLGalleryViewController.swift */; };
 		2CE344DD1D4928B500A27BEF /* libprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2CE344DC1D4928B500A27BEF /* libprotobuf.a */; };
 		2CE344DF1D4928CA00A27BEF /* libprotobuf-lite.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2CE344DE1D4928CA00A27BEF /* libprotobuf-lite.a */; };
@@ -129,6 +132,7 @@
 		2C21F0341D427E01002F90C7 /* MDLAppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDLAppDelegate.swift; sourceTree = "<group>"; };
 		2C21F0371D428328002F90C7 /* MDLLaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MDLLaunchScreen.storyboard; sourceTree = "<group>"; };
 		2C3FAF901D4285BB0058B8DF /* MDLCameraViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDLCameraViewController.swift; sourceTree = "<group>"; };
+		2C4AC9201D4C15E1003A468B /* MDLSplashScreen.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDLSplashScreen.swift; sourceTree = "<group>"; };
 		2C50CBB61D4684F8009BB7EE /* MDLUploadViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDLUploadViewController.swift; sourceTree = "<group>"; };
 		2C5F0A071D341908006AE9D0 /* ObjectCaptionLabel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectCaptionLabel.swift; sourceTree = "<group>"; };
 		2C7083FF1D3E9796001D3E16 /* CameraButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CameraButton.png; sourceTree = "<group>"; };
@@ -153,7 +157,9 @@
 		2CA806B51D3ECCB100D005D8 /* MenuButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MenuButton.png; sourceTree = "<group>"; };
 		2CAB03DC1D416F6D0020BE81 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		2CAB03DF1D4187C10020BE81 /* MyDigitalLife.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MyDigitalLife.storyboard; sourceTree = "<group>"; };
+		2CBC43881D4AC365008E41A7 /* MDLMapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDLMapViewController.swift; sourceTree = "<group>"; };
 		2CDB225B1D3EDC5E0062EAAA /* Global.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
+		2CDEB38A1D4AE460005AAD38 /* MDLImagePopover.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDLImagePopover.swift; sourceTree = "<group>"; };
 		2CE344DA1D48322E00A27BEF /* MDLGalleryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDLGalleryViewController.swift; sourceTree = "<group>"; };
 		2CE344DC1D4928B500A27BEF /* libprotobuf.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libprotobuf.a; path = tensorflow/contrib/makefile/gen/protobuf_ios/lib/libprotobuf.a; sourceTree = "<group>"; };
 		2CE344DE1D4928CA00A27BEF /* libprotobuf-lite.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libprotobuf-lite.a"; path = "tensorflow/contrib/makefile/gen/protobuf_ios/lib/libprotobuf-lite.a"; sourceTree = "<group>"; };
@@ -277,10 +283,13 @@
 				2C72D9B91D2F265300C3D707 /* tensorflow_utils.mm */,
 				2C72D9BA1D2F265300C3D707 /* tensorflow_utils.h */,
 				2C95143F1D42E4B80081B24B /* MDL-Bridging-Header.h */,
+				2CDEB38A1D4AE460005AAD38 /* MDLImagePopover.swift */,
 				2CE344DA1D48322E00A27BEF /* MDLGalleryViewController.swift */,
+				2CBC43881D4AC365008E41A7 /* MDLMapViewController.swift */,
 				2C21F0341D427E01002F90C7 /* MDLAppDelegate.swift */,
 				2C3FAF901D4285BB0058B8DF /* MDLCameraViewController.swift */,
 				2C50CBB61D4684F8009BB7EE /* MDLUploadViewController.swift */,
+				2C4AC9201D4C15E1003A468B /* MDLSplashScreen.swift */,
 				2C9514351D42A3970081B24B /* MDLHomeViewController.swift */,
 				2C21F0371D428328002F90C7 /* MDLLaunchScreen.storyboard */,
 				2CE4410A1D18A599009A7DC1 /* AppDelegate.swift */,
@@ -442,6 +451,12 @@
 				LastUpgradeCheck = 0730;
 				ORGANIZATIONNAME = Microsoft;
 				TargetAttributes = {
+					2C21F0011D427A4A002F90C7 = {
+						DevelopmentTeam = J44PM8Q84B;
+					};
+					2C72D95A1D2EFD8D00C3D707 = {
+						DevelopmentTeam = J44PM8Q84B;
+					};
 					2CE441061D18A599009A7DC1 = {
 						CreatedOnToolsVersion = 7.3.1;
 						DevelopmentTeam = J44PM8Q84B;
@@ -571,12 +586,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2C4AC9211D4C15E1003A468B /* MDLSplashScreen.swift in Sources */,
 				2C50CBB71D4684F8009BB7EE /* MDLUploadViewController.swift in Sources */,
+				2CDEB38B1D4AE460005AAD38 /* MDLImagePopover.swift in Sources */,
 				2C21F0351D427E01002F90C7 /* MDLAppDelegate.swift in Sources */,
 				2C21F0041D427A4A002F90C7 /* tensorflow_utils.mm in Sources */,
 				2C21F0091D427A4A002F90C7 /* API.swift in Sources */,
 				2C3FAF911D4285BB0058B8DF /* MDLCameraViewController.swift in Sources */,
 				2CE344DB1D48322E00A27BEF /* MDLGalleryViewController.swift in Sources */,
+				2CBC43891D4AC365008E41A7 /* MDLMapViewController.swift in Sources */,
 				2C21F00A1D427A4A002F90C7 /* TensorflowWrapper.mm in Sources */,
 				2C9514361D42A3970081B24B /* MDLHomeViewController.swift in Sources */,
 			);
@@ -691,7 +709,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = NO;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -739,7 +757,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = NO;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -786,7 +804,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = NO;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -833,7 +851,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = NO;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";

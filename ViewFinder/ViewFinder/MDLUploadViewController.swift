@@ -14,12 +14,24 @@ class MDLUploadViewController: UIViewController, UICollectionViewDelegate, UICol
     
     @IBOutlet weak var cv: UICollectionView!
     
+    var metadata = [NSDictionary]()
     var photos = [UIImage]()
     var shouldUpload = [Bool]()
     var activityIndicator = UIActivityIndicatorView()
     let caption = UILabel()
     let cover = UIView()
     let uploadingAlert = UIAlertController(title: "Uploading", message: "Hang on while we upload your images", preferredStyle: .Alert)
+    
+    //Face Detector
+    var detector: CIDetector?
+    var options: [String : AnyObject]?
+    var context: CIContext?
+    
+    //Text Detector
+    var textDetector: CIDetector?
+    var textDetectorOptions: [String : AnyObject]?
+    var textContext: CIContext?
+    var translating = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,6 +55,9 @@ class MDLUploadViewController: UIViewController, UICollectionViewDelegate, UICol
         cover.addSubview(caption)
         
         configureCollectionView()
+        
+        setUpFaceDetector()
+        setUpTextDetector()
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -50,6 +65,11 @@ class MDLUploadViewController: UIViewController, UICollectionViewDelegate, UICol
         loadPhotos()
     }
     
+    
+    /////////////////// UPLOADING ////////////////////
+    
+    
+    //uploads all the selected images
     func upload(sender: AnyObject) {
         
         self.presentViewController(uploadingAlert, animated: true, completion: nil)
@@ -69,7 +89,7 @@ class MDLUploadViewController: UIViewController, UICollectionViewDelegate, UICol
         
     }
     
-    
+    //Uploads one image and adds in some metadata
     func uploadOneImage(image: UIImage, index: Int, lastImage: Int) {
         do {
             let account = try AZSCloudStorageAccount(fromConnectionString:"DefaultEndpointsProtocol=https;AccountName=prajnabot;AccountKey=T5dp2kZO0vMJzlFo54a+ZgELkVinI4HZe5Hl9e6XLIO2Rj7i680cFl7ztHN8uIbiL95Z03DlY+hGUE+Uds2ziw==") //I stored the property in my header file
@@ -88,10 +108,11 @@ class MDLUploadViewController: UIViewController, UICollectionViewDelegate, UICol
                     
                 else {
                     let imageName = CFUUIDCreateString(nil, CFUUIDCreate(nil))
-                    let blob: AZSCloudBlockBlob = blobContainer.blockBlobReferenceFromName(imageName as String) //If you want a random name, I used let imageName = CFUUIDCreateString(nil, CFUUIDCreate(nil))
-                    
-                    let imageData = UIImageJPEGRepresentation(image, 0.9)
-                    
+
+                    let blob:AZSCloudBlockBlob = blobContainer.blockBlobReferenceFromName(imageName as String)
+                    blob.properties.contentType == "JPEG"
+                    let imageData = UIImageJPEGRepresentation(image, 1.0)
+
                     blob.uploadFromData(imageData!, completionHandler: {(NSError) -> Void in
                         let cell = self.cv.cellForItemAtIndexPath(NSIndexPath(forRow: index, inSection: 0)) as! UploadCollectionViewCell
                         cell.selectedFrame.hidden = true
@@ -101,15 +122,46 @@ class MDLUploadViewController: UIViewController, UICollectionViewDelegate, UICol
                             self.uploadingAlert.dismissViewControllerAnimated(true, completion: nil)
                         }
                     })
+                    
+                    //safely unwrap just to be safe
+                    var latitude: String! = ""
+                    if (self.metadata[index]["latitude"] as? String) != nil {
+                        latitude = self.metadata[index]["latitude"] as! String
+                    }
+                    var longitude: String! = ""
+                    if (self.metadata[index]["longitude"] as? String) != nil {
+                        longitude = self.metadata[index]["longitude"] as! String
+                    }
+                    var date: String! = ""
+                    if (self.metadata[index]["date"] as? String) != nil {
+                        date = self.metadata[index]["date"] as! String
+                    }
+                    print("LATITUDE \(latitude). LONGITUDE \(longitude)")
+                    let jsonObject: [String: AnyObject] = [
+                        "latitude": latitude,
+                        "longitude": longitude,
+                        "faces": self.getFacialFeatures(CIImage(CGImage: image.CGImage!)),
+                        "text": self.getTextFeatures(CIImage(CGImage: image.CGImage!)),
+                        "date": date,
+                        "imagename": imageName]
+                    print(jsonObject)
+                    do {
+                        let obj = try NSJSONSerialization.dataWithJSONObject(jsonObject, options: NSJSONWritingOptions.PrettyPrinted)
+                        let jsonStream = NSInputStream(data: obj)
+                        let jsonBlob: AZSCloudAppendBlob = blobContainer.appendBlobReferenceFromName((imageName as String) + "-m")
+                        jsonBlob.properties.contentType = "STRING"
+                        jsonBlob.uploadFromStream(jsonStream, createNew: true, completionHandler: { Void in
+                            
+                        })
+                    }
+                    catch {
+                        print("UH OH")
+                    }
                 }
             }
         } catch {
             print("Could not get account from connection string")
         }
-    }
-    
-    override func didReceiveMemoryWarning() {
-        //
     }
     
     func loadPhotos() {
@@ -126,11 +178,26 @@ class MDLUploadViewController: UIViewController, UICollectionViewDelegate, UICol
         if(result.count < maxPhotos) {
             maxPhotos = result.count
         }
-        
-        print((result.count - maxPhotos ..< result.count).reverse())
+
         for i in (result.count - maxPhotos ..< result.count).reverse() {
             PHImageManager.defaultManager().requestImageForAsset(result[i] as! PHAsset, targetSize: PHImageManagerMaximumSize, contentMode: PHImageContentMode.Default, options: requestOptions, resultHandler: { image, info in
                 if let img = image {
+                    
+                    let asset = result[i] as! PHAsset
+                    var latitude: String! = ""
+                    if((asset.location?.coordinate.latitude) != nil) {
+                        latitude = String(asset.location!.coordinate.latitude)
+                    }
+                    var longitude: String! = ""
+                    if((asset.location?.coordinate.longitude) != nil) {
+                        longitude = String(asset.location!.coordinate.longitude)
+                    }
+
+                    var date: String! = ""
+                    if(asset.creationDate != nil) {
+                        date = String(asset.creationDate!)
+                    }
+                    self.metadata.append(["latitude": latitude, "longitude": longitude, "date": date])
                     self.photos.append(img)
                     self.shouldUpload.append(false)
                 }
@@ -141,6 +208,8 @@ class MDLUploadViewController: UIViewController, UICollectionViewDelegate, UICol
         cover.removeFromSuperview()
         cv.reloadData()
     }
+    
+    ////////////////////// Collection View ///////////////////////////////
     
     func configureCollectionView() {
         cv.dataSource = self
@@ -199,6 +268,43 @@ class MDLUploadViewController: UIViewController, UICollectionViewDelegate, UICol
     
     func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
         return 1
+    }
+    
+    ///////////////////// Detectors ////////////////////////////
+    
+    //sets up the detector to track faces
+    func setUpFaceDetector() {
+        context = CIContext()
+        options = [String : AnyObject]()
+        options![CIDetectorAccuracy] = CIDetectorAccuracyLow
+        
+        detector = CIDetector(ofType: CIDetectorTypeFace, context: context, options: options)
+    }
+
+    func getFacialFeatures(image: CIImage) -> Bool {
+        let imageOptions = [CIDetectorImageOrientation : 6]
+        if(detector!.featuresInImage(image, options: imageOptions).count > 0) {
+            return true
+        }
+        return false
+    }
+    
+    func setUpTextDetector() {
+        textDetector = CIDetector(ofType: CIDetectorTypeText, context: nil, options: [CIDetectorAccuracy: CIDetectorAccuracyLow])
+    }
+    
+    func getTextFeatures(image: CIImage) -> Bool {
+        let imageOptions = [CIDetectorImageOrientation : 6]
+        if(textDetector!.featuresInImage(image, options: imageOptions).count > 0) {
+            return true
+        }
+        return false
+    }
+    
+    ///////////////// NEEDED //////////////////////
+    
+    override func didReceiveMemoryWarning() {
+        //
     }
 }
 
