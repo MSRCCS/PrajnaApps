@@ -28,6 +28,9 @@
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3xJ-LW-jWM">
                                 <rect key="frame" x="276" y="514" width="48" height="30"/>
                                 <state key="normal" title="Search"/>
+                                <connections>
+                                    <segue destination="Oit-vU-zig" kind="show" id="zy0-uA-ZtQ"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lmd-TZ-BaY">
                                 <rect key="frame" x="185" y="514" width="50" height="30"/>
@@ -206,7 +209,53 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Eu7-Li-u1c" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="710" y="398"/>
+            <point key="canvasLocation" x="310" y="393"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="Wvt-CK-Qgl">
+            <objects>
+                <viewController id="Oit-vU-zig" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="cVr-B1-dlC"/>
+                        <viewControllerLayoutGuide type="bottom" id="dgh-mv-XuH"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="SaJ-sZ-JUX">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <searchBar contentMode="redraw" ambiguous="YES" misplaced="YES" placeholder="Search Your Photos" translatesAutoresizingMaskIntoConstraints="NO" id="iSW-Ta-UUk">
+                                <rect key="frame" x="0.0" y="205" width="600" height="44"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </searchBar>
+                            <pickerView contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="m6m-m7-vlo">
+                                <rect key="frame" x="0.0" y="65" width="600" height="140"/>
+                            </pickerView>
+                            <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="H8u-37-10W">
+                                <rect key="frame" x="220" y="289" width="160" height="37"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="28"/>
+                                <state key="normal" title="Search!">
+                                    <color key="titleColor" red="0.09989015976" green="0.74128763090000005" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="iSW-Ta-UUk" firstAttribute="top" secondItem="cVr-B1-dlC" secondAttribute="bottom" constant="8" id="Gc8-bU-1gj"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="iSW-Ta-UUk" secondAttribute="trailing" constant="-20" id="XAC-ul-6ua"/>
+                            <constraint firstItem="H8u-37-10W" firstAttribute="centerX" secondItem="SaJ-sZ-JUX" secondAttribute="centerX" id="YlE-Ic-JoH"/>
+                            <constraint firstItem="iSW-Ta-UUk" firstAttribute="leading" secondItem="SaJ-sZ-JUX" secondAttribute="leadingMargin" constant="-20" id="ZiU-gl-C5T"/>
+                            <constraint firstItem="H8u-37-10W" firstAttribute="top" secondItem="iSW-Ta-UUk" secondAttribute="bottom" constant="38" id="h9y-B8-jae"/>
+                        </constraints>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="Gc8-bU-1gj"/>
+                            </mask>
+                        </variation>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="fcL-9u-w4u" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1115" y="393"/>
         </scene>
         <!--Camera View Controller-->
         <scene sceneID="ize-Il-tYT">
@@ -224,7 +273,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="5s6-5t-FIx" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1402" y="398"/>
+            <point key="canvasLocation" x="1808" y="380"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="NW2-k1-9t3">

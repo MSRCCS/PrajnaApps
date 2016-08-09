@@ -845,12 +845,11 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
             let formatDescription = CMSampleBufferGetFormatDescription(sampleBuffer)
             
             let cleanAperture = CMVideoFormatDescriptionGetCleanAperture(formatDescription!, false)
-            
+            print(cleanAperture)
             var ids = [Int]()
             var coords = [[Int: CGPoint]]()
 
             if(steady) {
-                
                 //creates and draws face boxes
                 dispatch_async(dispatch_get_main_queue()) {
                     

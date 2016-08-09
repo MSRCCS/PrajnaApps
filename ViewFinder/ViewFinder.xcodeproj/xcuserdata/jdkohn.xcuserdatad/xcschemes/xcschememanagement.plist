@@ -4,6 +4,11 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>CelebrityRecognizer.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>4</integer>
+		</dict>
 		<key>MyDigitalLife.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -28,6 +33,16 @@
 			<true/>
 		</dict>
 		<key>2C72D95A1D2EFD8D00C3D707</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>2CAE7FFC1D52B7F800031306</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>2CAE801F1D52B88E00031306</key>
 		<dict>
 			<key>primary</key>
 			<true/>

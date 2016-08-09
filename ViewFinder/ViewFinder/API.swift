@@ -68,3 +68,52 @@ class API {
         task.resume()
     }
 }
+
+class KnowledgeAPI {
+    var name: String
+    
+    init(name: String) {
+        self.name = name
+    }
+    
+    func callAPI(completionHandler: (rs: String) -> ()) {
+        var responseString = "" as NSString
+        
+        let urlName = formatName(name)
+        
+        let url = NSURL(string: "https://www.bingapis.com/api/v5/search?Knowledge=1&q=" + urlName + "&AppID=D41D8CD98F00B204E9800998ECF8427E496F9910&responseformat=json&responsesize=m")
+        
+        let request = NSMutableURLRequest(URL: url!)
+        request.HTTPMethod = "POST"
+        
+        let task = NSURLSession.sharedSession().dataTaskWithRequest(request) { data, response, error in
+            guard error == nil && data != nil else {            // check for fundamental networking error
+                print("error=\(error)")
+                return
+            }
+            
+            if let httpStatus = response as? NSHTTPURLResponse where httpStatus.statusCode != 200 {  // check for http errors
+                print("statusCode should be 200, but is \(httpStatus.statusCode)")
+                print("response = \(response)")
+            }
+            
+            responseString = NSString(data: data!, encoding: NSUTF8StringEncoding)!
+            //print("responseString = \(responseString)")
+            
+            dispatch_async(dispatch_get_main_queue()) {
+                completionHandler(rs: responseString as String)
+            }
+            
+        }
+        task.resume()
+    }
+    
+    func formatName(str: String) -> String {
+        let nameArr = str.characters.split{$0 == " "}.map(String.init)
+        var urlStr = nameArr[0]
+        for i in 1..<nameArr.count {
+            urlStr = urlStr + "+" + nameArr[i]
+        }
+        return urlStr
+    }
+}

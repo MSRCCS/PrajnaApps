@@ -26,7 +26,10 @@
 		2C4AC9211D4C15E1003A468B /* MDLSplashScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C4AC9201D4C15E1003A468B /* MDLSplashScreen.swift */; };
 		2C50CBB71D4684F8009BB7EE /* MDLUploadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C50CBB61D4684F8009BB7EE /* MDLUploadViewController.swift */; };
 		2C50CBB81D468AFC009BB7EE /* TensorflowSelected.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CF64E501D40052000374AAF /* TensorflowSelected.png */; };
+		2C580F381D55174C003193F0 /* CRFaceDetailController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C580F371D55174C003193F0 /* CRFaceDetailController.swift */; };
+		2C5DA7D31D53B4B10033F5BF /* CRSplashScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C5DA7D21D53B4B10033F5BF /* CRSplashScreen.swift */; };
 		2C5F0A081D341908006AE9D0 /* ObjectCaptionLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C5F0A071D341908006AE9D0 /* ObjectCaptionLabel.swift */; };
+		2C5FC72E1D52C65C007B20BD /* CelebrityRecognizer.xcdatamodel in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE805C1D52BAC800031306 /* CelebrityRecognizer.xcdatamodel */; };
 		2C7084021D3E9796001D3E16 /* CameraButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2C7083FF1D3E9796001D3E16 /* CameraButton.png */; };
 		2C7084031D3E9796001D3E16 /* CameraButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2C7083FF1D3E9796001D3E16 /* CameraButton.png */; };
 		2C7084041D3E9796001D3E16 /* FlipCameraButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2C7084001D3E9796001D3E16 /* FlipCameraButton.png */; };
@@ -71,6 +74,37 @@
 		2CA806B71D3ECCB100D005D8 /* MenuButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CA806B51D3ECCB100D005D8 /* MenuButton.png */; };
 		2CAB03DD1D416F6D0020BE81 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CAB03DC1D416F6D0020BE81 /* Icon.png */; };
 		2CAB03DE1D416F6D0020BE81 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CAB03DC1D416F6D0020BE81 /* Icon.png */; };
+		2CAE80221D52B88E00031306 /* tensorflow_utils.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2C72D9B91D2F265300C3D707 /* tensorflow_utils.mm */; };
+		2CAE80271D52B88E00031306 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CFF602E1D2C7A7A00C391E4 /* API.swift */; };
+		2CAE80281D52B88E00031306 /* TensorflowWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2CFD12F71D3039320000F1E7 /* TensorflowWrapper.mm */; };
+		2CAE802F1D52B88E00031306 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE4410A1D18A599009A7DC1 /* AppDelegate.swift */; };
+		2CAE80321D52B88E00031306 /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CDB225B1D3EDC5E0062EAAA /* Global.swift */; };
+		2CAE80341D52B88E00031306 /* libprotobuf-lite.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2CE344DE1D4928CA00A27BEF /* libprotobuf-lite.a */; };
+		2CAE80351D52B88E00031306 /* libprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2CE344DC1D4928B500A27BEF /* libprotobuf.a */; };
+		2CAE80371D52B88E00031306 /* InstructionsButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2C10E2E01D3E993B00B14F9F /* InstructionsButton.png */; };
+		2CAE80381D52B88E00031306 /* CameraButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2C7083FF1D3E9796001D3E16 /* CameraButton.png */; };
+		2CAE80391D52B88E00031306 /* imagenet_comp_graph_label_strings.txt in Resources */ = {isa = PBXBuildFile; fileRef = 2C72D97F1D2F1C8F00C3D707 /* imagenet_comp_graph_label_strings.txt */; };
+		2CAE803A1D52B88E00031306 /* FaceUnselected.png in Resources */ = {isa = PBXBuildFile; fileRef = 2C749EE71D3EACB10058D08D /* FaceUnselected.png */; };
+		2CAE803B1D52B88E00031306 /* tensorflow_inception_graph.pb in Resources */ = {isa = PBXBuildFile; fileRef = 2C72D9801D2F1C8F00C3D707 /* tensorflow_inception_graph.pb */; };
+		2CAE803C1D52B88E00031306 /* MenuButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CA806B51D3ECCB100D005D8 /* MenuButton.png */; };
+		2CAE803D1D52B88E00031306 /* closeButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CFF602C1D2C622800C391E4 /* closeButton.png */; };
+		2CAE803E1D52B88E00031306 /* FaceSelected.png in Resources */ = {isa = PBXBuildFile; fileRef = 2C749EE61D3EACB10058D08D /* FaceSelected.png */; };
+		2CAE803F1D52B88E00031306 /* TranslateUnselected.png in Resources */ = {isa = PBXBuildFile; fileRef = 2C749EEB1D3EACB10058D08D /* TranslateUnselected.png */; };
+		2CAE80401D52B88E00031306 /* CaptureButtonPNG.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CE4413D1D19B736009A7DC1 /* CaptureButtonPNG.png */; };
+		2CAE80411D52B88E00031306 /* glyphicons-facetime-video.png in Resources */ = {isa = PBXBuildFile; fileRef = 2C88ADAC1D3FF82200102736 /* glyphicons-facetime-video.png */; };
+		2CAE80421D52B88E00031306 /* FlipCameraButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2C7084001D3E9796001D3E16 /* FlipCameraButton.png */; };
+		2CAE80431D52B88E00031306 /* detailButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CFF60261D2C288100C391E4 /* detailButton.png */; };
+		2CAE80441D52B88E00031306 /* TranslateSelected.png in Resources */ = {isa = PBXBuildFile; fileRef = 2C749EEA1D3EACB10058D08D /* TranslateSelected.png */; };
+		2CAE80451D52B88E00031306 /* TensorflowUnselected.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CF64E511D40052000374AAF /* TensorflowUnselected.png */; };
+		2CAE80461D52B88E00031306 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CAB03DC1D416F6D0020BE81 /* Icon.png */; };
+		2CAE80471D52B88E00031306 /* Tensorflow.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2CFD128A1D300A0B0000F1E7 /* Tensorflow.storyboard */; };
+		2CAE80481D52B88E00031306 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2CE441161D18A599009A7DC1 /* LaunchScreen.storyboard */; };
+		2CAE80491D52B88E00031306 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2CE441141D18A599009A7DC1 /* Assets.xcassets */; };
+		2CAE804A1D52B88E00031306 /* TensorflowSelected.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CF64E501D40052000374AAF /* TensorflowSelected.png */; };
+		2CAE804B1D52B88E00031306 /* uploadButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CE441941D1D9E01009A7DC1 /* uploadButton.png */; };
+		2CAE80561D52B91700031306 /* CRViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE80541D52B91700031306 /* CRViewController.swift */; };
+		2CAE80571D52B91700031306 /* CRFacesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE80551D52B91700031306 /* CRFacesViewController.swift */; };
+		2CAE80591D52B92F00031306 /* CR.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2CAE80581D52B92F00031306 /* CR.storyboard */; };
 		2CBC43891D4AC365008E41A7 /* MDLMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CBC43881D4AC365008E41A7 /* MDLMapViewController.swift */; };
 		2CDB225C1D3EDC5E0062EAAA /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CDB225B1D3EDC5E0062EAAA /* Global.swift */; };
 		2CDB225D1D3EDC5E0062EAAA /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CDB225B1D3EDC5E0062EAAA /* Global.swift */; };
@@ -134,6 +168,8 @@
 		2C3FAF901D4285BB0058B8DF /* MDLCameraViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDLCameraViewController.swift; sourceTree = "<group>"; };
 		2C4AC9201D4C15E1003A468B /* MDLSplashScreen.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDLSplashScreen.swift; sourceTree = "<group>"; };
 		2C50CBB61D4684F8009BB7EE /* MDLUploadViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDLUploadViewController.swift; sourceTree = "<group>"; };
+		2C580F371D55174C003193F0 /* CRFaceDetailController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CRFaceDetailController.swift; sourceTree = "<group>"; };
+		2C5DA7D21D53B4B10033F5BF /* CRSplashScreen.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CRSplashScreen.swift; sourceTree = "<group>"; };
 		2C5F0A071D341908006AE9D0 /* ObjectCaptionLabel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectCaptionLabel.swift; sourceTree = "<group>"; };
 		2C7083FF1D3E9796001D3E16 /* CameraButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CameraButton.png; sourceTree = "<group>"; };
 		2C7084001D3E9796001D3E16 /* FlipCameraButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FlipCameraButton.png; sourceTree = "<group>"; };
@@ -157,6 +193,12 @@
 		2CA806B51D3ECCB100D005D8 /* MenuButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MenuButton.png; sourceTree = "<group>"; };
 		2CAB03DC1D416F6D0020BE81 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		2CAB03DF1D4187C10020BE81 /* MyDigitalLife.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MyDigitalLife.storyboard; sourceTree = "<group>"; };
+		2CAE804F1D52B88E00031306 /* CelebrityRecognizer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CelebrityRecognizer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2CAE80541D52B91700031306 /* CRViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CRViewController.swift; sourceTree = "<group>"; };
+		2CAE80551D52B91700031306 /* CRFacesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CRFacesViewController.swift; sourceTree = "<group>"; };
+		2CAE80581D52B92F00031306 /* CR.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = CR.storyboard; sourceTree = "<group>"; };
+		2CAE805A1D52B9BA00031306 /* CelebrityRecognizer.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = CelebrityRecognizer.plist; sourceTree = "<group>"; };
+		2CAE805C1D52BAC800031306 /* CelebrityRecognizer.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CelebrityRecognizer.xcdatamodel; sourceTree = "<group>"; };
 		2CBC43881D4AC365008E41A7 /* MDLMapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDLMapViewController.swift; sourceTree = "<group>"; };
 		2CDB225B1D3EDC5E0062EAAA /* Global.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
 		2CDEB38A1D4AE460005AAD38 /* MDLImagePopover.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDLImagePopover.swift; sourceTree = "<group>"; };
@@ -219,6 +261,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		2CAE80331D52B88E00031306 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2CAE80341D52B88E00031306 /* libprotobuf-lite.a in Frameworks */,
+				2CAE80351D52B88E00031306 /* libprotobuf.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		2CE441041D18A599009A7DC1 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -267,6 +318,7 @@
 				2CE441291D18A599009A7DC1 /* ViewFinderUITests.xctest */,
 				2C72D9781D2EFD8D00C3D707 /* ViewFinderTensorflow.app */,
 				2C21F0321D427A4A002F90C7 /* MyDigitalLife.app */,
+				2CAE804F1D52B88E00031306 /* CelebrityRecognizer.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -277,6 +329,11 @@
 				2CE4410E1D18A599009A7DC1 /* Main.storyboard */,
 				2CFD128A1D300A0B0000F1E7 /* Tensorflow.storyboard */,
 				2CAB03DF1D4187C10020BE81 /* MyDigitalLife.storyboard */,
+				2CAE80581D52B92F00031306 /* CR.storyboard */,
+				2C5DA7D21D53B4B10033F5BF /* CRSplashScreen.swift */,
+				2CAE80541D52B91700031306 /* CRViewController.swift */,
+				2CAE80551D52B91700031306 /* CRFacesViewController.swift */,
+				2C580F371D55174C003193F0 /* CRFaceDetailController.swift */,
 				2CFD12F61D3039320000F1E7 /* TensorflowWrapper.h */,
 				2CFD12F71D3039320000F1E7 /* TensorflowWrapper.mm */,
 				2C72D9BE1D2F269A00C3D707 /* ViewFinderTensorflow-Bridging-Header.h */,
@@ -313,6 +370,8 @@
 				2CE441191D18A599009A7DC1 /* Info.plist */,
 				2C72D9791D2EFD8D00C3D707 /* ViewFinderTensorflow-Info.plist */,
 				2C21F0331D427A4B002F90C7 /* MyDigitalLife-Info.plist */,
+				2CAE805A1D52B9BA00031306 /* CelebrityRecognizer.plist */,
+				2CAE805C1D52BAC800031306 /* CelebrityRecognizer.xcdatamodel */,
 				2C749EE61D3EACB10058D08D /* FaceSelected.png */,
 				2C749EE71D3EACB10058D08D /* FaceUnselected.png */,
 				2CF64E501D40052000374AAF /* TensorflowSelected.png */,
@@ -386,6 +445,23 @@
 			name = ViewFinderTensorflow;
 			productName = ViewFinder;
 			productReference = 2C72D9781D2EFD8D00C3D707 /* ViewFinderTensorflow.app */;
+			productType = "com.apple.product-type.application";
+		};
+		2CAE801F1D52B88E00031306 /* CelebrityRecognizer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2CAE804C1D52B88E00031306 /* Build configuration list for PBXNativeTarget "CelebrityRecognizer" */;
+			buildPhases = (
+				2CAE80201D52B88E00031306 /* Sources */,
+				2CAE80331D52B88E00031306 /* Frameworks */,
+				2CAE80361D52B88E00031306 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CelebrityRecognizer;
+			productName = ViewFinder;
+			productReference = 2CAE804F1D52B88E00031306 /* CelebrityRecognizer.app */;
 			productType = "com.apple.product-type.application";
 		};
 		2CE441061D18A599009A7DC1 /* ViewFinder */ = {
@@ -487,6 +563,7 @@
 				2CE441061D18A599009A7DC1 /* ViewFinder */,
 				2C72D95A1D2EFD8D00C3D707 /* ViewFinderTensorflow */,
 				2C21F0011D427A4A002F90C7 /* MyDigitalLife */,
+				2CAE801F1D52B88E00031306 /* CelebrityRecognizer */,
 				2CE4411D1D18A599009A7DC1 /* ViewFinderTests */,
 				2CE441281D18A599009A7DC1 /* ViewFinderUITests */,
 			);
@@ -537,6 +614,35 @@
 				2C72D9721D2EFD8D00C3D707 /* Assets.xcassets in Resources */,
 				2CF64E531D40052000374AAF /* TensorflowSelected.png in Resources */,
 				2C72D9731D2EFD8D00C3D707 /* uploadButton.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2CAE80361D52B88E00031306 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2CAE80371D52B88E00031306 /* InstructionsButton.png in Resources */,
+				2CAE80381D52B88E00031306 /* CameraButton.png in Resources */,
+				2CAE80391D52B88E00031306 /* imagenet_comp_graph_label_strings.txt in Resources */,
+				2CAE803A1D52B88E00031306 /* FaceUnselected.png in Resources */,
+				2CAE803B1D52B88E00031306 /* tensorflow_inception_graph.pb in Resources */,
+				2CAE803C1D52B88E00031306 /* MenuButton.png in Resources */,
+				2CAE803D1D52B88E00031306 /* closeButton.png in Resources */,
+				2CAE803E1D52B88E00031306 /* FaceSelected.png in Resources */,
+				2CAE803F1D52B88E00031306 /* TranslateUnselected.png in Resources */,
+				2CAE80401D52B88E00031306 /* CaptureButtonPNG.png in Resources */,
+				2CAE80411D52B88E00031306 /* glyphicons-facetime-video.png in Resources */,
+				2CAE80421D52B88E00031306 /* FlipCameraButton.png in Resources */,
+				2CAE80431D52B88E00031306 /* detailButton.png in Resources */,
+				2CAE80591D52B92F00031306 /* CR.storyboard in Resources */,
+				2CAE80441D52B88E00031306 /* TranslateSelected.png in Resources */,
+				2CAE80451D52B88E00031306 /* TensorflowUnselected.png in Resources */,
+				2CAE80461D52B88E00031306 /* Icon.png in Resources */,
+				2CAE80471D52B88E00031306 /* Tensorflow.storyboard in Resources */,
+				2CAE80481D52B88E00031306 /* LaunchScreen.storyboard in Resources */,
+				2CAE80491D52B88E00031306 /* Assets.xcassets in Resources */,
+				2CAE804A1D52B88E00031306 /* TensorflowSelected.png in Resources */,
+				2CAE804B1D52B88E00031306 /* uploadButton.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -622,6 +728,23 @@
 				2C72D9691D2EFD8D00C3D707 /* SteadyViewFinderViewController.swift in Sources */,
 				2CE4A5D61D35A8C500A77B9F /* TensorflowViewFinder.swift in Sources */,
 				2CDB225D1D3EDC5E0062EAAA /* Global.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2CAE80201D52B88E00031306 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2CAE80571D52B91700031306 /* CRFacesViewController.swift in Sources */,
+				2CAE80221D52B88E00031306 /* tensorflow_utils.mm in Sources */,
+				2C5DA7D31D53B4B10033F5BF /* CRSplashScreen.swift in Sources */,
+				2CAE80271D52B88E00031306 /* API.swift in Sources */,
+				2C580F381D55174C003193F0 /* CRFaceDetailController.swift in Sources */,
+				2CAE80281D52B88E00031306 /* TensorflowWrapper.mm in Sources */,
+				2CAE802F1D52B88E00031306 /* AppDelegate.swift in Sources */,
+				2CAE80561D52B91700031306 /* CRViewController.swift in Sources */,
+				2C5FC72E1D52C65C007B20BD /* CelebrityRecognizer.xcdatamodel in Sources */,
+				2CAE80321D52B88E00031306 /* Global.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -891,6 +1014,101 @@
 			};
 			name = Release;
 		};
+		2CAE804D1D52B88E00031306 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = NO;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_BITCODE = NO;
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "DEBUG=1";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				HEADER_SEARCH_PATHS = (
+					tensorflow/tensorflow/contrib/makefile/downloads/protobuf/src/,
+					tensorflow/tensorflow/contrib/makefile/downloads,
+					"tensorflow/tensorflow/contrib/makefile/downloads/eigen-latest",
+					tensorflow/tensorflow/contrib/makefile/gen/proto,
+					tensorflow,
+				);
+				INFOPLIST_FILE = "$(SRCROOT)/ViewFinder/CelebrityRecognizer.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					tensorflow/tensorflow/contrib/makefile/gen/lib,
+					tensorflow/tensorflow/contrib/makefile/gen/protobuf_ios/lib/,
+					"$(PROJECT_DIR)/tensorflow/contrib/makefile/gen/protobuf_ios/lib",
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = (
+					"-force_load",
+					"tensorflow/tensorflow/contrib/makefile/gen/lib/libtensorflow-core.a",
+					"-Xlinker",
+					"-S",
+					"-Xlinker",
+					"-x",
+					"-Xlinker",
+					"-dead_strip",
+				);
+				OTHER_SWIFT_FLAGS = "-DTENSORFLOW";
+				PRODUCT_BUNDLE_IDENTIFIER = CelebrityRecognizer;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "ViewFinder/ViewFinderTensorflow-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		2CAE804E1D52B88E00031306 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = NO;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_BITCODE = NO;
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				HEADER_SEARCH_PATHS = (
+					tensorflow/tensorflow/contrib/makefile/downloads/protobuf/src/,
+					tensorflow/tensorflow/contrib/makefile/downloads,
+					"tensorflow/tensorflow/contrib/makefile/downloads/eigen-latest",
+					tensorflow/tensorflow/contrib/makefile/gen/proto,
+					tensorflow,
+				);
+				INFOPLIST_FILE = "$(SRCROOT)/ViewFinder/CelebrityRecognizer.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					tensorflow/tensorflow/contrib/makefile/gen/lib,
+					tensorflow/tensorflow/contrib/makefile/gen/protobuf_ios/lib/,
+					"$(PROJECT_DIR)/tensorflow/contrib/makefile/gen/protobuf_ios/lib",
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = (
+					"-force_load",
+					"tensorflow/tensorflow/contrib/makefile/gen/lib/libtensorflow-core.a",
+					"-Xlinker",
+					"-S",
+					"-Xlinker",
+					"-x",
+					"-Xlinker",
+					"-dead_strip",
+				);
+				OTHER_SWIFT_FLAGS = "-DTENSORFLOW";
+				PRODUCT_BUNDLE_IDENTIFIER = CelebrityRecognizer;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "ViewFinder/ViewFinderTensorflow-Bridging-Header.h";
+			};
+			name = Release;
+		};
 		2CE441301D18A599009A7DC1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1067,6 +1285,15 @@
 			buildConfigurations = (
 				2C72D9761D2EFD8D00C3D707 /* Debug */,
 				2C72D9771D2EFD8D00C3D707 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2CAE804C1D52B88E00031306 /* Build configuration list for PBXNativeTarget "CelebrityRecognizer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2CAE804D1D52B88E00031306 /* Debug */,
+				2CAE804E1D52B88E00031306 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
