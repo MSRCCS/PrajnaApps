@@ -268,12 +268,12 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
 
         let context = CGBitmapContextCreate(nil, width, height, bitsPerComponent, bytesPerRow, colorSpace, bitmapInfo)
         
-        CGContextDrawImage(context, CGRectMake(0, 0, CGFloat(width), CGFloat(height)), inputCGImage)
+        CGContextDrawImage(context!, CGRectMake(0, 0, CGFloat(width), CGFloat(height)), inputCGImage)
 
         let resizedContext = CGBitmapContextCreate(nil, 224, 224, bitsPerComponent, 224 * bytesPerPixel, colorSpace, bitmapInfo)
 
-        let ogPixelBuffer = UnsafeMutablePointer<RGBA32>(CGBitmapContextGetData(context))
-        let outPixelBuffer = UnsafeMutablePointer<RGBA32>(CGBitmapContextGetData(resizedContext))
+        let ogPixelBuffer = UnsafeMutablePointer<RGBA32>(CGBitmapContextGetData(context!))
+        let outPixelBuffer = UnsafeMutablePointer<RGBA32>(CGBitmapContextGetData(resizedContext!))
         
         for y in 0 ..< 224 {
             for x in 0 ..< 224 {
@@ -286,7 +286,7 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
             }
         }
 
-        let outputCGImage = CGBitmapContextCreateImage(resizedContext)
+        let outputCGImage = CGBitmapContextCreateImage(resizedContext!)
         let outImage = UIImage(CGImage: outputCGImage!)
         
         debugImageView.image = outImage

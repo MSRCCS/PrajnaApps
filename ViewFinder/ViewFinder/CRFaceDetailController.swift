@@ -56,6 +56,7 @@ class CRFaceDetailController: UIViewController, UITextViewDelegate {
             attrString.appendAttributedString(appendString)
             self.bio.attributedText = attrString
         }
+        //get birthday and occupation
         var birthday = ""
         var occupation = ""
         if let info = dict!["entities"]!["value"]!![0]!["entityPresentationInfo"] {
@@ -71,9 +72,27 @@ class CRFaceDetailController: UIViewController, UITextViewDelegate {
                     }
                 }
             }
+            if let related = info!["related"] as? NSArray {
+                for r in related {
+                    if(r["id"] as! String == "PeopleAlsoSearchFor") {
+                        if let ppl = r["relationships"] as? NSArray {
+                            for person in ppl {
+                                print(person["relatedThing"]!!["name"])
+                            }
+                        }
+                    }
+                }
+            }
         }
         self.birthdayLabel.text = "Born: \(birthday)"
         self.occupationLabel.text = occupation
+        
+        //get websites
+        if let arr = dict!["webPages"]!["value"] as? NSArray {
+            for page in arr {
+                print("NAME: \(page["name"]). URL \(page["url"])")
+            }
+        }
     }
     
     func textView(textView: UITextView, shouldInteractWithURL URL: NSURL, inRange characterRange: NSRange) -> Bool {
