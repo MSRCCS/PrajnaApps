@@ -22,6 +22,7 @@
 		2C21F0361D4282FA002F90C7 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CAB03DC1D416F6D0020BE81 /* Icon.png */; };
 		2C21F0381D428328002F90C7 /* MDLLaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2C21F0371D428328002F90C7 /* MDLLaunchScreen.storyboard */; };
 		2C21F0391D428328002F90C7 /* MDLLaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2C21F0371D428328002F90C7 /* MDLLaunchScreen.storyboard */; };
+		2C2565801D5A5519005E0F13 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2CE662B21D5A3FBD00635873 /* libz.tbd */; };
 		2C3FAF911D4285BB0058B8DF /* MDLCameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C3FAF901D4285BB0058B8DF /* MDLCameraViewController.swift */; };
 		2C4AC9211D4C15E1003A468B /* MDLSplashScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C4AC9201D4C15E1003A468B /* MDLSplashScreen.swift */; };
 		2C50CBB71D4684F8009BB7EE /* MDLUploadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C50CBB61D4684F8009BB7EE /* MDLUploadViewController.swift */; };
@@ -129,6 +130,7 @@
 		2CE441AB1D2592B7009A7DC1 /* SteadyViewFinderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE441AA1D2592B7009A7DC1 /* SteadyViewFinderViewController.swift */; };
 		2CE4A5D61D35A8C500A77B9F /* TensorflowViewFinder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE4A5D51D35A8C500A77B9F /* TensorflowViewFinder.swift */; };
 		2CE4A5D81D35AB8F00A77B9F /* TensorflowMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE4A5D71D35AB8F00A77B9F /* TensorflowMenu.swift */; };
+		2CE662B31D5A3FBD00635873 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2CE662B21D5A3FBD00635873 /* libz.tbd */; };
 		2CF64E531D40052000374AAF /* TensorflowSelected.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CF64E501D40052000374AAF /* TensorflowSelected.png */; };
 		2CF64E551D40052000374AAF /* TensorflowUnselected.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CF64E511D40052000374AAF /* TensorflowUnselected.png */; };
 		2CFD128C1D300A0B0000F1E7 /* Tensorflow.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2CFD128A1D300A0B0000F1E7 /* Tensorflow.storyboard */; };
@@ -227,6 +229,7 @@
 		2CE441AA1D2592B7009A7DC1 /* SteadyViewFinderViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SteadyViewFinderViewController.swift; sourceTree = "<group>"; };
 		2CE4A5D51D35A8C500A77B9F /* TensorflowViewFinder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TensorflowViewFinder.swift; sourceTree = "<group>"; };
 		2CE4A5D71D35AB8F00A77B9F /* TensorflowMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TensorflowMenu.swift; sourceTree = "<group>"; };
+		2CE662B21D5A3FBD00635873 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		2CF64E501D40052000374AAF /* TensorflowSelected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = TensorflowSelected.png; sourceTree = "<group>"; };
 		2CF64E511D40052000374AAF /* TensorflowUnselected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = TensorflowUnselected.png; sourceTree = "<group>"; };
 		2CFD128B1D300A0B0000F1E7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Tensorflow.storyboard; sourceTree = "<group>"; };
@@ -256,6 +259,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2C2565801D5A5519005E0F13 /* libz.tbd in Frameworks */,
 				2CE344E01D49293E00A27BEF /* libprotobuf-lite.a in Frameworks */,
 				2CE344E11D49293E00A27BEF /* libprotobuf.a in Frameworks */,
 			);
@@ -265,6 +269,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2CE662B31D5A3FBD00635873 /* libz.tbd in Frameworks */,
 				2CAE80341D52B88E00031306 /* libprotobuf-lite.a in Frameworks */,
 				2CAE80351D52B88E00031306 /* libprotobuf.a in Frameworks */,
 			);
@@ -307,6 +312,7 @@
 				2CE441211D18A599009A7DC1 /* ViewFinderTests */,
 				2CE4412C1D18A599009A7DC1 /* ViewFinderUITests */,
 				2CE441081D18A599009A7DC1 /* Products */,
+				2CE662B11D5A3FBD00635873 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -408,6 +414,14 @@
 				2CE4412F1D18A599009A7DC1 /* Info.plist */,
 			);
 			path = ViewFinderUITests;
+			sourceTree = "<group>";
+		};
+		2CE662B11D5A3FBD00635873 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				2CE662B21D5A3FBD00635873 /* libz.tbd */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -532,6 +546,11 @@
 					};
 					2C72D95A1D2EFD8D00C3D707 = {
 						DevelopmentTeam = J44PM8Q84B;
+						LastSwiftMigration = 0800;
+					};
+					2CAE801F1D52B88E00031306 = {
+						DevelopmentTeam = J44PM8Q84B;
+						LastSwiftMigration = 0800;
 					};
 					2CE441061D18A599009A7DC1 = {
 						CreatedOnToolsVersion = 7.3.1;
@@ -965,6 +984,7 @@
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "ViewFinder/ViewFinderTensorflow-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 2.3;
 			};
 			name = Debug;
 		};
@@ -1011,6 +1031,7 @@
 				PRODUCT_NAME = ViewFinderTensorflow;
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "ViewFinder/ViewFinderTensorflow-Bridging-Header.h";
+				SWIFT_VERSION = 2.3;
 			};
 			name = Release;
 		};
@@ -1024,6 +1045,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = J44PM8Q84B;
 				ENABLE_BITCODE = NO;
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "DEBUG=1";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1059,6 +1081,7 @@
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "ViewFinder/ViewFinderTensorflow-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 2.3;
 			};
 			name = Debug;
 		};
@@ -1072,6 +1095,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = J44PM8Q84B;
 				ENABLE_BITCODE = NO;
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1106,6 +1130,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "ViewFinder/ViewFinderTensorflow-Bridging-Header.h";
+				SWIFT_VERSION = 2.3;
 			};
 			name = Release;
 		};

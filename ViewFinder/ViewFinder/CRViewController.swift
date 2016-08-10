@@ -122,17 +122,19 @@ class CRViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate
         var frame: FaceRectangle
         var image = UIImage()
         var view = UIView()
+        var present = Bool()
         
         init(bounds: CGRect) {
             frame = FaceRectangle(frame: bounds)
             name = "Person"
             image = UIImage()
+            present = true
         }
         
         mutating func updateFrame(frame: CGRect) {
-
             UIView.animateWithDuration(0.1, animations: { () -> Void in
                 self.frame.outline.frame = frame
+                self.present = true
             })
         }
         
@@ -277,9 +279,11 @@ class CRViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate
     func captureOutput(captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, fromConnection connection: AVCaptureConnection!) {
         let cim = getImageFromBuffer(sampleBuffer)
         if detectorSet {
-            if(frames % 5 == 0) {
-                if getFacialFeatures(cim) {
-                    
+            if getFacialFeatures(cim) {
+                if (frames % 5 == 0) {
+                    dispatch_async(dispatch_get_main_queue(), {
+                        self.setFacesToNotPresent()
+                    })
                     let imageOptions = [CIDetectorImageOrientation : 6]
                     let faces = self.detector!.featuresInImage(cim, options: imageOptions)
                     for f in faces {
@@ -302,15 +306,18 @@ class CRViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate
                             }
                         }
                     }
-                } else {
                     dispatch_async(dispatch_get_main_queue(), {
-                        let keys = self.faces.keys
-                        for key in keys {
-                            self.faces[key]?.frame.outline.removeFromSuperview()
-                        }
-                        self.faces.removeAll()
+                        self.cleanFaceBoxes()
                     })
                 }
+            } else {
+                dispatch_async(dispatch_get_main_queue(), {
+                    let keys = self.faces.keys
+                    for key in keys {
+                        self.faces[key]?.frame.outline.removeFromSuperview()
+                    }
+                    self.faces.removeAll()
+                })
             }
         }
         frames += 1
@@ -331,7 +338,6 @@ class CRViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate
                 let cim = CIImage(CGImage: (originalImage?.CGImage)!)
                 let imageOptions = [CIDetectorImageOrientation : 6]
                 let faces = self.detector!.featuresInImage(cim, options: imageOptions)
-                print(faces.count)
                 for f in faces {
                     let face = f as! CIFaceFeature
 
@@ -376,6 +382,25 @@ class CRViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate
         return pythagorean(xDist, b: yDist)
     }
     
+    func setFacesToNotPresent() {
+        let keys = self.faces.keys
+        for key in keys {
+            self.faces[key]?.present = false
+        }
+    }
+    
+    func cleanFaceBoxes() {
+        let keys = self.faces.keys
+        for key in keys {
+            if(!((self.faces[key]?.present)!)) {
+                self.faces[key]?.frame.removeFromSuperview()
+                if let idx = self.faces.indexForKey(key) {
+                    self.faces.removeAtIndex(idx)
+                }
+            }
+        }
+    }
+    
     //toggles between the front and back cameras
     func toggle(sender: AnyObject) {
         
@@ -411,6 +436,7 @@ class CRViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate
     }
     
     //////////////////////// API /////////////////////
+    
     func callAPI(image: UIImage, id: Int) {
         let api = API(state: 0, header: ["Ocp-Apim-Subscription-Key": "8cace64f78f34355b7e2ab22e3b06bed", "Content-Type": "application/octet-stream"], body: UIImageJPEGRepresentation(image, 0.9)!, fields: "?visualFeatures=Faces,Description,Categories&details=Celebrities")
         api.callAPI() { (rs: String) in
@@ -494,9 +520,9 @@ class CRViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate
         CGContextRotateCTM(bitmap, rads)
         //Now, draw the rotated/scaled image into the context
         CGContextScaleCTM(bitmap, 1.0, -1.0)
-        CGContextDrawImage(bitmap, CGRectMake(-oldImage.size.width / 2, -oldImage.size.height / 2, oldImage.size.height, oldImage.size.width), oldImage.CGImage)
+        CGContextDrawImage(bitmap, CGRectMake(-oldImage.size.width / 2, -oldImage.size.height / 2, oldImage.size.height, oldImage.size.width), oldImage.CGImage!)
         
-        let newImage: UIImage = UIGraphicsGetImageFromCurrentImageContext()
+        let newImage: UIImage = UIGraphicsGetImageFromCurrentImageContext()!
         UIGraphicsEndImageContext()
         return UIImage(CGImage: newImage.CGImage!, scale: oldImage.scale, orientation: oldImage.imageOrientation)
     }
@@ -527,7 +553,7 @@ class CRViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate
         
         let oddRect = CGRect(x: transformedRect.minY, y: image.size.width - transformedRect.minX - transformedRect.width, width: transformedRect.height, height: transformedRect.width)
         
-        let cgimge = CGImageCreateWithImageInRect(image.CGImage, oddRect)
+        let cgimge = CGImageCreateWithImageInRect(image.CGImage!, oddRect)
         let im = UIImage(CGImage: cgimge!, scale: image.scale, orientation: image.imageOrientation)
         return im
     }
@@ -737,7 +763,15 @@ class FaceDetectionBanner: UIView {
     }
     
     func bump(count: CGFloat) {
-        label.transform = CGAffineTransformMakeTranslation(0.0, 26.0 * (count))
+        UIView.animateWithDuration(0.1, animations: { () -> Void in
+            self.label.transform = CGAffineTransformMakeTranslation(0.0, 26.0 * (count))
+        })
+    }
+    
+    func remove(count: CGFloat) {
+        UIView.animateWithDuration(0.1, animations: { () -> Void in
+            self.label.transform = CGAffineTransformMakeTranslation(0.0, 78.0)
+        })
     }
 }
 
