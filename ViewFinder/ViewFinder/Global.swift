@@ -16,6 +16,8 @@ import UIKit
 
 let languages = [["name": "Arabic", "code": "ar"], ["name": "Chinese", "code": "zh-CHS"], ["name": "Dutch", "code": "nl"], ["name": "English", "code": "en"], ["name": "French", "code": "fr"], ["name": "German", "code": "de"], ["name": "Hebrew", "code": "he"], ["name": "Hindi", "code": "hi"], ["name": "Indonesian", "code": "id"], ["name": "Italian", "code": "it"], ["name": "Japanese", "code": "ja"], ["name": "Korean", "code": "ko"], ["name": "Portuguese", "code": "pt"], ["name": "Russian", "code": "ru"], ["name": "Spanish", "code": "es"], ["name": "Turkish", "code": "tr"], ["name": "Vietnamese", "code": "vi"]]
 
+let prajnaCodes: [[String: String]] = [["name": "Brand", "code": "f11feb63-4d0d-815b-cb1e-6d4ba8c878f3"], ["name": "Pokemon", "code": "1794a96d-3095-31fd-514b-d6c30d769786"], ["name": "Drink", "code": "2ca554a9-f08f-6ffa-2a92-342a0f94ae2b"], ["name": "Celebrity", "code": "d6297090-d72c-9507-2bf4-d2dfcfc67b61"], ["name": "Landmark", "code": "e8735ce9-02b3-ac1a-3594-191f9d8bfd49"], ["name": "Flower", "code": "a2294e0e-6004-3cac-66b1-09c984a80ec8"], ["name": "Product", "code": "40fdf7ff-fcb8-a7c2-0e2c-3bf804fe29c0"], ["name": "Landmark V2", "code": "178d4ec3-beac-ef49-35f1-4102e2b999fd"], ["name": "Office", "code": "a0d6d212-58f5-cf2c-abbb-0713d32505bf"], ["name": "Retail Product", "code": "93d8556f-ab13-c555-1df4-3c2951aa74c8"], ["name": "Dog", "code": "5c43512e-fba5-c6d0-0156-72c8e1e31df7"], ["name": "Seattle", "code": "b3dd0028-977f-7df9-56f4-2eec69dc0daf"]]
+
 func getLanguageFromCode(code: String) -> String {
     for language in languages {
         if(language["code"] == code) {
@@ -25,6 +27,14 @@ func getLanguageFromCode(code: String) -> String {
     return "Not a Real Language Code"
 }
 
+func getPrajnaNameFromCode(code: String) -> String {
+    for entity in prajnaCodes {
+        if(entity["code"] == code) {
+            return entity["name"]!
+        }
+    }
+    return "No"
+}
 var firstTime = Bool()
 
 

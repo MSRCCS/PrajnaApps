@@ -74,6 +74,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
     var camState = 0
     var camDetails = ":-)"
     let detailLabel = UILabel()
+    var prajnaIndex = 3
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -349,7 +350,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
                 
                 let fields = "?auth=96babypigmangocucumber&text=" + encText! + "&to=" + to
                 
-                let api = API(translate: true, fields: fields)
+                let api = TranslateAPI(fields: fields)
                 
                 api.callAPI() { (rs: String) in
                     
@@ -392,8 +393,10 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
         
         if(camState == 0) {
             detailLabel.text = "Facial Recognition"
-        } else {
+        } else if(camState == 1) {
             detailLabel.text = "Translating Into " + getLanguageFromCode(camDetails)
+        } else if(camState == 4) {
+            detailLabel.text = "Prajna " + getPrajnaNameFromCode(camDetails)
         }
     }
     
@@ -415,7 +418,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
         #endif
     
         let controller = storyboard.instantiateViewControllerWithIdentifier("menu") as! MenuViewController
-        controller.preferredContentSize = CGSizeMake(180, 300)
+        controller.preferredContentSize = CGSizeMake(180, 450)
         
         controller.modalPresentationStyle = UIModalPresentationStyle.Popover
         
@@ -451,9 +454,6 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
                 let image = UIImage(data: imageData)
                 // The above ^^ variable image is the captured image from the camera
                 
-                //UIImageWriteToSavedPhotosAlbum(image!, nil, nil, nil) // saves image
-                
-                
                 var fields = ""
                 
                 if(self.camState == 0) {
@@ -461,24 +461,40 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
                     self.captionLabel.text = "Generating Caption..."
                     
                     fields = "?visualFeatures=Faces,Description,Categories&details=Celebrities"
-
+                    let api = AnalyzeImageAPI(image: image!, header: ["Ocp-Apim-Subscription-Key": "8cace64f78f34355b7e2ab22e3b06bed", "Content-Type": "application/octet-stream"])
+                    api.callAPI() { (rs: String) in
+                        if(rs.containsString("celebrities")) {
+                            self.celebrityPresent = true
+                        } else {
+                            self.celebrityPresent = false
+                        }
+                        self.displayAnswers(rs)
+                    }
                 } else if(self.camState == 1) {
                 
                     self.captionLabel.text = "Getting Translation..."
-
-                }
-                
-                let api = API(state: self.camState, header: ["Ocp-Apim-Subscription-Key": "8cace64f78f34355b7e2ab22e3b06bed", "Content-Type": "application/octet-stream"], body: UIImageJPEGRepresentation(image!, 0.9)!, fields: fields)
-                
-                api.callAPI() { (rs: String) in
-                    if(rs.containsString("celebrities")) {
-                        self.celebrityPresent = true
-                    } else {
+                    let api = OCRAPI(image: image!, header: ["Ocp-Apim-Subscription-Key": "8cace64f78f34355b7e2ab22e3b06bed", "Content-Type": "application/octet-stream"])
+                    api.callAPI() { (rs: String) in
                         self.celebrityPresent = false
+                        self.displayAnswers(rs)
                     }
-                    self.displayAnswers(rs)
+                } else if(self.camState == 4) {
+                    self.captionLabel.text = "Finding " + getPrajnaNameFromCode(self.camDetails)
+                    var test = image!
+                    test = self.resize(test, newWidth: 256.0)
+                    
+                    let api = PrajnaAPI(image: test, classifier: self.camDetails)
+                    api.callAPI() { (rs: String) in
+                        let dict = self.convertStringToDictionary(rs)
+                        print(dict)
+                        if let description = dict!["Description"] as? String {
+                            if let name: String = (description.characters.split{$0 == ":"}.map(String.init))[0] {
+                                self.captionLabel.text = name
+                            }
+                        }
+                    }
                 }
-                
+
                 let width = image!.size.width
                 
                 let resizedHeight = self.view.frame.size.height * (self.view.frame.size.width / width)
@@ -508,6 +524,18 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
                 self.currentImage = image!
             }
         }
+    }
+    
+    func resize(image: UIImage, newWidth: CGFloat) -> UIImage {
+        
+        let scale = newWidth / image.size.width
+        let newHeight = image.size.height * scale
+        UIGraphicsBeginImageContext(CGSize(width: newWidth, height: newHeight))
+        image.drawInRect(CGRect(x: 0, y: 0, width: newWidth, height: newHeight))
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return newImage!
     }
     
     func save(sender: UIButton) {

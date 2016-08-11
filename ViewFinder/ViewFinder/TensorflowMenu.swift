@@ -22,6 +22,7 @@ class TensorflowMenu: UIViewController, UITableViewDataSource, UITableViewDelega
     @IBOutlet weak var faceButton:UIButton!
 //    @IBOutlet weak var translateButton: UIButton!
     @IBOutlet weak var tensorflowButton: UIButton!
+    @IBOutlet weak var celebrityButton: UIButton!
     
     let table = UITableView()
     let cover = UIView()
@@ -52,6 +53,9 @@ class TensorflowMenu: UIViewController, UITableViewDataSource, UITableViewDelega
         
         tensorflowButton.tag = 2
         tensorflowButton.addTarget(self, action: #selector(self.buttonPressed(_:)), forControlEvents: .TouchUpInside)
+        
+        celebrityButton.tag = 3
+        celebrityButton.addTarget(self, action: #selector(self.buttonPressed(_:)), forControlEvents: .TouchUpInside)
         
         cover.frame = CGRect(x: 0, y: 0, width: 180, height: 44)
         cover.backgroundColor = UIColor.whiteColor()
@@ -123,9 +127,11 @@ class TensorflowMenu: UIViewController, UITableViewDataSource, UITableViewDelega
         if(camState == 0) {
             faceButton.setImage(UIImage(named: "FaceSelected.png"), forState: .Normal)
         } else if(camState == 1) {
-//            translateButton.setImage(UIImage(named: "TranslateSelected.png"), forState: .Normal)
-        } else {
+
+        } else if(camState == 2) {
             tensorflowButton.setImage(UIImage(named: "TensorflowSelected.png"), forState: .Normal)
+        } else if(camState == 3) {
+            celebrityButton.setImage(UIImage(named: "CelebritySelected.jpg"), forState: .Normal)
         }
     }
 }

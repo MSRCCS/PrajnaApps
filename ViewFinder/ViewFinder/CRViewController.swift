@@ -68,9 +68,6 @@ class CRViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate
     
     //Face Detection Banners
     var banners = [FaceDetectionBanner]()
-    
-    var boxes = [FaceRectangle]()
-    
     var faces = [Int: Face]()
     
     override func viewDidLoad() {
@@ -438,7 +435,7 @@ class CRViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate
     //////////////////////// API /////////////////////
     
     func callAPI(image: UIImage, id: Int) {
-        let api = API(state: 0, header: ["Ocp-Apim-Subscription-Key": "8cace64f78f34355b7e2ab22e3b06bed", "Content-Type": "application/octet-stream"], body: UIImageJPEGRepresentation(image, 0.9)!, fields: "?visualFeatures=Faces,Description,Categories&details=Celebrities")
+        let api = AnalyzeImageAPI(image: image, header: ["Ocp-Apim-Subscription-Key": "8cace64f78f34355b7e2ab22e3b06bed", "Content-Type": "application/octet-stream"])
         api.callAPI() { (rs: String) in
             var noCeleb = true
             
@@ -776,7 +773,6 @@ class FaceDetectionBanner: UIView {
 }
 
 class FaceRectangle: UIView {
-    
     var outline = UILabel()
     
     required init?(coder aDecoder: NSCoder) {
