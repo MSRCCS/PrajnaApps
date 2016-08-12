@@ -372,7 +372,7 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
                 
                 let fields = "?auth=96babypigmangocucumber&text=" + encText! + "&to=" + to
                 
-                let api = API(translate: true, fields: fields)
+                let api = TranslateAPI(fields: fields)
                 
                 api.callAPI() { (rs: String) in
                     
@@ -685,25 +685,24 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
                 if(self.camState == 0) {
                     // self.analyzeImage(image!) //calls analyze image API
                     self.captionLabel.text = "Generating Caption..."
-                    
-                    if(self.camDetails == ":-)") {
-                        fields = "?visualFeatures=Faces,Description,Categories"
-                    } else if(self.camDetails == "B-)") {
-                        fields = "?visualFeatures=Faces,Description,Categories&details=Celebrities"
+
+                    let api = AnalyzeImageAPI(image: image!, header: ["Ocp-Apim-Subscription-Key": "8cace64f78f34355b7e2ab22e3b06bed", "Content-Type": "application/octet-stream"])
+                    api.callAPI() { (rs: String) in
+                        if(rs.containsString("celebrities")) {
+                            self.celebrityPresent = true
+                        } else {
+                            self.celebrityPresent = false
+                        }
+                        self.displayAnswers(rs, ids: ids, coordinates: coordinates)
                     }
                 } else if(self.camState == 1) {
                     self.captionLabel.text = "Getting Translation..."
-                }
-                
-                let api = API(state: self.camState, header: ["Ocp-Apim-Subscription-Key": "8cace64f78f34355b7e2ab22e3b06bed", "Content-Type": "application/octet-stream"], body: UIImageJPEGRepresentation(image!, 0.9)!, fields: fields)
-                
-                api.callAPI() { (rs: String) in
-                    if(rs.containsString("celebrities")) {
-                        self.celebrityPresent = true
-                    } else {
+                    
+                    let api = OCRAPI(image: image!, header: ["Ocp-Apim-Subscription-Key": "8cace64f78f34355b7e2ab22e3b06bed", "Content-Type": "application/octet-stream"])
+                    api.callAPI() { (rs: String) in
                         self.celebrityPresent = false
+                        self.displayAnswers(rs, ids: ids, coordinates: coordinates)
                     }
-                    self.displayAnswers(rs, ids: ids, coordinates: coordinates)
                 }
             }
         }

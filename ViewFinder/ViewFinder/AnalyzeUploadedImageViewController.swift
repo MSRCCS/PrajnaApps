@@ -61,8 +61,8 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
         let header = ["Ocp-Apim-Subscription-Key": "8cace64f78f34355b7e2ab22e3b06bed", "Content-Type": "application/octet-stream"]
         let body = UIImageJPEGRepresentation(image, 0.9)!
         
-        let analyzeAPI = API(state: 0, header: header, body: body, fields: "?visualFeatures=Faces,Description,Categories&details=Celebrities")
-        let ocrAPI = API(state: 1, header: header, body: body, fields: "")
+        let analyzeAPI = AnalyzeImageAPI(image: image, header: header)
+        let ocrAPI = OCRAPI(image: image, header: header)
 
         if(camState == 0) {
             analyzeAPI.callAPI() { (rs: String) in
@@ -82,6 +82,16 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
                 } else {
                     self.captionLabel.backgroundColor = UIColor.redColor()
                     self.captionLabel.text = "Oops! Input image is too large"
+                }
+            }
+        } else if(camState == 4) {
+            let api = PrajnaAPI(image: image, classifier: camDetails)
+            api.callAPI() { (rs: String) in
+                let dict = self.convertStringToDictionary(rs)
+                if let description = dict!["Description"] as? String {
+                    if let name: String = (description.characters.split{$0 == ":"}.map(String.init))[0] {
+                        self.captionLabel.text = name
+                    }
                 }
             }
         }
@@ -174,6 +184,8 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
             self.captionLabel.text = "Generating Caption..."
         } else if(camState == 1) {
             self.captionLabel.text = "Translating..."
+        } else if(camState == 4) {
+            self.captionLabel.text = "Finding " + getPrajnaNameFromCode(self.camDetails)
         }
         self.captionLabel.textAlignment = NSTextAlignment.Center
         self.captionLabel.backgroundColor = UIColor.blackColor()
@@ -228,7 +240,7 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
             
             let fields = "?auth=96babypigmangocucumber&text=" + encText! + "&to=" + to
             
-            let api = API(translate: true, fields: fields)
+            let api = TranslateAPI(fields: fields)
             
             api.callAPI() { (rs: String) in
                 

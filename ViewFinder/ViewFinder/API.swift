@@ -11,28 +11,16 @@ import UIKit
 
 class API {
     
+    var method: String!
+    var url: NSURL!
     var body: NSData
-    var header: [String: String]
-    var method: String
-    var url: NSURL
-    var translate: Bool
+    var header: [String:String]!
     
-    let stateURLS: [Int: String] = [0: "https://api.projectoxford.ai/vision/v1.0/analyze", 1: "https://api.projectoxford.ai/vision/v1.0/ocr"]
-    
-    init(state: Int, header: [String: String], body: NSData, fields: String) {
-        self.header = header
+    init(method: String, url: NSURL, body: NSData, header: [String: String]) {
+        self.method = method
+        self.url = url
         self.body = body
-        self.method = "POST"
-        self.url = NSURL(string: stateURLS[state]! + fields)!
-        self.translate = false
-    }
-    
-    init(translate: Bool, fields: String) {
-        self.translate = translate
-        self.header = ["":""]
-        self.body = NSData.init()
-        self.method = "POST"
-        self.url = NSURL(string: "https://metrofantasyball.com/translate/translatearray.php" + fields)!
+        self.header = header
     }
     
     func callAPI(completionHandler: (rs: String) -> ()) {
@@ -41,10 +29,8 @@ class API {
         let request = NSMutableURLRequest(URL: url)
         request.HTTPMethod = method
         
-        if(!translate) {
-            request.allHTTPHeaderFields = header
-            request.HTTPBody = body
-        }
+        request.allHTTPHeaderFields = header
+        request.HTTPBody = body
         
         let task = NSURLSession.sharedSession().dataTaskWithRequest(request) { data, response, error in
             guard error == nil && data != nil else {            // check for fundamental networking error
@@ -69,51 +55,41 @@ class API {
     }
 }
 
-class KnowledgeAPI {
-    var name: String
-    
-    init(name: String) {
-        self.name = name
+class PrajnaAPI: API {
+    init(image: UIImage, classifier: String) {
+        let url = NSURL(string: "http://vm-hub.trafficmanager.net/Vhub/Process/00000000-0000-0000-0000-000000000000/00000000-0000-0000-0000-000000000000/" + classifier + "/00000000-0000-0000-0000-000000000000/00000000-0000-0000-0000-000000000000/00000000-0000-0000-0000-000000000000/636064468986830000/0/SecretKeyShouldbeLongerThan10")
+        super.init(method: "POST", url: url!, body: UIImageJPEGRepresentation(image, 0.9)!, header: [:])
     }
-    
-    func callAPI(completionHandler: (rs: String) -> ()) {
-        var responseString = "" as NSString
-        
-        let urlName = formatName(name)
+}
+
+class AnalyzeImageAPI: API {
+    init(image: UIImage, header: [String: String]) {
+        super.init(method: "POST", url: NSURL(string: "https://api.projectoxford.ai/vision/v1.0/analyze?visualFeatures=Faces,Description,Categories&details=Celebrities")!, body: UIImageJPEGRepresentation(image, 0.9)!, header: header)
+    }
+}
+
+class OCRAPI: API {
+    init(image: UIImage, header: [String: String]) {
+        super.init(method: "POST", url: NSURL(string: "https://api.projectoxford.ai/vision/v1.0/ocr")!, body: UIImageJPEGRepresentation(image, 0.9)!, header: header)
+    }
+}
+
+class TranslateAPI: API {
+    init(fields: String) {
+        super.init(method: "POST", url: NSURL(string: "https://metrofantasyball.com/translate/translatearray.php" + fields)!, body: NSData.init(), header: [:])
+    }
+}
+
+class KnowledgeAPI: API {
+    init(name: String) {
+        let nameArr = name.characters.split{$0 == " "}.map(String.init)
+        var urlName = nameArr[0]
+        for i in 1..<nameArr.count {
+            urlName = urlName + "+" + nameArr[i]
+        }
         
         let url = NSURL(string: "https://www.bingapis.com/api/v5/search?Knowledge=1&q=" + urlName + "&AppID=D41D8CD98F00B204E9800998ECF8427E496F9910&responseformat=json&responsesize=m")
         
-        let request = NSMutableURLRequest(URL: url!)
-        request.HTTPMethod = "POST"
-        
-        let task = NSURLSession.sharedSession().dataTaskWithRequest(request) { data, response, error in
-            guard error == nil && data != nil else {            // check for fundamental networking error
-                print("error=\(error)")
-                return
-            }
-            
-            if let httpStatus = response as? NSHTTPURLResponse where httpStatus.statusCode != 200 {  // check for http errors
-                print("statusCode should be 200, but is \(httpStatus.statusCode)")
-                print("response = \(response)")
-            }
-            
-            responseString = NSString(data: data!, encoding: NSUTF8StringEncoding)!
-            //print("responseString = \(responseString)")
-            
-            dispatch_async(dispatch_get_main_queue()) {
-                completionHandler(rs: responseString as String)
-            }
-            
-        }
-        task.resume()
-    }
-    
-    func formatName(str: String) -> String {
-        let nameArr = str.characters.split{$0 == " "}.map(String.init)
-        var urlStr = nameArr[0]
-        for i in 1..<nameArr.count {
-            urlStr = urlStr + "+" + nameArr[i]
-        }
-        return urlStr
+        super.init(method: "POST", url: url!, body: NSData.init(), header: [:])
     }
 }

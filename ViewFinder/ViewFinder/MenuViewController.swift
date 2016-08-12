@@ -24,6 +24,7 @@ class MenuViewController: UIViewController, UITableViewDataSource, UITableViewDe
     
     @IBOutlet weak var faceButton:UIButton!
     @IBOutlet weak var translateButton: UIButton!
+    @IBOutlet weak var prajnaButton: UIButton!
     
     let table = UITableView()
     let cover = UIView()
@@ -33,11 +34,12 @@ class MenuViewController: UIViewController, UITableViewDataSource, UITableViewDe
     var api = Int()
     var camState = Int()
     var camDetails = String()
+    var tableData = Int()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        table.frame = CGRect(x: 0, y: 44, width: 180, height: 300 - 44)
+        table.frame = CGRect(x: 0, y: 44, width: 180, height: 450 - 44)
         table.scrollEnabled = true
         table.dataSource = self
         table.delegate = self
@@ -52,6 +54,9 @@ class MenuViewController: UIViewController, UITableViewDataSource, UITableViewDe
         
         translateButton.tag = 1
         translateButton.addTarget(self, action: #selector(self.buttonPressed(_:)), forControlEvents: .TouchUpInside)
+        
+        prajnaButton.tag = 4
+        prajnaButton.addTarget(self, action: #selector(self.buttonPressed(_:)), forControlEvents: .TouchUpInside)
         
         cover.frame = CGRect(x: 0, y: 0, width: 180, height: 44)
         cover.backgroundColor = UIColor.whiteColor()
@@ -72,14 +77,21 @@ class MenuViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     func buttonPressed(sender: UIButton) {
-        if(sender.tag == 1) {
+        if(sender.tag == 0) {
+            passDataBackWards(sender.tag, details: "")
+            self.dismissViewControllerAnimated(true, completion: nil)
+        } else {
             self.view.addSubview(table)
             self.view.addSubview(cover)
             self.view.addSubview(backButton)
             self.view.addSubview(cancelButton)
-        } else {
-            passDataBackWards(sender.tag, details: "")
-            self.dismissViewControllerAnimated(true, completion: nil)
+            if(sender.tag == 1) {
+                self.tableData = 1
+                table.reloadData()
+            } else if(sender.tag == 4) {
+                self.tableData = 4
+                table.reloadData()
+            }
         }
     }
     
@@ -99,18 +111,32 @@ class MenuViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        if(tableData == 1) {
+            let cell = UITableViewCell(style: UITableViewCellStyle.Default, reuseIdentifier: "ri")
+            cell.textLabel!.text = languages[indexPath.row]["name"]
+            return cell
+        }
         let cell = UITableViewCell(style: UITableViewCellStyle.Default, reuseIdentifier: "ri")
-        cell.textLabel!.text = languages[indexPath.row]["name"]
+        cell.textLabel!.text = prajnaCodes[indexPath.row]["name"]
         return cell
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        passDataBackWards(1, details: languages[indexPath.row]["code"]!)
+        if(tableData == 1) {
+            passDataBackWards(1, details: languages[indexPath.row]["code"]!)
+        } else if(tableData == 4) {
+            passDataBackWards(4, details: prajnaCodes[indexPath.row]["code"]!)
+        }
         self.dismissViewControllerAnimated(true, completion: nil)
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return languages.count
+        if(tableData == 1) {
+            return languages.count
+        } else {
+            return prajnaCodes.count
+        }
+        
     }
     
     var delegate: MenuViewControllerDelegate?
@@ -124,8 +150,10 @@ class MenuViewController: UIViewController, UITableViewDataSource, UITableViewDe
         self.camDetails = camDetails
         if(camState == 0) {
             faceButton.setImage(UIImage(named: "FaceSelected.png"), forState: .Normal)
-        } else {
+        } else if(camState == 1) {
             translateButton.setImage(UIImage(named: "TranslateSelected.png"), forState: .Normal)
+        } else if(camState == 4) {
+            prajnaButton.setImage(UIImage(named: "PrajnaSelected.png"), forState: .Normal)
         }
     }
 }
