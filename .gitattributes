@@ -1,0 +1,59 @@
+# Text files that should be normalized to LF
+*.cs       text diff=csharp
+*.fs       text diff=csharp
+*.fsi      text diff=csharp
+*.fsx      text diff=csharp
+*.cpp      text diff=cpp
+*.h        text diff=cpp
+*.hpp      text diff=cpp
+*.md       text 
+*.sh       text
+*.ps1      text
+*.cmd      text
+*.bat      text
+*.markdown text
+*.msbuild  text
+*.config   text
+*.html     text
+*.cshtml   text
+*.xml      text
+*.yml      text
+*.json     text
+*.txt      text
+*.css      text
+*.rc       text
+paket.*    text
+*.paket.*  text
+.gitattributes text
+.gitignore     text
+
+## vs files
+*.sln      text merge=union
+*.csproj   text merge=union
+*.vbproj   text merge=union
+*.fsproj   text merge=union
+*.dbproj   text merge=union
+*.vcxproj  text merge=union
+
+# binary files
+*.png    binary
+*.jpg    binary
+*.gif    binary
+*.ico    binary
+
+*.pfx    binary
+*.snk    binary
+*.dll    binary
+*.exe    binary
+*.lib    binary
+*.exp    binary
+*.pdb    binary
+*.sdf    binary
+*.7z     binary
+*.pdf    binary
+*.doc    binary
+*.docx   binary
+*.docm   binary
+
+# Catch all for anything we forgot. Add rules if you get CRLF -> LF warnings.
+* text=auto
