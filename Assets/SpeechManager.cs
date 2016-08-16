@@ -14,32 +14,41 @@ public class SpeechManager : MonoBehaviour
         keywords.Add("Caption", () =>
         {
             Debug.Log("command caption");
-            //this.GetComponent<Clicker>().Captions();
-            if (!Clicker.caption)
-            {
-                this.BroadcastMessage("ChangeMode");
-            }
+            Clicker.mode = 0;
+            this.BroadcastMessage("ChangeMode");
         });
 
         keywords.Add("Face", () =>
         {
             Debug.Log("command face");
-            //this.GetComponent<Clicker>().Faces();
-            if (Clicker.caption)
-            {
-                this.BroadcastMessage("ChangeMode");
-            }
+            Clicker.mode = 1;
+            this.BroadcastMessage("ChangeMode", 1);
         });
 
         keywords.Add("Add Person", () =>
         {
             Debug.Log("command add");
-            if (!Clicker.caption && Clicker.newFace)
+            if (Clicker.mode == 1 && Clicker.newFace)
             {
+                Clicker.recordingMethod = 0;
                 this.BroadcastMessage("StartRecording");
             }
         });
 
+        keywords.Add("All Classifiers", () =>
+        {
+            Debug.Log("command all classifiers");
+            Clicker.mode = 2;
+            Clicker.prajnaMode = -1;
+            this.BroadcastMessage("ChangeMode");
+        });
+
+        keywords.Add("Choose Classifier", () =>
+        {
+            Debug.Log("command choose classifier");
+            Clicker.recordingMethod = 1;
+            this.BroadcastMessage("StartRecording");
+        });
         // Tell the KeywordRecognizer about our keywords.
         keywordRecognizer = new KeywordRecognizer(keywords.Keys.ToArray());
 
