@@ -572,18 +572,7 @@ class CRViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate
         }
         return false
     }
-    
-    //helper function - converts a json string into a dictionary
-    func convertStringToDictionary(text: String) -> [String:AnyObject]? {
-        if let data = text.dataUsingEncoding(NSUTF8StringEncoding) {
-            do {
-                return try NSJSONSerialization.JSONObjectWithData(data, options: []) as? [String:AnyObject]
-            } catch let error as NSError {
-                print(error)
-            }
-        }
-        return nil
-    }
+
 
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "showFaces" {

@@ -30,9 +30,10 @@ class InstructionsViewController: UIViewController, UIPickerViewDelegate, UIPick
     }
     
     override func didReceiveMemoryWarning() {
-        //
+        super.didReceiveMemoryWarning()
     }
     
+    //sets the number of components in the picker view - returns one - sections
     func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
         return 1
     }
@@ -48,6 +49,4 @@ class InstructionsViewController: UIViewController, UIPickerViewDelegate, UIPick
     func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         textView.text = sectionDetails[row]
     }
-    
-    
 }

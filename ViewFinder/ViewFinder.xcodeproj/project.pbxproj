@@ -37,6 +37,7 @@
 		2C5DA7D31D53B4B10033F5BF /* CRSplashScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C5DA7D21D53B4B10033F5BF /* CRSplashScreen.swift */; };
 		2C5F0A081D341908006AE9D0 /* ObjectCaptionLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C5F0A071D341908006AE9D0 /* ObjectCaptionLabel.swift */; };
 		2C5FC72E1D52C65C007B20BD /* CelebrityRecognizer.xcdatamodel in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE805C1D52BAC800031306 /* CelebrityRecognizer.xcdatamodel */; };
+		2C69A16F1D63990400ED48CF /* TermsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C69A16E1D63990400ED48CF /* TermsViewController.swift */; };
 		2C7084021D3E9796001D3E16 /* CameraButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2C7083FF1D3E9796001D3E16 /* CameraButton.png */; };
 		2C7084031D3E9796001D3E16 /* CameraButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2C7083FF1D3E9796001D3E16 /* CameraButton.png */; };
 		2C7084041D3E9796001D3E16 /* FlipCameraButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2C7084001D3E9796001D3E16 /* FlipCameraButton.png */; };
@@ -115,6 +116,7 @@
 		2CAE80571D52B91700031306 /* CRFacesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CAE80551D52B91700031306 /* CRFacesViewController.swift */; };
 		2CAE80591D52B92F00031306 /* CR.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2CAE80581D52B92F00031306 /* CR.storyboard */; };
 		2CBC43891D4AC365008E41A7 /* MDLMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CBC43881D4AC365008E41A7 /* MDLMapViewController.swift */; };
+		2CD076751D639CC2003CB8CE /* TensorflowSplashScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD076731D639CBF003CB8CE /* TensorflowSplashScreen.swift */; };
 		2CDB225C1D3EDC5E0062EAAA /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CDB225B1D3EDC5E0062EAAA /* Global.swift */; };
 		2CDB225D1D3EDC5E0062EAAA /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CDB225B1D3EDC5E0062EAAA /* Global.swift */; };
 		2CDEB38B1D4AE460005AAD38 /* MDLImagePopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CDEB38A1D4AE460005AAD38 /* MDLImagePopover.swift */; };
@@ -186,6 +188,7 @@
 		2C580F371D55174C003193F0 /* CRFaceDetailController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CRFaceDetailController.swift; sourceTree = "<group>"; };
 		2C5DA7D21D53B4B10033F5BF /* CRSplashScreen.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CRSplashScreen.swift; sourceTree = "<group>"; };
 		2C5F0A071D341908006AE9D0 /* ObjectCaptionLabel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectCaptionLabel.swift; sourceTree = "<group>"; };
+		2C69A16E1D63990400ED48CF /* TermsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TermsViewController.swift; sourceTree = "<group>"; };
 		2C7083FF1D3E9796001D3E16 /* CameraButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CameraButton.png; sourceTree = "<group>"; };
 		2C7084001D3E9796001D3E16 /* FlipCameraButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FlipCameraButton.png; sourceTree = "<group>"; };
 		2C72D9781D2EFD8D00C3D707 /* ViewFinderTensorflow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ViewFinderTensorflow.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -215,6 +218,7 @@
 		2CAE805A1D52B9BA00031306 /* CelebrityRecognizer.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = CelebrityRecognizer.plist; sourceTree = "<group>"; };
 		2CAE805C1D52BAC800031306 /* CelebrityRecognizer.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CelebrityRecognizer.xcdatamodel; sourceTree = "<group>"; };
 		2CBC43881D4AC365008E41A7 /* MDLMapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDLMapViewController.swift; sourceTree = "<group>"; };
+		2CD076731D639CBF003CB8CE /* TensorflowSplashScreen.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TensorflowSplashScreen.swift; sourceTree = "<group>"; };
 		2CDB225B1D3EDC5E0062EAAA /* Global.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
 		2CDEB38A1D4AE460005AAD38 /* MDLImagePopover.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDLImagePopover.swift; sourceTree = "<group>"; };
 		2CE344DA1D48322E00A27BEF /* MDLGalleryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDLGalleryViewController.swift; sourceTree = "<group>"; };
@@ -347,6 +351,8 @@
 			children = (
 				2CE4410E1D18A599009A7DC1 /* Main.storyboard */,
 				2CFD128A1D300A0B0000F1E7 /* Tensorflow.storyboard */,
+				2CD076731D639CBF003CB8CE /* TensorflowSplashScreen.swift */,
+				2C69A16E1D63990400ED48CF /* TermsViewController.swift */,
 				2CAB03DF1D4187C10020BE81 /* MyDigitalLife.storyboard */,
 				2CAE80581D52B92F00031306 /* CR.storyboard */,
 				2C5DA7D21D53B4B10033F5BF /* CRSplashScreen.swift */,
@@ -756,6 +762,7 @@
 				2C72D9BD1D2F265300C3D707 /* tensorflow_utils.mm in Sources */,
 				2C72D95D1D2EFD8D00C3D707 /* AnalyzeUploadedImageViewController.swift in Sources */,
 				2C72D95F1D2EFD8D00C3D707 /* MenuViewController.swift in Sources */,
+				2CD076751D639CC2003CB8CE /* TensorflowSplashScreen.swift in Sources */,
 				2C7CDC9C1D5A925A00839C9A /* CRFaceDetailController.swift in Sources */,
 				2C72D9601D2EFD8D00C3D707 /* TranslateWordBox.swift in Sources */,
 				2C3CBF9F1D5D384C00992883 /* FormatFace.swift in Sources */,
@@ -766,6 +773,7 @@
 				2C72D9641D2EFD8D00C3D707 /* ImageCaptureViewController.swift in Sources */,
 				2C72D9651D2EFD8D00C3D707 /* TranslationDetailViewController.swift in Sources */,
 				2C2565831D5A7BD6005E0F13 /* CelebrityRecognizer.xcdatamodel in Sources */,
+				2C69A16F1D63990400ED48CF /* TermsViewController.swift in Sources */,
 				2CE4A5D81D35AB8F00A77B9F /* TensorflowMenu.swift in Sources */,
 				2C9EB43A1D3DA69900744FBD /* InstructionsViewController.swift in Sources */,
 				2C72D9671D2EFD8D00C3D707 /* TranslationTableViewController.swift in Sources */,

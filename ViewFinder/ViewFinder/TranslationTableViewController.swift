@@ -6,6 +6,11 @@
 //  Copyright © 2016 Microsoft. All rights reserved.
 //
 
+/* This class is a table of translation details
+ * This is only used in live translation mode, which is 
+ * not currently an available feature in the app
+*/
+
 import Foundation
 import UIKit
 

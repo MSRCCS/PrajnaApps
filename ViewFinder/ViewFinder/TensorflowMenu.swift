@@ -8,6 +8,7 @@
 
 /*
  * This is the menu View Controller for the Tensorflow Version
+ * Instead of translation and prajna hub it has Tensorflow and Celebrity Recognition
  */
 
 import Foundation

@@ -7,7 +7,7 @@
 //
 
 /*
- * This ViewController allows the user to upload an image. 
+ * This ViewController calls APIs on an uploaded image that the user chooses
  * It checks for words to be translated, faces, and captions
  * the image.
 */
@@ -32,8 +32,6 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
     
     var celebrityPresent = false
     
-    var language = String()
-    
     var camState = Int()
     var camDetails = String()
     
@@ -54,12 +52,12 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
         fatalError("init(coder:) has not been implemented")
     }
     
+    //calls the APIs
     func setDetails(camState: Int, camDetails: String) {
         self.camState = camState
         self.camDetails = camDetails
 
         let header = ["Ocp-Apim-Subscription-Key": "8cace64f78f34355b7e2ab22e3b06bed", "Content-Type": "application/octet-stream"]
-        let body = UIImageJPEGRepresentation(image, 0.9)!
         
         let analyzeAPI = AnalyzeImageAPI(image: image, header: header)
         let ocrAPI = OCRAPI(image: image, header: header)
@@ -68,7 +66,7 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
             analyzeAPI.callAPI() { (rs: String) in
                 if(!rs.containsString("Input image is too large")) {
                     print(rs)
-                    self.displayAnswers(rs)
+                    self.displayAnswers(rs, image: self.image)
                 } else {
                     print(rs)
                     self.captionLabel.backgroundColor = UIColor.redColor()
@@ -87,11 +85,14 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
         } else if(camState == 4) {
             let api = PrajnaAPI(image: image, classifier: camDetails)
             api.callAPI() { (rs: String) in
-                let dict = self.convertStringToDictionary(rs)
-                if let description = dict!["Description"] as? String {
-                    if let name: String = (description.characters.split{$0 == ":"}.map(String.init))[0] {
-                        self.captionLabel.text = name
+                if let dict = convertStringToDictionary(rs) {
+                    if let description = dict["Description"] as? String {
+                        if let name: String = (description.characters.split{$0 == ":"}.map(String.init))[0] {
+                            self.captionLabel.text = name
+                        }
                     }
+                } else {
+                    //catch for prajna service not working
                 }
             }
         }
@@ -99,16 +100,14 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
     
  ////////////////////// POPOVERS //////////////////////////////
     
+    //shows popovers of the translation details
     func showTranslationDetails(sender: AnyObject) {
-        
-        print("!!")
-        
+
         #if TENSORFLOW
             let storyboard = UIStoryboard(name: "Tensorflow", bundle: nil)
         #else
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
         #endif
-        
         
         let controller = storyboard.instantiateViewControllerWithIdentifier("tdc") as! TranslationDetailViewController
         
@@ -282,7 +281,7 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
     }
     
     //parses the analyze image api json for faces, celebrities, and captions
-    func displayAnswers(rs: String) {
+    func displayAnswers(rs: String, image: UIImage) {
         let dict = (convertStringToDictionary(rs)!)
         
         if(rs.containsString("celeb")) {
@@ -329,8 +328,7 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
                                             //checks each FaceDetectionBox to see if is close to the celebrity face. If the origin point is within fifteen of the celebrity face the 'nametag' is replaced with the celebrity's name
                                             if(withinFifteen(Int(face.outline.frame.minX), two: newX) && withinFifteen(Int(face.outline.frame.minY), two: newY)) {
                                                 face.caption.text = (celeb["name"] as! String)
-                                            } else {
-                                                print("!")
+                                                saveFaceFromImage(image, origin: CGPoint(x: y, y: x), name: celeb["name"] as! String)
                                             }
                                         }
                                     }
@@ -345,16 +343,11 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
         }
         
         let x = (dict["description"] as! NSDictionary)["captions"]![0]["text"]
-        
-        print(x)
-        
         captionLabel.text = (x as! String)
-        
-        print(captionLabel.text)
     }
     
  ////////////////////// HELPER METHODS ////////////////////////
-    
+
     /*
      * Turns a str of 4 digits separated by commas into a CGRect
      *@param: str: String to get frame from
@@ -371,7 +364,7 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
         
         return rect
     }
-
+    
     //draws a rectangle over detected faces
     func drawFaceRectangle(x: Int, y: Int, height: Int, width: Int, caption: String) {
         let frame = resizeFrame(x, y: y, height: height, width: width)
@@ -381,6 +374,7 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
         faces.append(faceBox)
     }
     
+    //resizes a frame for the given image
     func resizeFrame(x: Int, y: Int, height: Int, width: Int) -> CGRect {
         var newX = Int(newWidth * (CGFloat(x) / self.image.size.width))
         var newY = Int(newHeight * (CGFloat(y) / self.image.size.height))
@@ -396,18 +390,7 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
         
         return CGRect(x: newX, y: newY, width: newSizeX, height: newSizeY)
     }
-    
-    //helper function - converts a json string into a dictionary
-    func convertStringToDictionary(text: String) -> [String:AnyObject]? {
-        if let data = text.dataUsingEncoding(NSUTF8StringEncoding) {
-            do {
-                return try NSJSONSerialization.JSONObjectWithData(data, options: []) as? [String:AnyObject]
-            } catch let error as NSError {
-                print(error)
-            }
-        }
-        return nil
-    }
+
     
     //This checks to see if two numbers are within fifteen of each other
     //This is for updating the FaceDetectionBoxes with celebrity names
