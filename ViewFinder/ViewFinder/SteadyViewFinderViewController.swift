@@ -811,18 +811,6 @@ class SteadyViewFinderViewController: UIViewController, UIGestureRecognizerDeleg
         }
     }
     
-    //helper function - converts a json string into a dictionary
-    func convertStringToDictionary(text: String) -> [String:AnyObject]? {
-        if let data = text.dataUsingEncoding(NSUTF8StringEncoding) {
-            do {
-                return try NSJSONSerialization.JSONObjectWithData(data, options: []) as? [String:AnyObject]
-            } catch let error as NSError {
-                print(error)
-            }
-        }
-        return nil
-    }
-    
     //This checks to see if two numbers are within fifteen of each other
     //This is for updating the FaceDetectionBoxes with celebrity names
     func withinFifteen(one: Int, two: Int) -> Bool {

@@ -55,3 +55,28 @@ let translationIns = "There are many different languages that the app can transl
 let uploadImageIns = "If you are uploading an image, the API used to analyze the image is decided by what the selected menu option is in the still image mode. If you want to translate words in the image you are uploading, make sure you set the mode to translation from the still image capture screen."
 
 let troubleshootingIns = "“I didn’t allow access to Camera or Photos”:\n\nGo to the settings for this app and toggle to allow access to Camera, Photos, and probably cellular data too (the only feature that works offline is object detection)\n\n“The camera stopped running”:\n\nEither restart the app or switch between modes."
+
+//global methods
+
+func resize(image: UIImage, newWidth: CGFloat) -> UIImage {
+    
+    let scale = newWidth / image.size.width
+    let newHeight = image.size.height * scale
+    UIGraphicsBeginImageContext(CGSize(width: newWidth, height: newHeight))
+    image.drawInRect(CGRect(x: 0, y: 0, width: newWidth, height: newHeight))
+    let newImage = UIGraphicsGetImageFromCurrentImageContext()
+    UIGraphicsEndImageContext()
+    
+    return newImage!
+}
+
+func convertStringToDictionary(text: String) -> [String:AnyObject]? {
+    if let data = text.dataUsingEncoding(NSUTF8StringEncoding) {
+        do {
+            return try NSJSONSerialization.JSONObjectWithData(data, options: []) as? [String:AnyObject]
+        } catch let error as NSError {
+            print(error)
+        }
+    }
+    return nil
+}

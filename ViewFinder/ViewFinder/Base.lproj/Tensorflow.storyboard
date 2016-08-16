@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11185.3" systemVersion="15G31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="jqs-pA-ZH6">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11185.3" systemVersion="15G31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="FJM-aB-pOs">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11151.4"/>
@@ -641,12 +641,168 @@
             </objects>
             <point key="canvasLocation" x="4758" y="405"/>
         </scene>
+        <!--Tensorflow Splash Screen-->
+        <scene sceneID="Xqy-Bc-FUS">
+            <objects>
+                <viewController id="FJM-aB-pOs" customClass="TensorflowSplashScreen" customModule="ViewFinderTensorflow" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Gyx-GE-rKO"/>
+                        <viewControllerLayoutGuide type="bottom" id="fs7-gg-Rxs"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="3eS-E1-b0I">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="MSRCCS" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7ss-Jh-BVn">
+                                <frame key="frameInset" minX="134" minY="231" width="107" height="36"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="Icon.png" translatesAutoresizingMaskIntoConstraints="NO" id="8fL-yP-qgz">
+                                <frame key="frameInset" minX="147" minY="159" width="80" height="80"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="80" id="frg-fW-Uwf"/>
+                                    <constraint firstAttribute="height" constant="80" id="rIP-0F-NMC"/>
+                                </constraints>
+                                <variation key="default">
+                                    <mask key="constraints">
+                                        <exclude reference="frg-fW-Uwf"/>
+                                        <exclude reference="rIP-0F-NMC"/>
+                                    </mask>
+                                </variation>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Real-Time Object Detection" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ujF-H4-F4y">
+                                <frame key="frameInset" minX="87" minY="265" width="212" height="35"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="ujF-H4-F4y" firstAttribute="top" secondItem="7ss-Jh-BVn" secondAttribute="bottom" constant="8" id="5xm-nZ-F0h"/>
+                            <constraint firstItem="7ss-Jh-BVn" firstAttribute="centerX" secondItem="3eS-E1-b0I" secondAttribute="centerX" id="DcT-ti-9Nx"/>
+                            <constraint firstItem="8fL-yP-qgz" firstAttribute="top" secondItem="Gyx-GE-rKO" secondAttribute="bottom" constant="148" id="L26-fW-3m4"/>
+                            <constraint firstItem="ujF-H4-F4y" firstAttribute="centerX" secondItem="3eS-E1-b0I" secondAttribute="centerX" id="MhH-Xg-gmg"/>
+                            <constraint firstItem="7ss-Jh-BVn" firstAttribute="top" secondItem="8fL-yP-qgz" secondAttribute="bottom" constant="8" id="eud-9G-VSQ"/>
+                            <constraint firstItem="8fL-yP-qgz" firstAttribute="centerX" secondItem="3eS-E1-b0I" secondAttribute="centerX" id="r3R-zN-bhB"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <segue destination="X0f-gu-hHp" kind="show" identifier="showTerms" id="dMZ-qy-k6c"/>
+                        <segue destination="jqs-pA-ZH6" kind="show" identifier="previouslyAgreed" id="8ey-F4-zPM"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="YaH-7e-6TL" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1431" y="932"/>
+        </scene>
+        <!--Terms View Controller-->
+        <scene sceneID="THh-Vl-hCy">
+            <objects>
+                <viewController modalTransitionStyle="flipHorizontal" id="X0f-gu-hHp" customClass="TermsViewController" customModule="ViewFinderTensorflow" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Dsa-7K-rtX"/>
+                        <viewControllerLayoutGuide type="bottom" id="IiE-xv-nkf"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="0nW-yP-3QQ">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ad4-VJ-Z3P">
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <string key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</string>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="jxt-7n-Hke">
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Terms of Use" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2mc-bo-f6o">
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="33" id="yjN-Fy-2qk"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstItem="2mc-bo-f6o" firstAttribute="top" secondItem="jxt-7n-Hke" secondAttribute="top" constant="21" id="Udp-B1-1Au"/>
+                                    <constraint firstItem="2mc-bo-f6o" firstAttribute="leading" secondItem="jxt-7n-Hke" secondAttribute="leading" constant="8" id="fHU-hE-1UO"/>
+                                    <constraint firstAttribute="height" constant="64" id="lJ9-uP-SVF"/>
+                                    <constraint firstAttribute="trailing" secondItem="2mc-bo-f6o" secondAttribute="trailing" constant="8" id="w7o-Mv-MhF"/>
+                                </constraints>
+                            </view>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="c9r-qy-QOh">
+                                <items>
+                                    <barButtonItem title="Decline" id="pFS-xI-jPx">
+                                        <connections>
+                                            <action selector="declineTerms" destination="X0f-gu-hHp" id="mxc-qd-KPv"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="8Xf-oN-r9O"/>
+                                    <barButtonItem title="Accept" id="oZp-5u-s3A">
+                                        <connections>
+                                            <action selector="acceptTerms" destination="X0f-gu-hHp" id="Gyl-Gs-61F"/>
+                                        </connections>
+                                    </barButtonItem>
+                                </items>
+                                <color key="barTintColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </toolbar>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="jxt-7n-Hke" firstAttribute="top" secondItem="0nW-yP-3QQ" secondAttribute="top" id="6Ot-pm-bgo"/>
+                            <constraint firstAttribute="trailing" secondItem="jxt-7n-Hke" secondAttribute="trailing" id="EAP-IB-LVe"/>
+                            <constraint firstItem="Ad4-VJ-Z3P" firstAttribute="top" secondItem="jxt-7n-Hke" secondAttribute="bottom" constant="8" id="ija-AC-1Bp"/>
+                            <constraint firstItem="jxt-7n-Hke" firstAttribute="leading" secondItem="0nW-yP-3QQ" secondAttribute="leading" id="j55-7n-Xsd"/>
+                            <constraint firstItem="Ad4-VJ-Z3P" firstAttribute="leading" secondItem="0nW-yP-3QQ" secondAttribute="leading" id="jM3-6x-I9r"/>
+                            <constraint firstItem="c9r-qy-QOh" firstAttribute="top" secondItem="Ad4-VJ-Z3P" secondAttribute="bottom" constant="6" id="lUU-48-Q1y"/>
+                            <constraint firstItem="IiE-xv-nkf" firstAttribute="top" secondItem="c9r-qy-QOh" secondAttribute="bottom" id="nF6-Hg-iio"/>
+                            <constraint firstAttribute="trailing" secondItem="Ad4-VJ-Z3P" secondAttribute="trailing" id="rxC-Kv-qDX"/>
+                            <constraint firstItem="c9r-qy-QOh" firstAttribute="leading" secondItem="0nW-yP-3QQ" secondAttribute="leading" id="tVP-M7-HLi"/>
+                            <constraint firstAttribute="trailing" secondItem="c9r-qy-QOh" secondAttribute="trailing" id="uYS-U8-Foz"/>
+                        </constraints>
+                    </view>
+                    <extendedEdge key="edgesForExtendedLayout"/>
+                    <toolbarItems>
+                        <barButtonItem title="Decline" id="EmG-QN-ONq">
+                            <connections>
+                                <action selector="declineTerms" destination="X0f-gu-hHp" id="qFn-Dn-WQt"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="UFa-Sl-oQD"/>
+                        <barButtonItem title="Accept" id="m21-Za-bQh">
+                            <connections>
+                                <action selector="acceptTerms" destination="X0f-gu-hHp" id="Sdq-RU-I2I"/>
+                            </connections>
+                        </barButtonItem>
+                    </toolbarItems>
+                    <nil key="simulatedTopBarMetrics"/>
+                    <nil key="simulatedBottomBarMetrics"/>
+                    <connections>
+                        <outlet property="acceptButton" destination="oZp-5u-s3A" id="lrv-zq-uNY"/>
+                        <outlet property="declineButton" destination="pFS-xI-jPx" id="JFs-1h-VmQ"/>
+                        <outlet property="terms" destination="Ad4-VJ-Z3P" id="0IP-a7-CRe"/>
+                        <segue destination="jqs-pA-ZH6" kind="show" identifier="acceptedTerms" id="57q-tk-a01"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="vsV-pk-xIR" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-516" y="432.23388305847078"/>
+        </scene>
     </scenes>
     <resources>
         <image name="CelebrityUnselected.jpg" width="300" height="300"/>
         <image name="FaceUnselected.png" width="140" height="140"/>
+        <image name="Icon.png" width="58" height="58"/>
         <image name="PrajnaUnselected.png" width="300" height="300"/>
         <image name="TensorflowUnselected.png" width="300" height="300"/>
         <image name="TranslateUnselected.png" width="140" height="140"/>
     </resources>
+    <inferredMetricsTieBreakers>
+        <segue reference="57q-tk-a01"/>
+    </inferredMetricsTieBreakers>
 </document>

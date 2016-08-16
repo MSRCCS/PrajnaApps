@@ -41,10 +41,7 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
     //Face Detection Banners - 3rd State
     var banners = [FaceDetectionBanner]()
     var celebrities = [Int: Celebrity]()
-    var detectedFaces = [NSManagedObject]()
-    
-    //var faceFeatures
-    var totalFacesDetected = 1          // starts at one so doesn't get initializer. Sets IDs for the faces
+
     
     //Camera Capture requiered properties
     var videoDataOutput: AVCaptureVideoDataOutput!;
@@ -68,8 +65,6 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
     var detector: CIDetector?
     var options: [String : AnyObject]?
     var context: CIContext?
-    var hasFace = false
-    var callFaceAPI = false
     var celebrityPresent = false
     var detectorSet = false
     
@@ -86,7 +81,7 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
     
     //Motion
     let motionManager = CMMotionManager()
-    let motionThreshold : Double = 0.15
+    let motionThreshold : Double = 0.15         //the threshold that the motion has to be under for the camera to register as steady. Make greater to make it easier to hold steady, decrease to make it more difficult
     var numSteady = 0
     var steady = false
 
@@ -128,6 +123,8 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
         
         setUpTensorflow()
         
+        //occasionally the AVCaputeSession will time out, this timer checks to see if it has
+        //if the camera has timed out it will restart it
         timeOutTimer = NSTimer.scheduledTimerWithTimeInterval(0.5, target: self, selector: #selector(self.testIfRunning(_:)), userInfo: nil, repeats: true)
         
         self.tabBarController?.tabBar.hidden = true
@@ -138,18 +135,6 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
         self.navigationController?.setNavigationBarHidden(false, animated: true)
     }
     
-    func loadFaces() {
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        let managedContext = appDelegate.managedObjectContext
-        let fetchRequest = NSFetchRequest(entityName: "Face")
-        do {
-            let results =
-                try managedContext.executeFetchRequest(fetchRequest)
-            detectedFaces = results as! [NSManagedObject]
-        } catch let error as NSError {
-            print("Could not fetch \(error), \(error.userInfo)")
-        }
-    }
     
     func testIfRunning(sender: NSTimer) {
         if(session.running) {
@@ -278,85 +263,7 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
             numLabels = 0
         }
     }
-    
-    //samples and displays the image that is running through the tensorflow neural network
-    func debugImage(sender: UIButton) {
-        
-        stopCamera()
-        self.view.addSubview(debugImageView)
-        self.view.addSubview(dismissDebugImageButton)
-        
-        //samples image like Tensorflow does
-        
-        let inputCGImage = currentImage
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let width = CGImageGetWidth(inputCGImage)
-        let height = CGImageGetHeight(inputCGImage)
-        let bytesPerPixel = 4
-        let bitsPerComponent = 8
-        let bytesPerRow = bytesPerPixel * width
-        let bitmapInfo = RGBA32.bitmapInfo
 
-        let context = CGBitmapContextCreate(nil, width, height, bitsPerComponent, bytesPerRow, colorSpace, bitmapInfo)
-        
-        CGContextDrawImage(context!, CGRectMake(0, 0, CGFloat(width), CGFloat(height)), inputCGImage)
-
-        let resizedContext = CGBitmapContextCreate(nil, 224, 224, bitsPerComponent, 224 * bytesPerPixel, colorSpace, bitmapInfo)
-
-        let ogPixelBuffer = UnsafeMutablePointer<RGBA32>(CGBitmapContextGetData(context!))
-        let outPixelBuffer = UnsafeMutablePointer<RGBA32>(CGBitmapContextGetData(resizedContext!))
-        
-        for y in 0 ..< 224 {
-            for x in 0 ..< 224 {
-                let in_x = (y * width) / 224
-                let in_y = (x * height) / 224
-                let ogPixel = ogPixelBuffer + ((in_y * width) + (in_x))
-                let outPixel = outPixelBuffer + 224 + (y * 224 - x)
-                let color = RGBA32(red: (ogPixel.memory.red()), green: (ogPixel.memory.green()), blue: (ogPixel.memory.blue()), alpha: 255)
-                outPixel.memory = color
-            }
-        }
-
-        let outputCGImage = CGBitmapContextCreateImage(resizedContext!)
-        let outImage = UIImage(CGImage: outputCGImage!)
-        
-        debugImageView.image = outImage
-        //set image for image view
-        //show labels
-    }
-    
-    struct RGBA32 {
-        var color: UInt32
-        
-        func red() -> UInt8 {
-            return UInt8((color >> 24) & 255)
-        }
-        
-        func green() -> UInt8 {
-            return UInt8((color >> 16) & 255)
-        }
-        
-        func blue() -> UInt8 {
-            return UInt8((color >> 8) & 255)
-        }
-        
-        func alpha() -> UInt8 {
-            return UInt8((color >> 0) & 255)
-        }
-        
-        init(red: UInt8, green: UInt8, blue: UInt8, alpha: UInt8) {
-            color = (UInt32(red) << 24) | (UInt32(green) << 16) | (UInt32(blue) << 8) | (UInt32(alpha) << 0)
-        }
-        
-        static let bitmapInfo = CGImageAlphaInfo.PremultipliedLast.rawValue | CGBitmapInfo.ByteOrder32Little.rawValue
-    }
-    
-    func doneDebugging(sender: AnyObject) {
-        debugImageView.removeFromSuperview()
-        dismissDebugImageButton.removeFromSuperview()
-        restartCamera()
-    }
-    
     ///////////////////// STRUCTS ///////////////////////////////
     
     //Stores the information about a face
@@ -501,6 +408,7 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
         return .None
     }
     
+    //shows the TranslationTableViewController as a popover - not currently implemented
     func showTranslations(sender: AnyObject) {
         let storyboard = UIStoryboard(name: "Tensorflow", bundle: nil)
         let controller = storyboard.instantiateViewControllerWithIdentifier("ttvc") as! TranslationTableViewController
@@ -522,6 +430,7 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
         self.presentViewController(controller, animated: true, completion: nil)
     }
     
+    //displays the InstructionsViewController as a popover
     func showInstructions(sender: AnyObject) {
 
         let storyboard = UIStoryboard(name: "Tensorflow", bundle: nil)
@@ -747,18 +656,7 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
         segButton.addTarget(self, action: #selector(self.showFaces(_:)), forControlEvents: .TouchUpInside)
         self.view.addSubview(segButton)
     }
-    
-    func showFaces(sender: UIButton) {
-        performSegueWithIdentifier("showFaces", sender: nil)
-    }
-    
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if segue.identifier == "showFaces" {
-            let controller = segue.destinationViewController as! CRFacesViewController
-            controller.faces = self.detectedFaces
-        }
-    }
-    
+
     ///////////////////// FACE DETECTOR /////////////////////////
     
     //sets up the detector to track faces
@@ -777,6 +675,17 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
     func getFacialFeatures(image: CIImage) -> [CIFeature] {
         let imageOptions = [CIDetectorImageOrientation : 6]
         return detector!.featuresInImage(image, options: imageOptions)
+    }
+    
+    func hasFaces(image: CIImage) -> Bool {
+        let imageOptions = [CIDetectorImageOrientation : 6]
+        if let arr: [CIFeature]? = detector!.featuresInImage(image, options: imageOptions) {
+            if(arr == nil) {
+                return false
+            }
+            return true
+        }
+        return false
     }
     
     ///////////////////// TEXT DETECTOR /////////////////////////
@@ -892,6 +801,8 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
     //runs almost every frame (?) and draws face boxes
     func captureOutput(captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, fromConnection connection: AVCaptureConnection!) {
         
+        if sampleBuffer != nil {
+        
         let image = getImageFromBuffer(sampleBuffer)
         
         let context = CIContext(options: nil)
@@ -902,6 +813,7 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
         self.currentImage = context.createCGImage(image, fromRect: image.extent)
         
         if(camState == 2) {
+            // Run Tensorflow
             if(loaded) {
 
                 let pb : CVPixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)!
@@ -915,41 +827,44 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
                 }
             }
         } else if(camState == 3) {
-            
             // celebrity recognition
-            
             let cim = getImageFromBuffer(sampleBuffer)
             if detectorSet {
-                if getFacialFeatures(cim).count > 0 {
-                    if (frames % 5 == 0) {
+                if hasFaces(cim){
+                    if (frames % 7 == 0) {
                         dispatch_async(dispatch_get_main_queue(), {
-                            self.setFacesToNotPresent()
+                            self.setCelebritiesToNotPresent()
                         })
                         let imageOptions = [CIDetectorImageOrientation : 6]
-                        let faces = self.detector!.featuresInImage(cim, options: imageOptions)
-                        for f in faces {
-                            let face = f as! CIFaceFeature
-                            let id = Int(face.trackingID)
-                            
-                            if self.celebrities[id] != nil {
-                                let frame = self.transformFacialFeaturePosition(face.bounds.minX, yPosition: face.bounds.minY, width: face.bounds.width, height: face.bounds.height, videoRect: cleanAperture, previewRect: self.cameraPreview.frame, isMirrored: !(self.back))
-                                dispatch_async(dispatch_get_main_queue(), {
-                                    self.celebrities[id]!.updateFrame(frame)
-                                })
-                            } else {
-                                if(steady) {
+                        if let faces = self.detector!.featuresInImage(cim, options: imageOptions) as? [CIFaceFeature] {
+                            for f in faces {
+                                let face = f
+                                let id = Int(face.trackingID)
+
+                                if self.celebrities[id] != nil {
+                                    //if recognizes the tracking id, update frame
                                     let frame = self.transformFacialFeaturePosition(face.bounds.minX, yPosition: face.bounds.minY, width: face.bounds.width, height: face.bounds.height, videoRect: cleanAperture, previewRect: self.cameraPreview.frame, isMirrored: !(self.back))
-                                    self.celebrities.updateValue(Celebrity(bounds: frame), forKey: id)
                                     dispatch_async(dispatch_get_main_queue(), {
-                                        self.view.addSubview(self.celebrities[id]!.frame)
+                                        self.celebrities[id]!.updateFrame(frame)
                                     })
-                                    self.cropCelebrity(id)
+                                } else {
+                                    if(steady) {
+                                        //creates new frame and calls API
+                                        let frame = self.transformFacialFeaturePosition(face.bounds.minX, yPosition: face.bounds.minY, width: face.bounds.width, height: face.bounds.height, videoRect: cleanAperture, previewRect: self.cameraPreview.frame, isMirrored: !(self.back))
+                                        self.celebrities.updateValue(Celebrity(bounds: frame), forKey: id)
+                                        dispatch_async(dispatch_get_main_queue(), {
+                                            self.view.addSubview(self.celebrities[id]!.frame)
+                                        })
+                                        dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), {
+                                            self.cropCelebrity(id)
+                                        })
+                                    }
                                 }
                             }
+                            dispatch_async(dispatch_get_main_queue(), {
+                                self.cleanFaceBoxes()
+                            })
                         }
-                        dispatch_async(dispatch_get_main_queue(), {
-                            self.cleanFaceBoxes()
-                        })
                     }
                 } else {
                     dispatch_async(dispatch_get_main_queue(), {
@@ -959,8 +874,8 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
             }
         } else {
         
+            //gets features from the detector
             var features = [CIFeature]()
-            
             if(camState == 0) {
                 features = self.getFacialFeatures(image)
             } else if(camState == 1) {
@@ -976,6 +891,7 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
                 dispatch_async(dispatch_get_main_queue()) {
                     
                     if(self.camState == 0) {
+                        //face recognition
                         self.removeBoxes()     //deletes the unused boxes
                         for i in 0 ..< features.count {
                             
@@ -1009,6 +925,7 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
                         }
                         self.drawBoxes()
                     } else if(self.camState == 1) {
+                        //live translation, not currently implemented
                         if(!self.translating) {
                             if(features.count > 0) {
                                 self.translateActivity.startAnimating()
@@ -1038,64 +955,11 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
                     self.drawBoxes()
                 }
             }
-
+        }
         }
         frames += 1
     }
-    
-    func matchFaceMethod(origin: CGPoint, list: [CIFaceFeature]) -> CIFaceFeature {
-        var closest = 0
-        var distance = getDistanceBetweenPoints(origin, two: list[0].bounds.origin)
-        for i in 1..<list.count {
-            let newDist = getDistanceBetweenPoints(origin, two: list[i].bounds.origin)
-            if(newDist < distance) {
-                closest = i
-                distance = newDist
-            }
-        }
-        return list[closest]
-    }
-    
-    func getDistanceBetweenPoints(one: CGPoint, two: CGPoint) -> CGFloat {
-        let xDist = one.x - two.x
-        let yDist = one.y - two.y
-        return pythagorean(xDist, b: yDist)
-    }
-    
-    func setFacesToNotPresent() {
-        let keys = self.celebrities.keys
-        for key in keys {
-            self.celebrities[key]?.present = false
-        }
-    }
-    
-    func cleanFaceBoxes() {
-        let keys = self.celebrities.keys
-        for key in keys {
-            if(!((self.celebrities[key]?.present)!)) {
-                self.celebrities[key]?.frame.removeFromSuperview()
-                if let idx = self.celebrities.indexForKey(key) {
-                    self.celebrities.removeAtIndex(idx)
-                }
-            }
-        }
-    }
-    
-    func removeCelebrities() {
-        let keys = self.celebrities.keys
-        for key in keys {
-            self.celebrities[key]?.frame.removeFromSuperview()
-        }
-        self.celebrities.removeAll()
-    }
-    
-    func removeFaceBanners() {
-        for banner in banners {
-            banner.removeFromSuperview()
-        }
-        self.banners.removeAll()
-    }
-    
+
     /*
      This function rotates and then crops the celebrity picture and then calls the API on that picture
      */
@@ -1123,13 +987,12 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
                         if(face.rightEyePosition != face.leftEyePosition) {
                             //rotate face to horizontal
                             image = rotateFace(face, image: image)
-                            //UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
                         }
                         
                         //get new face frame
                         if let straightenedFaces = self.detector!.featuresInImage(CIImage(CGImage: (image.CGImage!)), options: imageOptions) as? [CIFaceFeature] {
                             
-                            image = cropFace(image, rect: self.matchFaceMethod(face.bounds.origin, list: straightenedFaces).bounds)
+                            image = cropFace(image, rect: matchFaceMethod(face.bounds.origin, list: straightenedFaces).bounds)
                             self.callAPI(image, id: id)
                         }
                     }
@@ -1177,95 +1040,6 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
             }
         }
     }
-    
-    //this method calls the API
-    func callAPI(image: UIImage, id: Int) {
-        let api = AnalyzeImageAPI(image: image, header: ["Ocp-Apim-Subscription-Key": "8cace64f78f34355b7e2ab22e3b06bed", "Content-Type": "application/octet-stream"])
-        api.callAPI() { (rs: String) in
-            var noCeleb = true
-
-            //This is the callback of the AnalyzeImageAPI
-            
-            let dict = (self.convertStringToDictionary(rs)!)
-            
-            //tries to safely unwrap the dictionary - could be a source of error
-            if let categories = dict["categories"] as? NSArray {
-                for i in 0 ..< categories.count {
-                    if let details = categories[i]["detail"] as? NSDictionary {
-                        if let celebrities = details["celebrities"] as? [NSDictionary] {
-                            for celeb in celebrities {
-                                noCeleb = false
-                                
-                                //name not safely unwrapped - could be source of error
-                                let name = (celeb["name"] as! String)
-                                
-                                //checks to see if already knows celebrity, if not saves face
-                                if(!(self.alreadyHasFace(name))) {
-                                    self.saveFace(name, image: image)
-                                }
-                                
-                                //updates the celebrity name banners - not likely a source of error
-                                dispatch_async(dispatch_get_main_queue(), {
-                                    self.removeLastBanner()
-                                    var count = 1
-                                    for banner in self.banners {
-                                        banner.bump(CGFloat(count))
-                                        count += 1
-                                    }
-                                    self.celebrities[id]!.name = name
-                                    self.celebrities[id]!.image = image
-                                    let b = FaceDetectionBanner(celebrity: ["name": name, "image": image])
-                                    self.banners.insert(b, atIndex: 0)
-                                    self.view.addSubview(b)
-                                })
-                            }
-                        }
-                    }
-                }
-            }
-            if(noCeleb) {
-                //updates banner to reflect not being able to find celebrity
-                dispatch_async(dispatch_get_main_queue(), {
-                    self.removeLastBanner()
-                    var count = 1
-                    for banner in self.banners {
-                        banner.bump(CGFloat(count))
-                        count += 1
-                    }
-                    
-                    let b = FaceDetectionBanner()
-                    self.banners.insert(b, atIndex: 0)
-                    self.view.addSubview(b)
-                })
-            }
-        }
-    }
-
-    //returns the frame for the face box
-    private func transformFacialFeaturePosition(xPosition: CGFloat, yPosition: CGFloat, width: CGFloat, height: CGFloat, videoRect: CGRect, previewRect: CGRect, isMirrored: Bool) -> CGRect {
-        
-        var featureRect = CGRect(origin: CGPoint(x: xPosition, y: yPosition), size: CGSize(width: width, height: height))
-        let widthScale = previewRect.size.width / videoRect.size.height
-        let heightScale = previewRect.size.height / videoRect.size.width
-        
-        let transform = isMirrored ? CGAffineTransformMake(0, heightScale, -widthScale, 0, previewRect.size.width, 0) :
-            CGAffineTransformMake(0, heightScale, widthScale, 0, 0, 0)
-        
-        featureRect = CGRectApplyAffineTransform(featureRect, transform)
-        
-        featureRect = CGRectOffset(featureRect, previewRect.origin.x, previewRect.origin.y)
-        
-        return featureRect
-    }
-    
-    //calls the segue to move to the ImageCaptureViewController
-    func takeStill(sender: AnyObject) {
-        self.stopCamera()
-        timeOutTimer.invalidate()
-        if let tbc = self.tabBarController {
-            tbc.selectedIndex = 1
-        }
-    }
 
     //Touch to focus
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
@@ -1282,10 +1056,59 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
     
     ///////////////////// HELPER METHODS ////////////////////////
     
+    //returns the frame for the face box
+    private func transformFacialFeaturePosition(xPosition: CGFloat, yPosition: CGFloat, width: CGFloat, height: CGFloat, videoRect: CGRect, previewRect: CGRect, isMirrored: Bool) -> CGRect {
+        
+        var featureRect = CGRect(origin: CGPoint(x: xPosition, y: yPosition), size: CGSize(width: width, height: height))
+        let widthScale = previewRect.size.width / videoRect.size.height
+        let heightScale = previewRect.size.height / videoRect.size.width
+        
+        let transform = isMirrored ? CGAffineTransformMake(0, heightScale, -widthScale, 0, previewRect.size.width, 0) :
+            CGAffineTransformMake(0, heightScale, widthScale, 0, 0, 0)
+        
+        featureRect = CGRectApplyAffineTransform(featureRect, transform)
+        
+        featureRect = CGRectOffset(featureRect, previewRect.origin.x, previewRect.origin.y)
+        
+        return featureRect
+    }
+
+    //This checks to see if two numbers are within fifteen of each other
+    //This is for updating the FaceDetectionBoxes with celebrity names
+    func withinFifteen(one: Int, two: Int) -> Bool {
+        if(two == one) {
+            return true
+        }
+        if(two + 15 > one && two < one) {
+            return true
+        }
+        if(one + 15 > two && one < two) {
+            return true
+        }
+        return false
+    }
+    
+    ///////////////////// SEGUES ////////////////////////
+    
+    //calls the segue to move to the ImageCaptureViewController
+    func takeStill(sender: AnyObject) {
+        self.stopCamera()
+        timeOutTimer.invalidate()
+        if let tbc = self.tabBarController {
+            tbc.selectedIndex = 1
+        }
+    }
+    
+    func showFaces(sender: UIButton) {
+        performSegueWithIdentifier("showFaces", sender: nil)
+    }
+    
+////////////////////// FACE BOXES //////////////////////
+    
     //This method compares one point to an array of type Dictionary<Int: CGPoint>
     //It returns the ID of the point closes to the given point
     func comparePoints(point: CGPoint, ids: [Int], coordinates: [[Int: CGPoint]]) -> Int {
-
+        
         var currentStoretest:CGFloat = 1500.0
         var shortestId = 0
         
@@ -1347,33 +1170,9 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
         }
     }
     
-    //helper function - converts a json string into a dictionary
-    func convertStringToDictionary(text: String) -> [String:AnyObject]? {
-        if let data = text.dataUsingEncoding(NSUTF8StringEncoding) {
-            do {
-                return try NSJSONSerialization.JSONObjectWithData(data, options: []) as? [String:AnyObject]
-            } catch let error as NSError {
-                print(error)
-            }
-        }
-        return nil
-    }
+/////////////////// CELEBRITY DETECTION ////////////////
     
-    //This checks to see if two numbers are within fifteen of each other
-    //This is for updating the FaceDetectionBoxes with celebrity names
-    func withinFifteen(one: Int, two: Int) -> Bool {
-        if(two == one) {
-            return true
-        }
-        if(two + 15 > one && two < one) {
-            return true
-        }
-        if(one + 15 > two && one < two) {
-            return true
-        }
-        return false
-    }
-    
+    //removes the third banner when a new one is going to be added
     func removeLastBanner() {
         if(banners.count == 3) {
             banners[2].removeFromSuperview()
@@ -1381,44 +1180,198 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
         }
     }
     
-    func alreadyHasFace(name: String) -> Bool {
-        for face in detectedFaces {
-            if(face.valueForKey("name") as! String == name) {
-                return true
+    //creates a face banner with celebrity data
+    func updateBannerWithCelebrity(image: UIImage, name: String, id: Int) {
+        self.removeLastBanner()
+        var count = 1
+        for banner in self.banners {
+            banner.bump(CGFloat(count))
+            count += 1
+        }
+        self.celebrities[id]!.name = name
+        self.celebrities[id]!.image = image
+        let b = FaceDetectionBanner(celebrity: ["name": name, "image": image])
+        self.banners.insert(b, atIndex: 0)
+        self.view.addSubview(b)
+    }
+    
+    //creates a face banner for a face that could not be recognized
+    func updateBannerWithoutCelebrity() {
+        self.removeLastBanner()
+        var count = 1
+        for banner in self.banners {
+            banner.bump(CGFloat(count))
+            count += 1
+        }
+        
+        let b = FaceDetectionBanner()
+        self.banners.insert(b, atIndex: 0)
+        self.view.addSubview(b)
+    }
+    
+    //removes face boxes if they are no longer present
+    func cleanFaceBoxes() {
+        let keys = self.celebrities.keys
+        for key in keys {
+            if(!((self.celebrities[key]?.present)!)) {
+                self.celebrities[key]?.frame.removeFromSuperview()
+                if let idx = self.celebrities.indexForKey(key) {
+                    self.celebrities.removeAtIndex(idx)
+                }
             }
         }
-        return false
     }
     
-    /////////////////// CORE DATA //////////////////////////
+    //removes all celebrities and boxes from the frame
+    func removeCelebrities() {
+        let keys = self.celebrities.keys
+        for key in keys {
+            self.celebrities[key]?.frame.removeFromSuperview()
+        }
+        self.celebrities.removeAll()
+        removeFaceBanners()
+    }
     
-    func saveFace(name: String, image: UIImage) {
-        let appDelegate =
-            UIApplication.sharedApplication().delegate as! AppDelegate
-        
-        let managedContext = appDelegate.managedObjectContext
-        
-        let entity =  NSEntityDescription.entityForName("Face",
-                                                        inManagedObjectContext:managedContext)
-        
-        let person = NSManagedObject(entity: entity!,
-                                     insertIntoManagedObjectContext: managedContext)
-        
-        let imageData = UIImageJPEGRepresentation(image, 1.0)
-        person.setValue(name, forKey: "name")
-        person.setValue(imageData!, forKey: "image")
-        
-        do {
-            try managedContext.save()
-            detectedFaces.append(person)
-        } catch let error {
-            print("Could not save \(error), \((error as NSError).userInfo)")
+    //removes all the face banners
+    func removeFaceBanners() {
+        for banner in banners {
+            banner.removeFromSuperview()
+        }
+        self.banners.removeAll()
+    }
+    
+    //sets celebriteis to not present for when it loops through
+    func setCelebritiesToNotPresent() {
+        let keys = self.celebrities.keys
+        for key in keys {
+            self.celebrities[key]?.present = false
         }
     }
     
-    ////////// CROP / ROTATE / TRANSFORM /////////////
+    //this method calls the API
+    func callAPI(image: UIImage, id: Int) {
+        let api = AnalyzeImageAPI(image: image, header: ["Ocp-Apim-Subscription-Key": "8cace64f78f34355b7e2ab22e3b06bed", "Content-Type": "application/octet-stream"])
+        api.callAPI() { (rs: String) in
+            var noCeleb = true
+            
+            //This is the callback of the AnalyzeImageAPI
+            
+            if let dict: [String: AnyObject] = (convertStringToDictionary(rs)!) {
+                if let categories = dict["categories"] as? NSArray {
+                    for i in 0 ..< categories.count {
+                        if let details = categories[i]["detail"] as? NSDictionary {
+                            if let celebrities = details["celebrities"] as? [NSDictionary] {
+                                for celeb in celebrities {
+                                    noCeleb = false
+                                    //name not safely unwrapped - could be source of error
+                                    let name = (celeb["name"] as! String)
+                                    //checks to see if already knows celebrity, if not saves face
+                                    if(!(alreadyHasFace(name))) {
+                                        saveFace(name, image: image)
+                                    }
+                                    
+                                    dispatch_async(dispatch_get_main_queue(), {
+                                        self.updateBannerWithCelebrity(image, name: name, id: id)
+                                    })
+                                }
+                                if(noCeleb) {
+                                    //updates banner to reflect not being able to find celebrity
+                                    dispatch_async(dispatch_get_main_queue(), {
+                                        self.updateBannerWithoutCelebrity()
+                                    })
+                                }
+                                return
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     
+    
+///////////////////////// DEBUG IMAGE //////////////////////
+    
+    //shows the user the image that Tensorflow is looking at
 
+    //samples and displays the image that is running through the tensorflow neural network
+    func debugImage(sender: UIButton) {
+        
+        stopCamera()
+        self.view.addSubview(debugImageView)
+        self.view.addSubview(dismissDebugImageButton)
+        
+        //samples image like Tensorflow does
+        
+        let inputCGImage = currentImage
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let width = CGImageGetWidth(inputCGImage)
+        let height = CGImageGetHeight(inputCGImage)
+        let bytesPerPixel = 4
+        let bitsPerComponent = 8
+        let bytesPerRow = bytesPerPixel * width
+        let bitmapInfo = RGBA32.bitmapInfo
+        
+        let context = CGBitmapContextCreate(nil, width, height, bitsPerComponent, bytesPerRow, colorSpace, bitmapInfo)
+        
+        CGContextDrawImage(context!, CGRectMake(0, 0, CGFloat(width), CGFloat(height)), inputCGImage)
+        
+        let resizedContext = CGBitmapContextCreate(nil, 224, 224, bitsPerComponent, 224 * bytesPerPixel, colorSpace, bitmapInfo)
+        
+        let ogPixelBuffer = UnsafeMutablePointer<RGBA32>(CGBitmapContextGetData(context!))
+        let outPixelBuffer = UnsafeMutablePointer<RGBA32>(CGBitmapContextGetData(resizedContext!))
+        
+        for y in 0 ..< 224 {
+            for x in 0 ..< 224 {
+                let in_x = (y * width) / 224
+                let in_y = (x * height) / 224
+                let ogPixel = ogPixelBuffer + ((in_y * width) + (in_x))
+                let outPixel = outPixelBuffer + 224 + (y * 224 - x)
+                let color = RGBA32(red: (ogPixel.memory.red()), green: (ogPixel.memory.green()), blue: (ogPixel.memory.blue()), alpha: 255)
+                outPixel.memory = color
+            }
+        }
+        
+        let outputCGImage = CGBitmapContextCreateImage(resizedContext!)
+        let outImage = UIImage(CGImage: outputCGImage!)
+        
+        debugImageView.image = outImage
+        //set image for image view
+        //show labels
+    }
+    
+    struct RGBA32 {
+        var color: UInt32
+        
+        func red() -> UInt8 {
+            return UInt8((color >> 24) & 255)
+        }
+        
+        func green() -> UInt8 {
+            return UInt8((color >> 16) & 255)
+        }
+        
+        func blue() -> UInt8 {
+            return UInt8((color >> 8) & 255)
+        }
+        
+        func alpha() -> UInt8 {
+            return UInt8((color >> 0) & 255)
+        }
+        
+        init(red: UInt8, green: UInt8, blue: UInt8, alpha: UInt8) {
+            color = (UInt32(red) << 24) | (UInt32(green) << 16) | (UInt32(blue) << 8) | (UInt32(alpha) << 0)
+        }
+        
+        static let bitmapInfo = CGImageAlphaInfo.PremultipliedLast.rawValue | CGBitmapInfo.ByteOrder32Little.rawValue
+    }
+    
+    func doneDebugging(sender: AnyObject) {
+        debugImageView.removeFromSuperview()
+        dismissDebugImageButton.removeFromSuperview()
+        restartCamera()
+    }
+    
 }
 
 //////////////////////// CAMERA EXTENSION ///////////////////

@@ -130,7 +130,6 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
     func viewFinder(sender: UISwipeGestureRecognizer) {
         self.stopCamera()
         self.tabBarController?.selectedIndex = 0
-        print("!!")
     }
     
     //adds attributes to the buttons and adds some of them to the view
@@ -247,7 +246,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
  /////////////////// PARSING JSON ///////////////////////
 
     //this is called after the analyze image api is used
-    func displayAnswers(rs: String) {
+    func displayAnswers(rs: String, image: UIImage) {
         let dict = (convertStringToDictionary(rs)!)
         
         //parses analzyeimage api results
@@ -291,8 +290,10 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
                                                 if(withinFifteen(Int(face.outline.frame.minX), two: newX) && withinFifteen(Int(face.outline.frame.minY), two: newY)) {
                                                     face.caption.text = (celeb["name"] as! String)
                                                     print(face.caption.text)
+                                                    
                                                 }
                                             }
+                                            saveFaceFromImage(image, origin: CGPoint(x: y, y: x), name: celeb["name"] as! String)
                                         }
                                     }
                                 }
@@ -386,7 +387,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
     
  /////////////////// CHANGE STATE //////////////////////
     
-    //setter method for the language code
+    //changes the state of the camera from the menu
     func changeState(state: Int, details: String) {
         self.camDetails = details
         self.camState = state
@@ -468,7 +469,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
                         } else {
                             self.celebrityPresent = false
                         }
-                        self.displayAnswers(rs)
+                        self.displayAnswers(rs, image: image!)
                     }
                 } else if(self.camState == 1) {
                 
@@ -476,21 +477,25 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
                     let api = OCRAPI(image: image!, header: ["Ocp-Apim-Subscription-Key": "8cace64f78f34355b7e2ab22e3b06bed", "Content-Type": "application/octet-stream"])
                     api.callAPI() { (rs: String) in
                         self.celebrityPresent = false
-                        self.displayAnswers(rs)
+                        self.displayAnswers(rs, image: image!)
                     }
                 } else if(self.camState == 4) {
                     self.captionLabel.text = "Finding " + getPrajnaNameFromCode(self.camDetails)
                     var test = image!
-                    test = self.resize(test, newWidth: 256.0)
+                    test = resize(test, newWidth: 256.0)
+                    UIImageWriteToSavedPhotosAlbum(test, nil, nil, nil)
                     
                     let api = PrajnaAPI(image: test, classifier: self.camDetails)
                     api.callAPI() { (rs: String) in
-                        let dict = self.convertStringToDictionary(rs)
-                        print(dict)
-                        if let description = dict!["Description"] as? String {
-                            if let name: String = (description.characters.split{$0 == ":"}.map(String.init))[0] {
-                                self.captionLabel.text = name
+                        if let dict = convertStringToDictionary(rs) {
+                            print(dict)
+                            if let description = dict["Description"] as? String {
+                                if let name: String = (description.characters.split{$0 == ":"}.map(String.init))[0] {
+                                    self.captionLabel.text = name
+                                }
                             }
+                        } else {
+                            //catch for prajna service not working
                         }
                     }
                 }
@@ -525,19 +530,8 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
             }
         }
     }
-    
-    func resize(image: UIImage, newWidth: CGFloat) -> UIImage {
-        
-        let scale = newWidth / image.size.width
-        let newHeight = image.size.height * scale
-        UIGraphicsBeginImageContext(CGSize(width: newWidth, height: newHeight))
-        image.drawInRect(CGRect(x: 0, y: 0, width: newWidth, height: newHeight))
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        
-        return newImage!
-    }
-    
+
+    //saves the captured image to the camera roll
     func save(sender: UIButton) {
         UIImageWriteToSavedPhotosAlbum(currentImage, nil, nil, nil)
         saveButton.setTitle("✅", forState: .Normal)
@@ -583,11 +577,8 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
     
     //adds the UIImagePickerController to the view
     func uploadPicture(sender: AnyObject) {
-        
         self.picker.sourceType = UIImagePickerControllerSourceType.SavedPhotosAlbum
-        
         self.presentViewController(self.picker, animated: true, completion: nil)
-        
     }
     
     //called when image is selected to analyze
@@ -630,6 +621,23 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
     }
     
 /////////////////// HELPER METHODS ///////////////////
+    
+    /*
+     * Turns a str of 4 digits separated by commas into a CGRect
+     *@param: str: String to get frame from
+     */
+    func getFrameFromStr(str: String) -> CGRect{
+        let strArr = str.characters.split{$0 == ","}.map(String.init)
+        
+        let x = Int(strArr[0])!
+        let y = Int(strArr[1])!
+        let width = Int(strArr[2])!
+        let height = Int(strArr[3])!
+        
+        let rect = resizeFrame(x, y: y, height: height, width: width)
+        
+        return rect
+    }
     
     /*
      * Resizes a frame to fit the image instead of the view
@@ -677,37 +685,7 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
         }
         return false
     }
-    
-    //helper function - converts a json string into a dictionary
-    func convertStringToDictionary(text: String) -> [String:AnyObject]? {
-        if let data = text.dataUsingEncoding(NSUTF8StringEncoding) {
-            do {
-                return try NSJSONSerialization.JSONObjectWithData(data, options: []) as? [String:AnyObject]
-            } catch let error as NSError {
-                print(error)
-            }
-        }
-        return nil
-    }
-    
-    /*
-     * Turns a str of 4 digits separated by commas into a CGRect
-     *@param: str: String to get frame from
-     */
-    func getFrameFromStr(str: String) -> CGRect{
-        let strArr = str.characters.split{$0 == ","}.map(String.init)
-        
-        let x = Int(strArr[0])!
-        let y = Int(strArr[1])!
-        let width = Int(strArr[2])!
-        let height = Int(strArr[3])!
-        
-        let rect = resizeFrame(x, y: y, height: height, width: width)
-        
-        return rect
-    }
-    
-    
+
 /////////////////// CAMERA METHODS //////////////////
     
     //toggles between the front and back cameras
@@ -757,7 +735,6 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
     }
 
 }
-
 
 //////////// CAMERA EXTENSION //////////////////////
 

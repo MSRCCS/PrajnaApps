@@ -12,7 +12,7 @@ import CoreData
 
 class CRFacesViewController: UITableViewController {
     
-    var faces = [NSManagedObject]()
+    //var faces = [NSManagedObject]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,14 +28,14 @@ class CRFacesViewController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return faces.count
+        return detectedFaces.count
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("faceCell") as! CRFaceTableCell
-        let imageData = faces[indexPath.row].valueForKey("image") as! NSData
+        let imageData = detectedFaces[indexPath.row].valueForKey("image") as! NSData
         cell.imgView.image = UIImage(data: imageData)
-        cell.label.text = (faces[indexPath.row].valueForKey("name") as? String)
+        cell.label.text = (detectedFaces[indexPath.row].valueForKey("name") as? String)
         cell.label.adjustsFontSizeToFitWidth = true
         cell.button.tag = indexPath.row
         cell.button.addTarget(self, action: #selector(self.showWikipedia(_:)), forControlEvents: .TouchUpInside)
@@ -48,7 +48,7 @@ class CRFacesViewController: UITableViewController {
     }
     
     func showWikipedia(sender: UIButton) {
-        let name = faces[sender.tag].valueForKey("name") as? String
+        let name = detectedFaces[sender.tag].valueForKey("name") as? String
         let nameArr = name!.characters.split{$0 == " "}.map(String.init)
         var urlStr = nameArr[0]
         for i in 1..<nameArr.count {
@@ -62,7 +62,7 @@ class CRFacesViewController: UITableViewController {
         if segue.identifier == "showFaceDetails" {
             if let ip = sender as? NSIndexPath {
                 let controller = segue.destinationViewController as! CRFaceDetailController
-                controller.face = self.faces[ip.row]
+                controller.face = detectedFaces[ip.row]
             }
         }
     }
