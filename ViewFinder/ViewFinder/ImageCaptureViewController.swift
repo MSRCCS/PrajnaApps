@@ -483,7 +483,6 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
                     self.captionLabel.text = "Finding " + getPrajnaNameFromCode(self.camDetails)
                     var test = image!
                     test = resize(test, newWidth: 256.0)
-                    UIImageWriteToSavedPhotosAlbum(test, nil, nil, nil)
                     
                     let api = PrajnaAPI(image: test, classifier: self.camDetails)
                     api.callAPI() { (rs: String) in
@@ -495,7 +494,11 @@ class ImageCaptureViewController: UIViewController, UIImagePickerControllerDeleg
                                 }
                             }
                         } else {
-                            //catch for prajna service not working
+                            let alert = UIAlertController(title: "Uh Oh", message: "This service isn't available right now. Try agian later.", preferredStyle: .Alert)
+                            alert.addAction(UIAlertAction(title: "Dismiss", style: .Cancel, handler: { Void in
+                                self.dismissCapturedImage(self.dismissButton)
+                            }))
+                            self.presentViewController(alert, animated: true, completion: nil)
                         }
                     }
                 }

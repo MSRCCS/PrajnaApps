@@ -92,7 +92,12 @@ class AnalyzeUploadedImageViewController: UIView, UIPopoverPresentationControlle
                         }
                     }
                 } else {
-                    //catch for prajna service not working
+                    let currentController = self.getCurrentViewController() as! ImageCaptureViewController
+                    let alert = UIAlertController(title: "Uh Oh", message: "This service isn't available right now. Try agian later.", preferredStyle: .Alert)
+                    alert.addAction(UIAlertAction(title: "Dismiss", style: .Cancel, handler: { Void in
+                        currentController.dismissCapturedImage(currentController.closeButton)
+                    }))
+                    currentController.presentViewController(alert, animated: true, completion: nil)
                 }
             }
         }
