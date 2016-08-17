@@ -14,15 +14,15 @@ class TensorflowSplashScreen: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        print("!")
-        
         loadFaces()
+        
+        //call api to get prajna codes
+        
         if(!NSUserDefaults.standardUserDefaults().boolForKey("AgreedToTerms")) {
             dispatch_async(dispatch_get_main_queue(), {
                 self.performSegueWithIdentifier("showTerms", sender: nil)
             })
         } else {
-            print("!!!")
             dispatch_async(dispatch_get_main_queue(), {
                 self.performSegueWithIdentifier("previouslyAgreed", sender: nil)
             })

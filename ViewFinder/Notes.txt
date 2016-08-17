@@ -1,0 +1,21 @@
+——— Notes on ViewFinder.xcodeproj ——-
+	There are four different targets or apps in ViewFinder.xcodeproj. They are ViewFinder, ViewFinderTensorflow (this is the main project), MyDigitalLife, and CelebrityRecognition. The ViewFinder and CelebrityRecognition projects are obsolete because ViewFinderTensorflow has all of their functionality and more.
+
+——— MyDigitalLife ———
+	MyDigitalLife can upload images to an Azure storage container and then display them on a map.
+
+——— ViewFinderTensorflow ———
+— Splash Screen —
+	TensorflowSplashScreen.swift is where all functionality that needs to be loaded should be put. In the future API Keys could be loaded in this section
+
+— Terms of Use —
+	The TermsViewController forces the user to agree to some terms and conditions before using the app. The text of the terms and conditions can be changed on line 34.
+
+— TabBarController —
+	The TabBarController is created so that the user can easily switch between the ImageCaptureViewController and the TesnorflowViewController. This way, there are no memory issues of these controllers being instantiated more than once each.
+
+— NavigationController —
+	The NavigationController that the TensorflowViewController is embedded in is there for navigation through the faces. The navigation controller allows the user to move from the CRFaceDetailController to the CRFacesViewController to the TensorflowViewFinder easily. 
+
+— ImageCaptureViewController —
+	The ImageCaptureViewController has three different modes: FacialRecognition/Captioning, Translation, and Prajna Hub. The mode is managed by the camState variable (0-Facial Recognition, 1-Translation, 4-Prajna Hub). The details are in the camDetails variable. Details would be language to translate to or the key for the prajna api.

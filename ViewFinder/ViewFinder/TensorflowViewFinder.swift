@@ -8,6 +8,19 @@
 
 /*
  * This is the ViewFinder View Controller with Tensorflow Incorporated.
+ * There are three camera states in this mode:
+ *  0: Face detection mode - this will call the AnalyzeImage API to get faces
+ *  2: Tensorflow - this will run tensorflow on the image
+ *  3: Celebrity detection - this will call the AnalyzeImage API but only display celebrities
+ 
+ * Face Detection:
+ *   Face detection works by using the CIDetector class and CIFaceFeature. First, the program will remove any boxes that are old (for faces that are no longer present in the video) by calling removeBoxes(). Then, it will loop through all of the face features that it discovered in the video and checks their tracking ID to see if it already has called the API for that face. If it has already discovered that face, it will update the frame. If it is a new face, it will call the API for that face.
+
+ * Tensorflow:
+ *   Tensorflow is set up in the ViewDidLoad function where it calls setUpTensorflow. This function loads the labels and graph for it to work. Then, in captureOutput it calls runCNNOnFrame which returns a dictionary that contains the prediction values.
+ 
+ * Celebrity Detection:
+ *   Celebrity detection is similar to Face Detection. It uses the CIDetector to find faces in the video and then it checks to see if it already has called the API for that face by using the tracking ID. If it is an old face, it updates the frame, but if it is a new face, it will crop and rotate the face so that the eyes will be at the same y position and the image will be smaller. It then sends that picture to the API.
 */
 
 import Foundation
@@ -937,8 +950,7 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
                 }
             } else if(faces.count > 1) {
                 
-                //If the camera isn't steady but it's detected a face that is in the frame, this code will run. Updates boxes for already
-                //  discovered faces without discovering a new one
+                //If the camera isn't steady but it's detected a face that is in the frame, this code will run. Updates boxes for already discovered faces without discovering a new one
                 
                 //creates and draws face boxes
                 dispatch_async(dispatch_get_main_queue()) {
@@ -1147,7 +1159,7 @@ class TensorflowViewController: UIViewController, UIGestureRecognizerDelegate, U
         return frame
     }
     
-    //gets rid of all the face boxes on the screen
+    //gets rid of all the face boxes on the screen that are not in the frame
     func removeBoxes() {
         for i in 1 ..< faces.count {
             
