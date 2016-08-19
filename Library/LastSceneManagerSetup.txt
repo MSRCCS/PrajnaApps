@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/TestText.unity
+- path: C:/Users/t-shjain/Documents/GitHub/HoloView/Assets/TestText.unity
   isLoaded: 1
   isActive: 1

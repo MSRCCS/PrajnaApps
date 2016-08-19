@@ -30,6 +30,7 @@ public class GazeManager : MonoBehaviour
         recognizer.TappedEvent += (source, tapCount, ray) =>
         {
             Debug.Log("Tapped object");
+            Clicker.mode = (Clicker.mode + 1) % 3;
             this.BroadcastMessage("ChangeMode");
         };
         recognizer.StartCapturingGestures();
