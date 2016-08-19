@@ -566,19 +566,19 @@
 				ORGANIZATIONNAME = Microsoft;
 				TargetAttributes = {
 					2C21F0011D427A4A002F90C7 = {
-						DevelopmentTeam = J44PM8Q84B;
+						DevelopmentTeam = UBF8T346G9;
 					};
 					2C72D95A1D2EFD8D00C3D707 = {
-						DevelopmentTeam = J44PM8Q84B;
+						DevelopmentTeam = UBF8T346G9;
 						LastSwiftMigration = 0800;
 					};
 					2CAE801F1D52B88E00031306 = {
-						DevelopmentTeam = J44PM8Q84B;
+						DevelopmentTeam = UBF8T346G9;
 						LastSwiftMigration = 0800;
 					};
 					2CE441061D18A599009A7DC1 = {
 						CreatedOnToolsVersion = 7.3.1;
-						DevelopmentTeam = J44PM8Q84B;
+						DevelopmentTeam = UBF8T346G9;
 					};
 					2CE4411D1D18A599009A7DC1 = {
 						CreatedOnToolsVersion = 7.3.1;
@@ -984,6 +984,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				ENABLE_BITCODE = NO;
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "DEBUG=1";
 				HEADER_SEARCH_PATHS = (
@@ -1032,6 +1033,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				ENABLE_BITCODE = NO;
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "";
 				HEADER_SEARCH_PATHS = (
@@ -1079,7 +1081,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = J44PM8Q84B;
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				ENABLE_BITCODE = NO;
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "DEBUG=1";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1129,7 +1131,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = J44PM8Q84B;
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				ENABLE_BITCODE = NO;
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
