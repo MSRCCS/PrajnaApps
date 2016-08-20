@@ -13,13 +13,23 @@ using System;
 
 public class Clicker : MonoBehaviour
 {
-    int iter = 0;
-    public Text textBox;
-    public Text modeBox;
-    public Image image;
+    public GameObject textPrefab;
+    public VerticalLayoutGroup layoutGroup;
+    public Canvas world;
+    public GameObject panel;
+    public GameObject display;
 
-    public static int mode = 0;
-    public static int prajnaMode = -1;
+    public enum Modes {Caption, Face, Prajna};
+
+    int iter = 0; // timing for calling PhotoCapture
+    public Text textBox; // main display textbox
+    public Text modeBox; // textbox on top right that shows mode
+    public Image image; // displays captured image on the screen 
+
+    public static int mode = (int) Modes.Caption; // 0 = caption, 1 = faces, 2 = prajna
+    public static int prajnaMode = -1; // -1 = none, 0-n = classifier within prajna
+    public static bool displayImage = false; // true = show picture, false = dont show
+    public static float confidenceThreshold = 0.0f; // minimum confidence to change caption
 
     public bool startedPhoto = false;
     public bool startedRoutine = false;
@@ -35,13 +45,14 @@ public class Clicker : MonoBehaviour
     private string dictationText = "";
     DictationRecognizer dictationRecognizer;
 
-    private static List<string> providerNames = null;
-    private static List<string> classifierNames = null;
-    private static List<string> classifierIds = null;
-    private static int classifiersFound = 0;
-    private static bool providersFound = false;
+    public static List<string> providerNames = null; // names of prajna providers
+    public static List<string> classifierNames = null; // names of prajna classifiers
+    public static List<string> classifierIds = null; // IDs of prajna classifiers
+    public static int providersEntered = 0; // used to ensure all classifiers parsed before displaying
+    public static bool providersFound = false; // used to ensure all classifiers parsed before finding classifiers
 
-    public static int recordingMethod;
+    public static int recordingMethod; // 0 = face name, 1 = prajna classifier name
+    public static bool switcher = false;
 
     void Start()
     {
@@ -53,9 +64,12 @@ public class Clicker : MonoBehaviour
         if (!startedPhoto && !startedRoutine && !newFace)
         {
             iter++;
-            if (((GazeManager.changedGaze && iter > 40) || (iter > 350)) && !(classifierNames != null && mode == 2 && prajnaMode == -1))
+            if (((GazeManager.changedGaze && iter > 40) || (iter > 350)) && !(classifierNames != null && mode == (int) Modes.Prajna  && prajnaMode == -1)) // passed distance or time threshold and won't redisplay all prajna classifiers
             {
-                //Debug.Log(iter);
+                //world.SetActive(true); // turns on and off
+                //world.transform.position = new Vector3(Camera.main.transform.forward.x * 50, Camera.main.transform.forward.y * 50, Camera.main.transform.position.z + 50); // not moving with camera
+                //degrees.transform.LookAt(Camera.main.transform);
+                //Debug.Log("cam: " + Camera.main.transform.position.x + " " + Camera.main.transform.position.y + " " + Camera.main.transform.position.z);
                 GazeManager.changedGaze = false;
                 GazeManager.totalDiff = 0;
                 iter = 0;
@@ -66,9 +80,13 @@ public class Clicker : MonoBehaviour
 
     private IEnumerator CapturePhoto()
     {
-        startedPhoto = true;
+        //Debug.Log("head: " + GazeManager.headPosition.x + " " + GazeManager.headPosition.y + " " + GazeManager.headPosition.z);
+        //Debug.Log("world: " + world.transform.position.x + " " + world.transform.position.y + " " + world.transform.position.z);
+        //Debug.Log("panel: " + panel.transform.position.x + " " + panel.transform.position.y + " " + panel.transform.position.z);
+        //Debug.Log("image: " + degrees.transform.position.x + " " + degrees.transform.position.y + " " + degrees.transform.position.z);
+        startedPhoto = true; // won't take another photo while one is already being taken
 
-        Resolution res = PhotoCapture.SupportedResolutions.OrderBy((r) => r.width * r.height).First(); // now takes highest res possible
+        Resolution res = PhotoCapture.SupportedResolutions.OrderBy((r) => r.width * r.height).First(); // sorts resolutions in asending order - this takes lowest
         PhotoCapture photoCapture = null;
         bool done = false;
         PhotoCapture.CreateAsync(false, (v) =>
@@ -91,8 +109,8 @@ public class Clicker : MonoBehaviour
         cameraParameters.hologramOpacity = 1.0f;
         cameraParameters.cameraResolutionWidth = res.width;
         cameraParameters.cameraResolutionHeight = res.height;
-        cameraParameters.pixelFormat = CapturePixelFormat.JPEG; // changed - JPEG
-        Debug.LogFormat("Starting photo mode with {0}x{1}", cameraParameters.cameraResolutionWidth, cameraParameters.cameraResolutionHeight);
+        cameraParameters.pixelFormat = CapturePixelFormat.JPEG; // need JPEG for sending to APIs
+        //Debug.LogFormat("Starting photo mode with {0}x{1}", cameraParameters.cameraResolutionWidth, cameraParameters.cameraResolutionHeight);
         done = false;
         PhotoCapture.PhotoCaptureResult result = default(PhotoCapture.PhotoCaptureResult);
         photoCapture.StartPhotoModeAsync(cameraParameters, false, (r) =>
@@ -131,7 +149,7 @@ public class Clicker : MonoBehaviour
 
         else if (result.resultType == PhotoCapture.CaptureResultType.Success)
         {
-            Debug.Log("Success photo");
+            //Debug.Log("Success photo");
         }
 
         done = false;
@@ -150,13 +168,13 @@ public class Clicker : MonoBehaviour
         photoCaptureFrame.CopyRawImageDataIntoBuffer(byteArray);
 
         photoCapture.Dispose();
+        ImagePanel();
 
-
-        if (mode == 0)
+        if (mode == (int) Modes.Caption)
         {
             Describe();
         }
-        else if (mode == 1)
+        else if (mode == (int) Modes.Face)
         {
             Face();
         }
@@ -173,10 +191,11 @@ public class Clicker : MonoBehaviour
         startedPhoto = false;
 
         ImagePost();
-        StopCoroutine("CapturePhoto");
+        StopCoroutine("CapturePhoto"); // safely end coroutine
     }
 
-    IEnumerator MakeRequest(UnityWebRequest req, Action<string> act, bool actionToDo)
+    /* request method for all API calls - operates asynchronously*/
+    IEnumerator MakeRequest(UnityWebRequest req, Action<string> act, bool actionToDo) // takes in request, method to call after request is sent (to parse results), whether a method needs to be called after
     {
         ////Debug.Log("making request");
         startedRoutine = true;
@@ -200,10 +219,11 @@ public class Clicker : MonoBehaviour
         StopCoroutine("MakeRequest");
     }
 
-    void ImagePanel() // displays captured image on panel on hololens
+    void ImagePanel() // displays captured image on panel on hololens (can turn this on/off by adjusting alpha level of the image in Unity editor)
     {
         Texture2D texture = new Texture2D(2, 2);
         texture.LoadImage(byteArray.ToArray());
+        //GC.Collect();
         image.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0, 0));
 
         //Debug.Log("posted image sprite");
@@ -211,7 +231,7 @@ public class Clicker : MonoBehaviour
 
     void Describe() // caption to textbox
     {
-        mode = 0;
+        mode = (int) Modes.Caption;
         string url = "https://api.projectoxford.ai/vision/v1.0/describe?maxCandidates=1";
         UnityWebRequest req = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPOST);
         req.SetRequestHeader("Ocp-Apim-Subscription-Key", keyCv);
@@ -223,7 +243,7 @@ public class Clicker : MonoBehaviour
 
     void Face() // face identification (age and gender)
     {
-        mode = 1;
+        mode = (int) Modes.Face;
         string url = "https://api.projectoxford.ai/face/v1.0/detect?returnFaceId=true&returnFaceAttributes=age,gender";
         UnityWebRequest req = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPOST);
         req.SetRequestHeader("Ocp-Apim-Subscription-Key", keyFace);
@@ -270,13 +290,10 @@ public class Clicker : MonoBehaviour
             newFace = true;
             //Debug.Log("unrecognized person");
             textBox.text = "Unrecognized person. Add?";
-            //Debug.Log(json);
         }
         else // face is part of person group
         {
             string id = JSON.Parse(json)[0]["candidates"][0]["personId"].Value;
-            //Debug.Log("JSON: !!!! " + json);
-            //Debug.Log("Person ID: " + id);
             PersonIdentify(id);
         }
     }
@@ -323,7 +340,7 @@ public class Clicker : MonoBehaviour
 
     void PrajnaHub()
     {
-        mode = 2;
+        mode = (int) Modes.Prajna;
         string url = "http://vm-hub.trafficmanager.net/Vhub/Process/00000000-0000-0000-0000-000000000000/00000000-0000-0000-0000-000000000000/" + classifierIds[prajnaMode] + "/00000000-0000-0000-0000-000000000000/00000000-0000-0000-0000-000000000000/00000000-0000-0000-0000-000000000000/636064468986830000/0/SecretKeyShouldbeLongerThan10";
         UnityWebRequest req = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPOST);
         req.downloadHandler = new DownloadHandlerBuffer();
@@ -376,7 +393,7 @@ public class Clicker : MonoBehaviour
 
     void AllProviders ()
     {
-        mode = 2;
+        mode = (int) Modes.Prajna;
         providersFound = false;
         providerNames = new List<string>();
         string url = "http://vm-hub.trafficmanager.net/Vhub/GetActiveProviders/00000000-0000-0000-0000-000000000000/" + TimeFormat() + "/0/SecretKeyShouldbeLongerThan10";
@@ -393,7 +410,7 @@ public class Clicker : MonoBehaviour
             start += 13;
             int end = json.IndexOf("}", start) - 1;
             providerNames.Add(json.Substring(start, (end - start)));
-            //Debug.Log(json.Substring(start, (end - start)));
+            Debug.Log(json.Substring(start, (end - start)));
         }
         providersFound = true;
     }
@@ -420,9 +437,10 @@ public class Clicker : MonoBehaviour
             }
         }
     }
+
     void AllClassifiers (bool display)
     {
-        mode = 2;
+        mode = (int) Modes.Prajna;
         prajnaMode = -1;
         modeBox.text = "Mode: Prajna";
         classifierNames = new List<string>();
@@ -456,7 +474,7 @@ public class Clicker : MonoBehaviour
     void ParseAllClassifiers (string json)
     {
         int i = 0;
-
+        providersEntered++;
         while ((i = json.IndexOf("\"Name", i)) != -1)
         {
             int end = json.IndexOf(',', i);
@@ -470,23 +488,24 @@ public class Clicker : MonoBehaviour
 
     void ParseAllClassifiersDisplay(string json)
     {
-        classifiersFound++;
+        providersEntered++;
         int i = 0;
 
         while ((i = json.IndexOf("\"Name", i)) != -1)
         {
             int end = json.IndexOf(',', i);
             i += 8;
+            string name = json.Substring(i, (end - i - 1));
             classifierNames.Add(json.Substring(i, (end - i - 1)));
             i = json.IndexOf("ServiceID", i) + 12;
             end = json.IndexOf(',', i);
             classifierIds.Add(json.Substring(i, (end - i - 1)));
         }
-        if (classifiersFound == providerNames.Count)
+        if (providersEntered == providerNames.Count)
         {
             //Debug.Log("displaying");
             textBox.text = (String.Join("\n", classifierNames.ToArray()));
-            classifiersFound = 0;
+            providersEntered = 0;
         }
     }
 
@@ -534,6 +553,11 @@ public class Clicker : MonoBehaviour
 
     int StringToNum(string name)
     {
+        if (name == null || name.Length == 0)
+        {
+            return -1;
+        }
+        name.Trim();
         if (name.Contains("one"))
         {
             name = "1";
@@ -548,8 +572,8 @@ public class Clicker : MonoBehaviour
         }
         if (number)
         {
+            Debug.Log("number: " + name);
             int num = Int32.Parse(name);
-            Debug.Log("number: " + num);
             return num;
         }
         return -1;
@@ -641,10 +665,7 @@ public class Clicker : MonoBehaviour
                 break;
         }
 
-        if (!startedPhoto && !startedRoutine)
-        {
-            StartCoroutine(CapturePhoto());
-        }
+        StartCoroutine(WaitForPhoto());
     }
 
     public void StartRecording()
@@ -696,12 +717,32 @@ public class Clicker : MonoBehaviour
         }
     }
 
-    IEnumerator Stop ()
+    IEnumerator WaitForPhoto()
     {
-        while (startedPhoto)
+        while (startedPhoto || startedRoutine)
         {
             yield return null;
         }
-        StopAllCoroutines();
+        StartCoroutine(CapturePhoto());
+    }
+
+    void TestMenu ()
+    {
+        if (switcher)
+        {
+            panel.SetActive(true);
+            display.SetActive(false);
+            world.renderMode = RenderMode.WorldSpace;
+            world.worldCamera = Camera.main;
+            switcher = !switcher;
+        }
+        else
+        {
+            panel.SetActive(false);
+            display.SetActive(true);
+            world.renderMode = RenderMode.ScreenSpaceCamera;
+            world.worldCamera = Camera.main;
+            switcher = !switcher;
+        }
     }
 }
