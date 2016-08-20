@@ -78,7 +78,6 @@
 		2C9514341D428D860081B24B /* CaptureButtonPNG.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CE4413D1D19B736009A7DC1 /* CaptureButtonPNG.png */; };
 		2C9514361D42A3970081B24B /* MDLHomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C9514351D42A3970081B24B /* MDLHomeViewController.swift */; };
 		2C95143C1D42E14D0081B24B /* libxml2.2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C95143B1D42E14D0081B24B /* libxml2.2.tbd */; };
-		2C9514401D42E71F0081B24B /* AZSClient.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C9514391D42E1050081B24B /* AZSClient.framework */; };
 		2C9EB43A1D3DA69900744FBD /* InstructionsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C9EB4391D3DA69900744FBD /* InstructionsViewController.swift */; };
 		2CA806B61D3ECCB100D005D8 /* MenuButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CA806B51D3ECCB100D005D8 /* MenuButton.png */; };
 		2CA806B71D3ECCB100D005D8 /* MenuButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CA806B51D3ECCB100D005D8 /* MenuButton.png */; };
@@ -89,8 +88,6 @@
 		2CAE80281D52B88E00031306 /* TensorflowWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2CFD12F71D3039320000F1E7 /* TensorflowWrapper.mm */; };
 		2CAE802F1D52B88E00031306 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE4410A1D18A599009A7DC1 /* AppDelegate.swift */; };
 		2CAE80321D52B88E00031306 /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CDB225B1D3EDC5E0062EAAA /* Global.swift */; };
-		2CAE80341D52B88E00031306 /* libprotobuf-lite.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2CE344DE1D4928CA00A27BEF /* libprotobuf-lite.a */; };
-		2CAE80351D52B88E00031306 /* libprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2CE344DC1D4928B500A27BEF /* libprotobuf.a */; };
 		2CAE80371D52B88E00031306 /* InstructionsButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2C10E2E01D3E993B00B14F9F /* InstructionsButton.png */; };
 		2CAE80381D52B88E00031306 /* CameraButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2C7083FF1D3E9796001D3E16 /* CameraButton.png */; };
 		2CAE80391D52B88E00031306 /* imagenet_comp_graph_label_strings.txt in Resources */ = {isa = PBXBuildFile; fileRef = 2C72D97F1D2F1C8F00C3D707 /* imagenet_comp_graph_label_strings.txt */; };
@@ -121,10 +118,6 @@
 		2CDB225D1D3EDC5E0062EAAA /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CDB225B1D3EDC5E0062EAAA /* Global.swift */; };
 		2CDEB38B1D4AE460005AAD38 /* MDLImagePopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CDEB38A1D4AE460005AAD38 /* MDLImagePopover.swift */; };
 		2CE344DB1D48322E00A27BEF /* MDLGalleryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE344DA1D48322E00A27BEF /* MDLGalleryViewController.swift */; };
-		2CE344DD1D4928B500A27BEF /* libprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2CE344DC1D4928B500A27BEF /* libprotobuf.a */; };
-		2CE344DF1D4928CA00A27BEF /* libprotobuf-lite.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2CE344DE1D4928CA00A27BEF /* libprotobuf-lite.a */; };
-		2CE344E01D49293E00A27BEF /* libprotobuf-lite.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2CE344DE1D4928CA00A27BEF /* libprotobuf-lite.a */; };
-		2CE344E11D49293E00A27BEF /* libprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2CE344DC1D4928B500A27BEF /* libprotobuf.a */; };
 		2CE4410B1D18A599009A7DC1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE4410A1D18A599009A7DC1 /* AppDelegate.swift */; };
 		2CE441151D18A599009A7DC1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2CE441141D18A599009A7DC1 /* Assets.xcassets */; };
 		2CE441181D18A599009A7DC1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2CE441161D18A599009A7DC1 /* LaunchScreen.storyboard */; };
@@ -152,6 +145,11 @@
 		2CFF602B1D2C583C00C391E4 /* TableCells.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CFF602A1D2C583C00C391E4 /* TableCells.swift */; };
 		2CFF602D1D2C622800C391E4 /* closeButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 2CFF602C1D2C622800C391E4 /* closeButton.png */; };
 		2CFF602F1D2C7A7A00C391E4 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CFF602E1D2C7A7A00C391E4 /* API.swift */; };
+		B913D5111D68223900E74B2E /* AZSClient.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B913D5101D68223900E74B2E /* AZSClient.framework */; };
+		B913D5121D68225700E74B2E /* AZSClient.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B913D5101D68223900E74B2E /* AZSClient.framework */; };
+		B9270BC71D676AEB0002AB66 /* libtensorflow-core.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B9270BC51D676AC40002AB66 /* libtensorflow-core.a */; };
+		B930977E1D6809B5002E9CF9 /* libprotobuf-lite.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B930977D1D6809B5002E9CF9 /* libprotobuf-lite.a */; };
+		B93097801D6809E1002E9CF9 /* libprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B930977F1D6809E1002E9CF9 /* libprotobuf.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -204,7 +202,6 @@
 		2C749EEB1D3EACB10058D08D /* TranslateUnselected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = TranslateUnselected.png; sourceTree = "<group>"; };
 		2C88ADAC1D3FF82200102736 /* glyphicons-facetime-video.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "glyphicons-facetime-video.png"; sourceTree = "<group>"; };
 		2C9514351D42A3970081B24B /* MDLHomeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDLHomeViewController.swift; sourceTree = "<group>"; };
-		2C9514391D42E1050081B24B /* AZSClient.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AZSClient.framework; path = ../../../../AZSClient.framework; sourceTree = "<group>"; };
 		2C95143B1D42E14D0081B24B /* libxml2.2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.2.tbd; path = usr/lib/libxml2.2.tbd; sourceTree = SDKROOT; };
 		2C95143F1D42E4B80081B24B /* MDL-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MDL-Bridging-Header.h"; sourceTree = "<group>"; };
 		2C9EB4391D3DA69900744FBD /* InstructionsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstructionsViewController.swift; sourceTree = "<group>"; };
@@ -222,8 +219,6 @@
 		2CDB225B1D3EDC5E0062EAAA /* Global.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
 		2CDEB38A1D4AE460005AAD38 /* MDLImagePopover.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDLImagePopover.swift; sourceTree = "<group>"; };
 		2CE344DA1D48322E00A27BEF /* MDLGalleryViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDLGalleryViewController.swift; sourceTree = "<group>"; };
-		2CE344DC1D4928B500A27BEF /* libprotobuf.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libprotobuf.a; path = tensorflow/contrib/makefile/gen/protobuf_ios/lib/libprotobuf.a; sourceTree = "<group>"; };
-		2CE344DE1D4928CA00A27BEF /* libprotobuf-lite.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libprotobuf-lite.a"; path = "tensorflow/contrib/makefile/gen/protobuf_ios/lib/libprotobuf-lite.a"; sourceTree = "<group>"; };
 		2CE441071D18A599009A7DC1 /* ViewFinder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ViewFinder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2CE4410A1D18A599009A7DC1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2CE4410F1D18A599009A7DC1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -258,6 +253,11 @@
 		2CFF602A1D2C583C00C391E4 /* TableCells.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableCells.swift; sourceTree = "<group>"; };
 		2CFF602C1D2C622800C391E4 /* closeButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = closeButton.png; sourceTree = "<group>"; };
 		2CFF602E1D2C7A7A00C391E4 /* API.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
+		B913D5101D68223900E74B2E /* AZSClient.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = AZSClient.framework; sourceTree = "<group>"; };
+		B9270BC51D676AC40002AB66 /* libtensorflow-core.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libtensorflow-core.a"; path = "tensorflow/tensorflow/contrib/makefile/gen/lib/libtensorflow-core.a"; sourceTree = "<group>"; };
+		B930977D1D6809B5002E9CF9 /* libprotobuf-lite.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libprotobuf-lite.a"; path = "tensorflow/tensorflow/contrib/makefile/gen/protobuf_ios/lib/libprotobuf-lite.a"; sourceTree = "<group>"; };
+		B930977F1D6809E1002E9CF9 /* libprotobuf.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libprotobuf.a; path = tensorflow/tensorflow/contrib/makefile/gen/protobuf_ios/lib/libprotobuf.a; sourceTree = "<group>"; };
+		B965DAC01D6752350014E802 /* libtensorflow-core-arm64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libtensorflow-core-arm64.a"; path = "tensorflow/tensorflow/contrib/makefile/gen/lib/ios_ARM64/libtensorflow-core-arm64.a"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -265,9 +265,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2CE344DF1D4928CA00A27BEF /* libprotobuf-lite.a in Frameworks */,
-				2CE344DD1D4928B500A27BEF /* libprotobuf.a in Frameworks */,
-				2C9514401D42E71F0081B24B /* AZSClient.framework in Frameworks */,
 				2C95143C1D42E14D0081B24B /* libxml2.2.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -276,9 +273,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B913D5121D68225700E74B2E /* AZSClient.framework in Frameworks */,
+				B93097801D6809E1002E9CF9 /* libprotobuf.a in Frameworks */,
+				B930977E1D6809B5002E9CF9 /* libprotobuf-lite.a in Frameworks */,
+				B9270BC71D676AEB0002AB66 /* libtensorflow-core.a in Frameworks */,
 				2C2565801D5A5519005E0F13 /* libz.tbd in Frameworks */,
-				2CE344E01D49293E00A27BEF /* libprotobuf-lite.a in Frameworks */,
-				2CE344E11D49293E00A27BEF /* libprotobuf.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -287,8 +286,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				2CE662B31D5A3FBD00635873 /* libz.tbd in Frameworks */,
-				2CAE80341D52B88E00031306 /* libprotobuf-lite.a in Frameworks */,
-				2CAE80351D52B88E00031306 /* libprotobuf.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -296,6 +293,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B913D5111D68223900E74B2E /* AZSClient.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -319,10 +317,8 @@
 		2CE440FE1D18A599009A7DC1 = {
 			isa = PBXGroup;
 			children = (
-				2CE344DE1D4928CA00A27BEF /* libprotobuf-lite.a */,
-				2CE344DC1D4928B500A27BEF /* libprotobuf.a */,
+				B913D5101D68223900E74B2E /* AZSClient.framework */,
 				2C95143B1D42E14D0081B24B /* libxml2.2.tbd */,
-				2C9514391D42E1050081B24B /* AZSClient.framework */,
 				2C72D97F1D2F1C8F00C3D707 /* imagenet_comp_graph_label_strings.txt */,
 				2C72D9801D2F1C8F00C3D707 /* tensorflow_inception_graph.pb */,
 				2CE441091D18A599009A7DC1 /* ViewFinder */,
@@ -443,6 +439,10 @@
 		2CE662B11D5A3FBD00635873 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B930977F1D6809E1002E9CF9 /* libprotobuf.a */,
+				B930977D1D6809B5002E9CF9 /* libprotobuf-lite.a */,
+				B9270BC51D676AC40002AB66 /* libtensorflow-core.a */,
+				B965DAC01D6752350014E802 /* libtensorflow-core-arm64.a */,
 				2CE662B21D5A3FBD00635873 /* libz.tbd */,
 			);
 			name = Frameworks;
@@ -566,26 +566,29 @@
 				ORGANIZATIONNAME = Microsoft;
 				TargetAttributes = {
 					2C21F0011D427A4A002F90C7 = {
-						DevelopmentTeam = J44PM8Q84B;
+						DevelopmentTeam = UBF8T346G9;
 					};
 					2C72D95A1D2EFD8D00C3D707 = {
-						DevelopmentTeam = J44PM8Q84B;
+						DevelopmentTeam = UBF8T346G9;
 						LastSwiftMigration = 0800;
 					};
 					2CAE801F1D52B88E00031306 = {
-						DevelopmentTeam = J44PM8Q84B;
+						DevelopmentTeam = UBF8T346G9;
 						LastSwiftMigration = 0800;
 					};
 					2CE441061D18A599009A7DC1 = {
 						CreatedOnToolsVersion = 7.3.1;
-						DevelopmentTeam = J44PM8Q84B;
+						DevelopmentTeam = UBF8T346G9;
+						LastSwiftMigration = 0800;
 					};
 					2CE4411D1D18A599009A7DC1 = {
 						CreatedOnToolsVersion = 7.3.1;
+						LastSwiftMigration = 0800;
 						TestTargetID = 2CE441061D18A599009A7DC1;
 					};
 					2CE441281D18A599009A7DC1 = {
 						CreatedOnToolsVersion = 7.3.1;
+						LastSwiftMigration = 0800;
 						TestTargetID = 2CE441061D18A599009A7DC1;
 					};
 				};
@@ -984,7 +987,12 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "DEBUG=1";
 				HEADER_SEARCH_PATHS = (
 					tensorflow/tensorflow/contrib/makefile/downloads/protobuf/src/,
@@ -1000,6 +1008,8 @@
 					tensorflow/tensorflow/contrib/makefile/gen/lib,
 					tensorflow/tensorflow/contrib/makefile/gen/protobuf_ios/lib/,
 					"$(PROJECT_DIR)/tensorflow/contrib/makefile/gen/protobuf_ios/lib",
+					"$(PROJECT_DIR)/tensorflow/tensorflow/contrib/makefile/gen/lib",
+					"$(PROJECT_DIR)/tensorflow/tensorflow/contrib/makefile/gen/protobuf_ios/lib",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
@@ -1032,7 +1042,12 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "";
 				HEADER_SEARCH_PATHS = (
 					tensorflow/tensorflow/contrib/makefile/downloads/protobuf/src/,
@@ -1048,6 +1063,8 @@
 					tensorflow/tensorflow/contrib/makefile/gen/lib,
 					tensorflow/tensorflow/contrib/makefile/gen/protobuf_ios/lib/,
 					"$(PROJECT_DIR)/tensorflow/contrib/makefile/gen/protobuf_ios/lib",
+					"$(PROJECT_DIR)/tensorflow/tensorflow/contrib/makefile/gen/lib",
+					"$(PROJECT_DIR)/tensorflow/tensorflow/contrib/makefile/gen/protobuf_ios/lib",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
@@ -1079,7 +1096,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = J44PM8Q84B;
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				ENABLE_BITCODE = NO;
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "DEBUG=1";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1097,6 +1114,8 @@
 					tensorflow/tensorflow/contrib/makefile/gen/lib,
 					tensorflow/tensorflow/contrib/makefile/gen/protobuf_ios/lib/,
 					"$(PROJECT_DIR)/tensorflow/contrib/makefile/gen/protobuf_ios/lib",
+					"$(PROJECT_DIR)/tensorflow/tensorflow/contrib/makefile/gen/lib/ios_ARM64",
+					"$(PROJECT_DIR)/tensorflow/tensorflow/contrib/makefile/gen/lib",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
@@ -1129,7 +1148,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = J44PM8Q84B;
+				DEVELOPMENT_TEAM = UBF8T346G9;
 				ENABLE_BITCODE = NO;
 				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1147,6 +1166,8 @@
 					tensorflow/tensorflow/contrib/makefile/gen/lib,
 					tensorflow/tensorflow/contrib/makefile/gen/protobuf_ios/lib/,
 					"$(PROJECT_DIR)/tensorflow/contrib/makefile/gen/protobuf_ios/lib",
+					"$(PROJECT_DIR)/tensorflow/tensorflow/contrib/makefile/gen/lib/ios_ARM64",
+					"$(PROJECT_DIR)/tensorflow/tensorflow/contrib/makefile/gen/lib",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
@@ -1259,11 +1280,16 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = ViewFinder/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = jk.ViewFinder;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				SWIFT_VERSION = 2.3;
 			};
 			name = Debug;
 		};
@@ -1273,11 +1299,16 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = ViewFinder/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = jk.ViewFinder;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				SWIFT_VERSION = 2.3;
 			};
 			name = Release;
 		};
@@ -1289,6 +1320,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = jk.ViewFinderTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 2.3;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ViewFinder.app/ViewFinder";
 			};
 			name = Debug;
@@ -1301,6 +1333,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = jk.ViewFinderTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 2.3;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ViewFinder.app/ViewFinder";
 			};
 			name = Release;
@@ -1312,6 +1345,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = jk.ViewFinderUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 2.3;
 				TEST_TARGET_NAME = ViewFinder;
 			};
 			name = Debug;
@@ -1323,6 +1357,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = jk.ViewFinderUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 2.3;
 				TEST_TARGET_NAME = ViewFinder;
 			};
 			name = Release;

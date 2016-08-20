@@ -207,3 +207,6 @@ docs/content/release-notes.md
 # Tensorflow files
 *.pb
 ViewFinder/ViewFinder/TranslateWordBox.swift
+
+# AZSframework
+ViewFinder/AZSClient.framework/
