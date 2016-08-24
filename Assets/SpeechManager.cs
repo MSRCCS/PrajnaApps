@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Windows.Speech;
@@ -8,11 +9,10 @@ public class SpeechManager : MonoBehaviour
     KeywordRecognizer keywordRecognizer = null;
     Dictionary<string, System.Action> keywords = new Dictionary<string, System.Action>();
 
-    public bool onCanvas = true;
-
     public GameObject canvas;
-    public GameObject worldCanvas;
-    public GameObject cursor;
+
+    public List<GameObject> displayObjects;
+    public List<GameObject> menuObjects;
 
     // Use this for initialization
     void Start()
@@ -56,24 +56,9 @@ public class SpeechManager : MonoBehaviour
             canvas.BroadcastMessage("ChangeMode");
         });
 
-        keywords.Add("All Classifiers", () =>
-        {
-            Debug.Log("command all classifiers");
-            Clicker.mode = (int) Clicker.Modes.Prajna;
-            Clicker.prajnaMode = -1;
-            canvas.BroadcastMessage("ChangeMode");
-        });
-
         keywords.Add("Choose", () =>
         {
             Debug.Log("command choose (classifier)");
-            Clicker.recordingMethod = 1;
-            canvas.BroadcastMessage("StartRecording");
-        });
-
-        keywords.Add("Choose Classifier", () =>
-        {
-            Debug.Log("command choose classifier");
             Clicker.recordingMethod = 1;
             canvas.BroadcastMessage("StartRecording");
         });
@@ -82,25 +67,19 @@ public class SpeechManager : MonoBehaviour
         {
             Debug.Log("command menu");
 
-            if (onCanvas)
-            {
-                canvas.SetActive(false);
-                cursor.SetActive(true);
-                worldCanvas.SetActive(true);
-                onCanvas = !onCanvas;
-            }
+            StartCoroutine("GoMenu"); 
         });
 
         keywords.Add("Exit", () =>
         {
             Debug.Log("command exit");
-
-            if (!onCanvas)
+            foreach (GameObject g in menuObjects)
             {
-                worldCanvas.SetActive(false);
-                cursor.SetActive(false);
-                canvas.SetActive(true);
-                onCanvas = !onCanvas;
+                g.SetActive(false);
+            }
+            foreach (GameObject g in displayObjects)
+            {
+                g.SetActive(true);
             }
         });
         // Tell the KeywordRecognizer about our keywords.
@@ -117,6 +96,28 @@ public class SpeechManager : MonoBehaviour
         if (keywords.TryGetValue(args.text, out keywordAction))
         {
             keywordAction.Invoke();
+        }
+    }
+
+    IEnumerator GoMenu ()
+    {
+        while (Clicker.startedPhoto)
+        {
+            yield return null;
+            Debug.Log("started photo wait");
+        }
+
+        Clicker.startedPhoto = false;
+        Clicker.startedRoutine = false;
+        Clicker.newFace = false;
+
+        foreach (GameObject g in displayObjects)
+        {
+            g.SetActive(false);
+        }
+        foreach (GameObject g in menuObjects)
+        {
+            g.SetActive(true);
         }
     }
 }
