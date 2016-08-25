@@ -1,6 +1,9 @@
 [submodule "ViewFinder/tensorflow"]
 	path = ViewFinder/tensorflow
 	url = https://github.com/tensorflow/tensorflow
+[submodule "ViewFinder/Caffe"]
+	path = ViewFinder/Caffe
+	url = https://github.com/jinlmsft/Caffe
 [submodule "ViewFinder/azure-storage-ios"]
 	path = ViewFinder/azure-storage-ios
 	url = https://github.com/azure/azure-storage-ios
