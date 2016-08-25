@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using System;
 
 public class SettingText : MonoBehaviour
 {
@@ -83,12 +84,12 @@ public class SettingText : MonoBehaviour
     {
         if (up && Clicker.confidenceThreshold <= 0.9f)
         {
-            Clicker.confidenceThreshold += 0.1f;
+            Clicker.confidenceThreshold = (float) Math.Round(Clicker.confidenceThreshold + 0.1f, 1);
         }
 
         else if (!up && Clicker.confidenceThreshold >= 0.1f)
         {
-            Clicker.confidenceThreshold -= 0.1f;
+            Clicker.confidenceThreshold = (float) Math.Round(Clicker.confidenceThreshold - 0.1f, 1);
         }
     }
   

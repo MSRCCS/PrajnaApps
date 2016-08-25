@@ -5,7 +5,8 @@ using System.Collections.Generic;
 using System;
 using UnityEngine.Networking;
 
-public class MenuManager : MonoBehaviour {
+public class MenuManager : MonoBehaviour
+{
 
     public GameObject textPrefab;
     public VerticalLayoutGroup layoutGroup;
@@ -18,7 +19,7 @@ public class MenuManager : MonoBehaviour {
 
     void Start ()
     {
-        DisplayClassifiers();
+        //DisplayClassifiers();
 	}
 	
 	// Update is called once per frame
@@ -29,10 +30,20 @@ public class MenuManager : MonoBehaviour {
 
     void DisplayClassifiers ()
     {
+        var children = new List<GameObject>();
+        foreach (Transform child in layoutGroup.transform)
+        {
+            children.Add(child.gameObject);
+        }
+        if (children.Count >= 1)
+        {
+            children.ForEach(child => Destroy(child));
+        }
+
         MenuAdd("1. Caption", Clicker.Modes.Caption, -1, 1);
         MenuAdd("2. Face", Clicker.Modes.Face, -1, 2);
         MenuAdd("3. PrajnaHub", Clicker.Modes.Prajna, -1, 3);
-        AllClassifiers(true); // unity web request not working
+        AllClassifiers(true); 
     }
 
     public void MenuAdd (string text, Clicker.Modes type, int prajnaMode, int id)
@@ -151,21 +162,12 @@ public class MenuManager : MonoBehaviour {
         {
             int end = json.IndexOf(',', i);
             i += 8;
-            string name = json.Substring(i, (end - i - 1));
             classifierNames.Add(json.Substring(i, (end - i - 1)));
             Clicker.classifierNames.Add(json.Substring(i, (end - i - 1)));
             i = json.IndexOf("ServiceID", i) + 12;
             end = json.IndexOf(',', i);
             classifierIds.Add(json.Substring(i, (end - i - 1)));
             Clicker.classifierIds.Add(json.Substring(i, (end - i - 1)));
-
-            //GameObject temp = (GameObject)Instantiate(textPrefab); // start
-            //Text t = temp.GetComponent<Text>();
-            //t.text = name;
-            //temp.transform.localScale = new Vector3(1, 1, 1);
-            //temp.transform.SetParent(layoutGroup.transform, false); // end
-            //temp.GetComponent<PanelText>().prajnaMode = classifierIds.Count() - 1;
-            //Debug.Log(temp.transform.position.ToString());
         }
         if (providersEntered == providerNames.Count)
         {

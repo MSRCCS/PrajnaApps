@@ -28,11 +28,11 @@ public class Clicker : MonoBehaviour
 
     public static int mode = (int) Modes.Caption; // 0 = caption, 1 = faces, 2 = prajna
     public static int prajnaMode = -1; // -1 = none, 0-n = classifier within prajna
-    public static bool displayImage = false; // true = show picture, false = dont show
+    public static bool displayImage = true; // true = show picture, false = dont show
     public static float confidenceThreshold = 0.0f; // minimum confidence to change caption
 
-    public bool startedPhoto = false;
-    public bool startedRoutine = false;
+    public static bool startedPhoto = false;
+    public static bool startedRoutine = false;
     public static bool newFace = false;
 
     private string keyFace = "4cb2b28396104278867114638f7a75b0";
@@ -52,7 +52,6 @@ public class Clicker : MonoBehaviour
     public static bool providersFound = false; // used to ensure all classifiers parsed before finding classifiers
 
     public static int recordingMethod; // 0 = face name, 1 = prajna classifier name
-    public static bool switcher = false;
 
     void Start()
     {
@@ -64,12 +63,8 @@ public class Clicker : MonoBehaviour
         if (!startedPhoto && !startedRoutine && !newFace)
         {
             iter++;
-            if (((GazeManager.changedGaze && iter > 40) || (iter > 350)) && !(classifierNames != null && mode == (int) Modes.Prajna  && prajnaMode == -1)) // passed distance or time threshold and won't redisplay all prajna classifiers
+            if (((GazeManager.changedGaze && iter > 40) || (iter > 350))) // passed distance or time threshold and won't redisplay all prajna classifiers
             {
-                //world.SetActive(true); // turns on and off
-                //world.transform.position = new Vector3(Camera.main.transform.forward.x * 50, Camera.main.transform.forward.y * 50, Camera.main.transform.position.z + 50); // not moving with camera
-                //degrees.transform.LookAt(Camera.main.transform);
-                //Debug.Log("cam: " + Camera.main.transform.position.x + " " + Camera.main.transform.position.y + " " + Camera.main.transform.position.z);
                 GazeManager.changedGaze = false;
                 GazeManager.totalDiff = 0;
                 iter = 0;
@@ -80,10 +75,6 @@ public class Clicker : MonoBehaviour
 
     private IEnumerator CapturePhoto()
     {
-        //Debug.Log("head: " + GazeManager.headPosition.x + " " + GazeManager.headPosition.y + " " + GazeManager.headPosition.z);
-        //Debug.Log("world: " + world.transform.position.x + " " + world.transform.position.y + " " + world.transform.position.z);
-        //Debug.Log("panel: " + panel.transform.position.x + " " + panel.transform.position.y + " " + panel.transform.position.z);
-        //Debug.Log("image: " + degrees.transform.position.x + " " + degrees.transform.position.y + " " + degrees.transform.position.z);
         startedPhoto = true; // won't take another photo while one is already being taken
 
         Resolution res = PhotoCapture.SupportedResolutions.OrderBy((r) => r.width * r.height).First(); // sorts resolutions in asending order - this takes lowest
@@ -168,13 +159,13 @@ public class Clicker : MonoBehaviour
         photoCaptureFrame.CopyRawImageDataIntoBuffer(byteArray);
 
         photoCapture.Dispose();
-        ImagePanel();
+        startedPhoto = false;
 
-        if (mode == (int) Modes.Caption)
+        if (mode == (int)Modes.Caption)
         {
             Describe();
         }
-        else if (mode == (int) Modes.Face)
+        else if (mode == (int)Modes.Face)
         {
             Face();
         }
@@ -188,9 +179,16 @@ public class Clicker : MonoBehaviour
             PrajnaHub();
         }
 
-        startedPhoto = false;
+        if (displayImage)
+        {
+            image.gameObject.SetActive(true);
+            ImagePanel();
+        }
+        else
+        {
+            image.gameObject.SetActive(false);
+        }
 
-        ImagePost();
         StopCoroutine("CapturePhoto"); // safely end coroutine
     }
 
@@ -219,11 +217,18 @@ public class Clicker : MonoBehaviour
         StopCoroutine("MakeRequest");
     }
 
+    void SetTextbox (string text, float confidence)
+    {
+        if (confidence >= confidenceThreshold)
+        {
+            textBox.text = text;
+        }
+    }
+
     void ImagePanel() // displays captured image on panel on hololens (can turn this on/off by adjusting alpha level of the image in Unity editor)
     {
         Texture2D texture = new Texture2D(2, 2);
         texture.LoadImage(byteArray.ToArray());
-        //GC.Collect();
         image.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0, 0));
 
         //Debug.Log("posted image sprite");
@@ -353,7 +358,7 @@ public class Clicker : MonoBehaviour
         if (json != null)
         {
             StringBuilder sb = new StringBuilder();
-            if (json.Contains("CategoryName"))
+            if (json.Contains("CategoryName")) // eg celebrity
             {
                 int i = 0;
                 while ((i = json.IndexOf("CategoryName", i)) > 0)
@@ -369,11 +374,17 @@ public class Clicker : MonoBehaviour
                 string description = myClass.Description;
                 if (description.Contains(";")) // eg #office
                 {
-                    textBox.text = description.Substring(0, description.IndexOf(";"));
+                    //textBox.text = description.Substring(0, description.IndexOf(";"));
+                    string text = description.Substring(0, description.IndexOf(";"));
+                    Debug.Log((description.Substring(description.IndexOf(":") + 1, text.Length - description.IndexOf(":") - 1)));
+                    SetTextbox(text, Convert.ToSingle(description.Substring(description.IndexOf(":") + 1, text.Length - description.IndexOf(":") - 1)));
                 }
-                else if (description.Length > 2)
+                else if (description.Length > 2) // eg landmarkv2
                 {
-                    textBox.text = description;
+                    //textBox.text = description;
+                    string text = description;
+                    Debug.Log((description.Substring(description.IndexOf(":") + 1, text.Length - description.IndexOf(":") - 1)));
+                    SetTextbox(text, Convert.ToSingle(description.Substring(description.IndexOf(":") + 1, text.Length - description.IndexOf(":") - 1)));
                 }
                 else
                 {
@@ -443,6 +454,11 @@ public class Clicker : MonoBehaviour
         mode = (int) Modes.Prajna;
         prajnaMode = -1;
         modeBox.text = "Mode: Prajna";
+        if (classifierIds != null && display)
+        {
+            DisplayClassifiers();
+            return;
+        }
         classifierNames = new List<string>();
         classifierIds = new List<string>();
 
@@ -503,12 +519,20 @@ public class Clicker : MonoBehaviour
         }
         if (providersEntered == providerNames.Count)
         {
-            //Debug.Log("displaying");
-            textBox.text = (String.Join("\n", classifierNames.ToArray()));
+            DisplayClassifiers();
             providersEntered = 0;
         }
     }
 
+    void DisplayClassifiers ()
+    {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < classifierNames.Count; i++)
+        {
+            sb.Append((i + 1) + ": " + classifierNames[i] + "\n");
+        }
+        textBox.text = sb.ToString();
+    }
 
     Int64 TimeFormat()
     {
@@ -643,9 +667,11 @@ public class Clicker : MonoBehaviour
 
     void ParseDescribe (string json)
     {
-        int start = json.IndexOf("text\":\"") + 7;
-        int end = json.IndexOf("confi") - 3;
-        textBox.text = json.Substring(start, (end - start));
+        string text = (JSON.Parse(json)["description"]["captions"][0]["text"]);
+        string fString = JSON.Parse(json)["description"]["captions"][0]["confidence"];
+        float f = Convert.ToSingle(fString.Substring(1, fString.Length - 2));
+        Debug.Log("caption: " + f);
+        SetTextbox(text, f);
     }
 
     public void ChangeMode ()
@@ -724,25 +750,5 @@ public class Clicker : MonoBehaviour
             yield return null;
         }
         StartCoroutine(CapturePhoto());
-    }
-
-    void TestMenu ()
-    {
-        if (switcher)
-        {
-            panel.SetActive(true);
-            display.SetActive(false);
-            world.renderMode = RenderMode.WorldSpace;
-            world.worldCamera = Camera.main;
-            switcher = !switcher;
-        }
-        else
-        {
-            panel.SetActive(false);
-            display.SetActive(true);
-            world.renderMode = RenderMode.ScreenSpaceCamera;
-            world.worldCamera = Camera.main;
-            switcher = !switcher;
-        }
     }
 }

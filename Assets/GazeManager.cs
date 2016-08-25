@@ -9,16 +9,16 @@ public class GazeManager : MonoBehaviour
     public GameObject FocusedObject { get; private set; }
 
     public static Vector3 headPosition;
+    public static Vector3 gazeDirection;
     public static Vector3 previousPosition;
-    public static Vector3 cameraFor;
     public static bool changedGaze = false;
     public static float diff = 0;
     public static float totalDiff = 0;
+    public static int highlightedButtonId = 0;
 
-    private int iter = 0;
-    public int iter2 = 0;
+    public static int iter = 0;
 
-    GestureRecognizer recognizer;
+    public GestureRecognizer recognizer;
 
     // Use this for initialization
     void Start()
@@ -31,67 +31,57 @@ public class GazeManager : MonoBehaviour
         recognizer = new GestureRecognizer();
         recognizer.TappedEvent += (source, tapCount, ray) =>
         {
-            Debug.Log("Tapped object");
-            Clicker.mode = (Clicker.mode + 1) % 3; // switches to next mode (0, 1, 2)
-            this.BroadcastMessage("ChangeMode");
+            Debug.Log("Tapped object gaze");
+            if (FocusedObject == null)
+            {
+                Clicker.mode = (Clicker.mode + 1) % 3; // switches to next mode (0, 1, 2)
+                this.BroadcastMessage("ChangeMode");
+            }
+            else if (FocusedObject.tag.Equals("Button") && FocusedObject.GetComponent<ButtonManager>().id == 1)
+            {
+                Debug.Log("calling button press gaze");
+                FocusedObject.BroadcastMessage("ButtonPress", false);
+            }
         };
-        //recognizer.StartCapturingGestures();
+        recognizer.StartCapturingGestures();
     }
 
     // Update is called once per frame
     void Update()
     {
-        iter2++;
-        if (iter2 % 80 == 0)
-        {
-            cameraFor = Camera.main.transform.forward;
-            //Debug.Log("cam for: " + cameraFor.x + " " + cameraFor.y + " " + cameraFor.y);
-            //Debug.Log("cam tra: " + Camera.main.transform.position.x + " " + Camera.main.transform.position.y + " " + Camera.main.transform.position.z);
-        }
+       
         iter++;
-        // Figure out which hologram is focused this frame.
-        GameObject oldFocusObject = FocusedObject;
 
-        // Do a raycast into the world based on the user's
-        // head position and orientation.
         if (iter == 40)
         {
-            previousPosition = headPosition;
+            previousPosition = gazeDirection;
         }
 
         headPosition = Camera.main.transform.position;
+        gazeDirection = Camera.main.transform.forward;
 
         if (iter == 40)
         {
             iter = 0;
-            diff = Mathf.Pow((previousPosition.x - headPosition.x), 2) + Mathf.Pow((previousPosition.y - headPosition.y), 2);
+            diff = Mathf.Pow((previousPosition.x - gazeDirection.x), 2) + Mathf.Pow((previousPosition.y - gazeDirection.y), 2);
             totalDiff += diff;
 
-            if (totalDiff > 3 * Mathf.Pow(10, (-7))) // distance threshold for trigger another API call 
+            if (totalDiff > 3 * Mathf.Pow(10, (-5))) // distance threshold for trigger another API call 
             {
                 changedGaze = true;
             }
         }
-        var gazeDirection = Camera.main.transform.forward;
 
         RaycastHit hitInfo;
         if (Physics.Raycast(headPosition, gazeDirection, out hitInfo))
         {
-            // If the raycast hit a hologram, use that as the focused object.
-            FocusedObject = hitInfo.collider.gameObject;
+            FocusedObject = hitInfo.transform.gameObject;
+            highlightedButtonId = FocusedObject.GetComponent<ButtonManager>().id;
         }
         else
         {
-            // If the raycast did not hit a hologram, clear the focused object.
+            highlightedButtonId = 0;
             FocusedObject = null;
         }
-
-        // If the focused object changed this frame,
-        // start detecting fresh gestures again.
-        //if (FocusedObject != oldFocusObject)
-        //{
-        //    recognizer.CancelGestures();
-        //    recognizer.StartCapturingGestures();
-        //}
     }
 }

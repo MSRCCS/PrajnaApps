@@ -5,16 +5,22 @@ using UnityEngine.VR.WSA.Input;
 public class CursorManager : MonoBehaviour
 {
 
-    GestureRecognizer recognizer;
+    public GestureRecognizer recognizer;
     public bool hit = false;
     GameObject hitter;
+
     public static int idHighlighted = 0;
     public static int idHighlightedMenu = 0;
     public static int idHighlightedSetting = 0;
+    public static int idHighlighedButton = 0;
+    public static int idHighlightedTermButton = 0;
+
     public static int menuMode = 0;
 
     public GameObject settingsMenu;
     public GameObject classifiersMenu;
+    public GameObject tutorialMenu;
+
     // Use this for initialization
     void Start()
     {
@@ -37,6 +43,17 @@ public class CursorManager : MonoBehaviour
                         Debug.Log("setting");
                         SettingTag();
                         break;
+                    case ("Button"):
+                        Debug.Log("button");
+                        if (hitter.GetComponent<ButtonManager>().id == 2)
+                        {
+                            ButtonTag();
+                        }
+                        break;
+                    case ("TermButton"):
+                        Debug.Log("term button");
+                        TermButtonTag();
+                        break;
                 }
             }
         };
@@ -53,42 +70,54 @@ public class CursorManager : MonoBehaviour
 
         RaycastHit hitInfo;
 
-        if (!Clicker.switcher)
+        this.transform.position = new Vector3(Camera.main.transform.forward.x * 50, Camera.main.transform.forward.y * 50, Camera.main.transform.position.z + 50);
+        hit = Physics.Raycast(headPosition, gazeDirection, out hitInfo);
+
+        if (hit)
         {
-            this.transform.position = new Vector3(Camera.main.transform.forward.x * 50, Camera.main.transform.forward.y * 50, Camera.main.transform.position.z + 50);
-            hit = Physics.Raycast(headPosition, gazeDirection, out hitInfo);
-
-            if (hit)
+            hitter = hitInfo.transform.gameObject;
+            switch (hitter.tag)
             {
-                hitter = hitInfo.transform.gameObject;
-                switch (hitter.tag)
-                {
-                    case ("Classifier"):
-                        idHighlighted = hitter.GetComponent<PanelText>().id;
-                        idHighlightedMenu = 0;
-                        idHighlightedSetting = 0;
-                        break;
-                    case ("SelectionMenu"):
-                        idHighlightedMenu = hitter.GetComponent<SelectionMenu>().id;
-                        idHighlighted = 0;
-                        idHighlightedSetting = 0;
-                        break;
-                    case ("Setting"):
-                        idHighlightedSetting = hitter.GetComponent<SettingText>().id;
-                        idHighlighted = 0;
-                        idHighlightedMenu = 0;
-                        break;
-                }
-            }
-            else
-            {
-                idHighlighted = 0;
-            }
-
+                case ("Classifier"):
+                    idHighlighted = hitter.GetComponent<PanelText>().id;
+                    idHighlightedMenu = 0;
+                    idHighlightedSetting = 0;
+                    idHighlighedButton = 0;
+                    break;
+                case ("SelectionMenu"):
+                    idHighlightedMenu = hitter.GetComponent<SelectionMenu>().id;
+                    idHighlighted = 0;
+                    idHighlightedSetting = 0;
+                    idHighlighedButton = 0;
+                    break;
+                case ("Setting"):
+                    idHighlightedSetting = hitter.GetComponent<SettingText>().id;
+                    idHighlighted = 0;
+                    idHighlightedMenu = 0;
+                    idHighlighedButton = 0;
+                    break;
+                case ("Button"):
+                    idHighlighedButton = hitter.GetComponent<ButtonManager>().id;
+                    idHighlighted = 0;
+                    idHighlightedMenu = 0;
+                    idHighlightedSetting = 0;
+                    break;
+                case ("TermButton"):
+                    idHighlightedTermButton = hitter.GetComponent<TermButton>().id;
+                    idHighlighted = 0;
+                    idHighlightedMenu = 0;
+                    idHighlightedSetting = 0;
+                    idHighlighedButton = 0;
+                    break;
+             }
         }
         else
         {
             idHighlighted = 0;
+            idHighlightedMenu = 0;
+            idHighlightedSetting = 0;
+            idHighlighedButton = 0;
+            idHighlightedTermButton = 0;
         }
     }
 
@@ -100,22 +129,37 @@ public class CursorManager : MonoBehaviour
 
     void SelectionMenuTag ()
     {
-        int newMode = 1;
-        if (hitter.GetComponent<Text>().text.Contains("Classifiers"))
+        int newMode = 0;
+        if (hitter.GetComponent<Text>().text.Contains("Settings"))
         {
-            newMode = 0;
+            newMode = 1;
+        }
+        else if (hitter.GetComponent<Text>().text.Contains("Tutorial"))
+        {
+            newMode = 2;
         }
 
-        if (newMode != menuMode && newMode == 0)
+        if (newMode != menuMode)
         {
-            settingsMenu.SetActive(false);
-            classifiersMenu.SetActive(true);
-            menuMode = newMode;
-        }
-        else if (newMode != menuMode && newMode == 1)
-        {
-            classifiersMenu.SetActive(false);
-            settingsMenu.SetActive(true);
+            switch (newMode)
+            {
+                case 0:
+                    settingsMenu.SetActive(false);
+                    tutorialMenu.SetActive(false);
+                    classifiersMenu.SetActive(true);
+                    classifiersMenu.BroadcastMessage("DisplayClassifiers");
+                    break;
+                case 1:
+                    classifiersMenu.SetActive(false);
+                    tutorialMenu.SetActive(false);
+                    settingsMenu.SetActive(true);
+                    break;
+                case 2:
+                    classifiersMenu.SetActive(false);
+                    settingsMenu.SetActive(false);
+                    tutorialMenu.SetActive(true);
+                    break;
+            }
             menuMode = newMode;
         }
     }
@@ -123,5 +167,16 @@ public class CursorManager : MonoBehaviour
     void SettingTag ()
     {
         hitter.BroadcastMessage("SettingChange");
+    }
+
+    void ButtonTag ()
+    {
+        Debug.Log("calling button press cursor");
+        hitter.BroadcastMessage("ButtonPress", true);
+    }
+
+    void TermButtonTag ()
+    {
+        hitter.BroadcastMessage("ButtonPress");
     }
 }
